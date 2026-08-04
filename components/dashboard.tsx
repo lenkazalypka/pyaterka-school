@@ -1,0 +1,62 @@
+import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock3, Target } from "lucide-react";
+import Link from "next/link";
+import { StudentEventCard, eventTime, isEventToday } from "@/components/student-event-card";
+import { StudentShell } from "@/components/student-shell";
+import type { StudentLearningData } from "@/types/domain";
+
+const subscriptionLabels: Record<string, string> = {
+  draft: "черновик",
+  pending: "ожидает подтверждения",
+  active: "активна",
+  paused: "приостановлена",
+  cancelled: "отменена",
+  expired: "завершена",
+};
+
+function dueLabel(value: string, timezone: string) {
+  const date = new Date(value);
+  const datePart = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: timezone }).format(date);
+  return `${datePart}, ${eventTime(value, timezone)}`;
+}
+
+export function Dashboard({ data }: { data: StudentLearningData }) {
+  const { identity } = data;
+  const now = new Date(data.generatedAt).getTime();
+  const upcoming = data.events.filter((event) => event.status !== "cancelled" && new Date(event.endsAt).getTime() >= now);
+  const nextEvent = upcoming[0] ?? null;
+  const today = upcoming.filter((event) => isEventToday(event, identity.timezone, data.generatedAt));
+  const date = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", timeZone: identity.timezone }).format(new Date(data.generatedAt));
+
+  return <StudentShell identity={identity} active="home">
+    <div className="student-page student-dashboard">
+      <header className="student-page-heading">
+        <div><span className="student-eyebrow">Сегодня · <span className="capitalize">{date}</span></span><h1>Здравствуйте, {identity.name}</h1><p>Сначала — ближайшее действие. Остальная статистика не мешает учиться.</p></div>
+        {data.subscription && <div className={`student-subscription student-subscription-${data.subscription.status}`}><small>{data.subscription.planName}</small><b>{subscriptionLabels[data.subscription.status] ?? data.subscription.status}</b></div>}
+      </header>
+
+      {data.subscription?.status !== "active" && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям ещё не активирован</b><p>Подписка создаётся без фиктивной оплаты. После ручного подтверждения администратором здесь появятся занятия купленных предметов.</p></div></section>}
+
+      <section className="student-dashboard-grid" aria-label="Главное на сегодня">
+        <article className="student-next-card">
+          <div className="student-card-heading"><div><small>Следующее занятие</small><h2>{nextEvent ? nextEvent.title : "В расписании пока пусто"}</h2></div><CalendarDays aria-hidden="true" /></div>
+          {nextEvent ? <><div className="student-next-meta"><span>{nextEvent.subject ?? "Учебное событие"}</span><b>{new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", timeZone: identity.timezone }).format(new Date(nextEvent.startsAt))}, {eventTime(nextEvent.startsAt, identity.timezone)}</b>{nextEvent.teacher && <span>{nextEvent.teacher}</span>}</div><div className="student-next-actions">{nextEvent.joinUrl ? <a className="button button-primary" href={nextEvent.joinUrl} target="_blank" rel="noreferrer">Подключиться</a> : nextEvent.lessonId ? <Link className="button button-light" href={`/student/lessons/${nextEvent.lessonId}`}>Открыть урок</Link> : null}<Link href="/student/schedule">Всё расписание <ArrowRight aria-hidden="true" /></Link></div></> : <div className="student-empty-on-dark"><CheckCircle2 aria-hidden="true" /><p>Новых занятий нет. Когда администратор добавит вас в активную группу, событие появится автоматически.</p></div>}
+        </article>
+
+        <article className="student-tasks-card">
+          <div className="student-card-heading"><div><small>Фокус</small><h2>Что сделать сегодня</h2></div><Target aria-hidden="true" /></div>
+          {data.tasks.length ? <div className="student-task-list">{data.tasks.slice(0, 5).map((task) => <div className={task.overdue ? "is-overdue" : ""} key={task.id}><span>{task.overdue ? <AlertCircle aria-hidden="true" /> : <BookOpen aria-hidden="true" />}</span><div><b>{task.title}</b><small>{task.subject}</small></div><time dateTime={task.dueAt}>{task.overdue ? "Просрочено · " : "До "}{dueLabel(task.dueAt, identity.timezone)}</time></div>)}</div> : <div className="student-empty"><CheckCircle2 aria-hidden="true" /><b>Нет срочных заданий</b><p>Домашние задания появятся здесь после публикации преподавателем.</p></div>}
+        </article>
+      </section>
+
+      <section className="student-section">
+        <div className="student-section-heading"><div><span className="student-eyebrow">План дня</span><h2>{today.length ? `Сегодня ${today.length} ${today.length === 1 ? "событие" : "события"}` : "Сегодня без занятий"}</h2></div><Link href="/student/schedule">Открыть расписание <ArrowRight aria-hidden="true" /></Link></div>
+        {today.length ? <div className="student-event-list">{today.map((event) => <StudentEventCard event={event} timezone={identity.timezone} key={event.id} />)}</div> : <div className="student-empty student-empty-wide"><Clock3 aria-hidden="true" /><b>Можно сосредоточиться на самостоятельной работе</b><p>Недельный план и будущие занятия находятся в разделе расписания.</p></div>}
+      </section>
+
+      <section className="student-section">
+        <div className="student-section-heading"><div><span className="student-eyebrow">Ваши цели</span><h2>Предметы</h2></div></div>
+        {data.subjects.length ? <div className="student-subject-grid">{data.subjects.map((subject) => <article key={subject.id}><small>{subject.scoreUnit === "primary_score" ? "Первичный балл" : "Тестовый балл"}</small><h3>{subject.name}</h3><div><b>{subject.target}</b><span>цель</span></div><p>Фактический прогресс появится после проверенных работ и пробников.</p></article>)}</div> : <div className="student-empty student-empty-wide"><BookOpen aria-hidden="true" /><b>Предметы пока не назначены</b><p>Выбранные и оплаченные предметы появятся после завершения онбординга и активации подписки.</p></div>}
+      </section>
+    </div>
+  </StudentShell>;
+}

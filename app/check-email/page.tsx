@@ -1,0 +1,1 @@
+import { Brand } from "@/components/brand"; export default function Page(){return <main className="grid min-h-screen place-items-center px-6"><div className="card max-w-lg p-8 text-center"><Brand/><h1 className="mt-8 text-3xl font-extrabold">Проверьте почту</h1><p className="mt-3 text-[var(--text-muted)]">Ссылка подтверждения откроет анкету ученика.</p></div></main>}

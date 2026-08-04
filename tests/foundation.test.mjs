@@ -1,0 +1,6 @@
+import assert from"node:assert/strict";import{readFile}from"node:fs/promises";import test from"node:test";
+const sql=await readFile(new URL("../supabase/migrations/202607310001_foundation.sql",import.meta.url),"utf8");const doc=await readFile(new URL("../docs/PRODUCT_ARCHITECTURE.md",import.meta.url),"utf8");
+test("critical tables have RLS",()=>{for(const t of["user_roles","parent_student_links","subscriptions","lesson_attendance","assignment_submissions","student_score_forecasts","audit_logs"])assert.match(sql,new RegExp(`alter table public\\.%I enable row level security|array\\[[^\\]]*'${t}'`,"i"))});
+test("signup cannot assign admin",()=>{assert.match(sql,/intended_role' in\('student','parent'\)/);assert.doesNotMatch(sql,/intended_role' in\([^)]*admin/)});
+test("storage is private",()=>{assert.match(sql,/'lesson-materials','lesson-materials',false/);assert.match(sql,/do update set public=false/)});
+test("architecture has 14 deliverables",()=>{for(const s of["Краткое описание","Карта ролей","пользовательских сценариев","Sitemap","ER-диаграмма","Таблицы","Архитектура приложения","Структура директорий","Страницы MVP","API/server actions","Правила RLS","План реализации","Риски","Не входит"])assert.ok(doc.includes(s),s)});

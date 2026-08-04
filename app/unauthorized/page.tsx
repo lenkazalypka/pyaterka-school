@@ -1,0 +1,1 @@
+export default function Page(){return <main className="grid min-h-screen place-items-center"><div className="card max-w-lg p-8"><h1 className="text-3xl font-extrabold">Нет доступа</h1><p className="mt-3 text-[var(--text-muted)]">Роль нельзя назначить из браузера. Обратитесь к администратору.</p></div></main>}
