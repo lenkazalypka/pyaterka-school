@@ -1,1 +1,4 @@
-import {RoleHome} from "@/components/role-home";import{requireRole}from"@/lib/auth";export const dynamic="force-dynamic";export default async function Page(){await requireRole("admin");return <RoleHome title="Админ-панель" description="Пользователи, тарифы, группы, подписки и аудит." items={["Роли и пользователи","Академическая структура","Интеграции и аудит"]}/>}
+import { AdminDashboard } from "@/components/role-dashboards";
+import { getAdminDashboardData } from "@/lib/role-dashboards";
+export const dynamic = "force-dynamic";
+export default async function AdminPage() { return <AdminDashboard data={await getAdminDashboardData()} />; }
