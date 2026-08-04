@@ -1,1 +1,4 @@
-import {RoleHome} from "@/components/role-home";import{requireRole}from"@/lib/auth";export const dynamic="force-dynamic";export default async function Page(){await requireRole("parent");return <RoleHome title="Кабинет родителя" description="Только подтверждённые дети и учебные факты — без личной переписки ученика." items={["Дети и прогресс","Посещаемость и пробники","Отчёты и оплаты"]}/>}
+import { ParentDashboard } from "@/components/role-dashboards";
+import { getParentDashboardData } from "@/lib/role-dashboards";
+export const dynamic = "force-dynamic";
+export default async function ParentPage() { return <ParentDashboard data={await getParentDashboardData()} />; }
