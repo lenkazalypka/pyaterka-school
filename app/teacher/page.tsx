@@ -1,1 +1,4 @@
-import {RoleHome} from "@/components/role-home";import{requireRole}from"@/lib/auth";export const dynamic="force-dynamic";export default async function Page(){await requireRole("teacher");return <RoleHome title="Кабинет преподавателя" description="Группы, уроки и проверка только в назначенных группах." items={["Мои группы","Уроки и материалы","Проверка работ"]}/>}
+import { TeacherDashboard } from "@/components/role-dashboards";
+import { getTeacherDashboardData } from "@/lib/role-dashboards";
+export const dynamic = "force-dynamic";
+export default async function TeacherPage() { return <TeacherDashboard data={await getTeacherDashboardData()} />; }
