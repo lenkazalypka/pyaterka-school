@@ -1,41 +1,68 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Check, CirclePlay, TrendingUp } from "lucide-react";
+import { ArrowRight, Check, Play, Sparkles } from "lucide-react";
 
 export function PublicHero() {
+  const heroVideoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim();
+
   return (
-    <section className="v2-hero">
-      <div className="public-container v2-hero-grid">
-        <div className="v2-hero-copy">
-          <div className="v2-hero-kicker"><span>ЕГЭ</span><span>ОГЭ</span> Онлайн-школа «Пятёрка»</div>
-          <h1>Готовься<br />смелее. <em>На пять.</em></h1>
-          <p>Живые занятия, практика и поддержка без учебного хаоса. Всегда понятно, что учить сегодня и куда двигаться дальше.</p>
-          <div className="v2-hero-actions">
-            <Link className="button button-primary button-large" href="/register">Собрать мой план <ArrowRight aria-hidden="true" /></Link>
-            <a className="v2-watch-link" href="#format"><CirclePlay aria-hidden="true" /> Как проходит подготовка</a>
-          </div>
-          <ul className="v2-hero-points" aria-label="Коротко о школе">
-            <li><Check aria-hidden="true" /> 1–4 предмета</li>
-            <li><Check aria-hidden="true" /> 2 пробника в месяц</li>
-            <li><Check aria-hidden="true" /> Отчёт для родителя</li>
+    <section className="v9-hero" aria-labelledby="hero-title">
+      <div className="public-container v9-hero-grid">
+        <div className="v9-hero-copy" data-reveal>
+          <div className="v9-eyebrow"><Sparkles aria-hidden="true" /> ЕГЭ и ОГЭ без хаоса</div>
+          <h1 id="hero-title">Сложный экзамен.<br /><em>Понятный план.</em></h1>
+          <p className="v9-hero-lead">
+            За первый месяц ты войдёшь в ритм: живые занятия, практика, разбор ошибок
+            и ясное понимание, что делать дальше.
+          </p>
+          <ul className="v9-hero-points" aria-label="Что входит в подготовку">
+            <li><Check aria-hidden="true" /> От 1 до 4 предметов в одном кабинете</li>
+            <li><Check aria-hidden="true" /> Записи, материалы и дедлайны всегда под рукой</li>
+            <li><Check aria-hidden="true" /> Прогресс виден ученику и родителю</li>
           </ul>
+          <div className="v9-hero-actions">
+            <Link className="button button-primary button-large" href="/register">
+              Собрать свой план <ArrowRight aria-hidden="true" />
+            </Link>
+            <a className="v9-text-link" href="#format"><Play aria-hidden="true" /> Посмотреть, как всё устроено</a>
+          </div>
+          <p className="v9-hero-note">Без оплаты на первом шаге. Сначала выбираешь цель и предметы.</p>
         </div>
 
-        <div className="v2-hero-scene" aria-label="Подготовка к экзаменам с Пятёркой">
-          <div className="v2-hero-sun" aria-hidden="true" />
-          <Image
-            className="v2-hero-student"
-            src="/brand/hero-student-v2.png"
-            alt="Старшеклассник с тетрадью готовится к экзаменам"
-            width={1024}
-            height={1536}
-            priority
-            unoptimized
-            sizes="(max-width: 767px) 78vw, (max-width: 1023px) 56vw, 42vw"
-          />
-          <div className="v2-score-card" aria-label="Фирменный знак результата">
-            <small>результат</small><strong>5/5</strong><span><TrendingUp aria-hidden="true" /> шаг за шагом</span>
+        <div className="v9-hero-media" data-reveal>
+          <div className="v9-hero-image-wrap">
+            {heroVideoUrl ? (
+              <video
+                className="v9-hero-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster="/brand/hero-student-v2.png"
+                aria-label="Фрагмент онлайн-занятия в Пятёрке"
+              >
+                <source src={heroVideoUrl} />
+              </video>
+            ) : (
+              <Image
+                src="/brand/hero-student-v2.png"
+                alt="Старшеклассник готовится к экзаменам"
+                fill
+                priority
+                unoptimized
+                sizes="(max-width: 1023px) 100vw, 48vw"
+              />
+            )}
+            <div className="v9-media-overlay" aria-hidden="true" />
+            <div className="v9-media-caption"><Play aria-hidden="true" /><span><small>живой урок</small><strong>вопрос → разбор → практика</strong></span></div>
           </div>
+          <aside className="v2-score-card v9-score-card" aria-label="Формат подготовки">
+            <span>в одном плане</span>
+            <strong>1–4</strong>
+            <b>предмета</b>
+          </aside>
+          <div className="v9-hero-reaction" aria-hidden="true"><span>«Я не успеваю»</span><strong>→ теперь есть план 💪</strong></div>
         </div>
       </div>
     </section>
