@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": "22.x"
   },
   "scripts": {
     "install:ci": "bash scripts/sites-env.sh -- bash scripts/install-ci.sh",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
-    "build": "bash scripts/sites-env.sh -- bash scripts/build-verified.sh",
+    "build": "if [ \"${VERCEL:-}\" = \"1\" ]; then next build; else bash scripts/sites-env.sh -- bash scripts/build-verified.sh; fi",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
