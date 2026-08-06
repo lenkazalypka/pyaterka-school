@@ -6,17 +6,21 @@
     "node": "22.x"
   },
   "scripts": {
+    "build": "next build",
+    "build:sites": "bash scripts/sites-env.sh -- bash scripts/build-verified.sh",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate",
+    "dev": "next dev",
+    "dev:sites": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "install:ci": "bash scripts/sites-env.sh -- bash scripts/install-ci.sh",
-    "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
-    "build": "if [ \"${VERCEL:-}\" = \"1\" ]; then next build; else bash scripts/sites-env.sh -- bash scripts/build-verified.sh; fi",
-    "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
-    "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "start": "next start",
+    "start:sites": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
+    "test": "node --test tests/*.test.mjs",
     "test:foundation": "node --test tests/foundation.test.mjs",
-    "check": "npm run typecheck && npm run lint && npm test",
-    "validate:artifact": "bash scripts/sites-env.sh -- bash scripts/validate-artifact.sh",
-    "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
+    "test:sites": "npm run build:sites && node --test tests/sites/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "validate:artifact": "bash scripts/sites-env.sh -- bash scripts/validate-artifact.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",
