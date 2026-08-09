@@ -4,17 +4,23 @@ export interface EmailService {
   sendParentInvitation(message: ParentInvitationEmail): Promise<void>;
 }
 
-class DisabledEmailService implements EmailService {
-  async sendParentInvitation() { /* Provider is intentionally not configured. */ }
+class UnconfiguredEmailService implements EmailService {
+  async sendParentInvitation(): Promise<void> {
+    throw new Error("Production email provider is not configured");
+  }
 }
 
 class ConsoleEmailService implements EmailService {
-  async sendParentInvitation(message: ParentInvitationEmail) {
-    if (process.env.NODE_ENV !== "production") console.info(`[dev-email] Parent invitation for ${message.email}: ${message.inviteUrl}`);
+  async sendParentInvitation(message: ParentInvitationEmail): Promise<void> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("EMAIL_PROVIDER=console is not allowed in production");
+    }
+    console.info(`[dev-email] Parent invitation for ${message.email}: ${message.inviteUrl}`);
   }
 }
 
 export function emailService(): EmailService {
-  return process.env.EMAIL_PROVIDER === "console" ? new ConsoleEmailService() : new DisabledEmailService();
+  const provider = process.env.EMAIL_PROVIDER?.trim();
+  if (provider === "console") return new ConsoleEmailService();
+  return new UnconfiguredEmailService();
 }
-
