@@ -38,6 +38,29 @@ $$;
 revoke all on function private.can_view_program(uuid) from public;
 grant execute on function private.can_view_program(uuid) to anon, authenticated;
 
+create or replace function private.can_view_subscription_subjects(target_subscription uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.subscriptions s
+    where s.id = target_subscription
+      and (
+        s.student_id = auth.uid()
+        or private.parent_of(s.student_id)
+        or private.curates_student(s.student_id)
+        or private.has_role('admin')
+      )
+  );
+$$;
+
+revoke all on function private.can_view_subscription_subjects(uuid) from public;
+grant execute on function private.can_view_subscription_subjects(uuid) to authenticated;
+
 drop policy if exists curator_students_scoped_read on public.curator_students;
 create policy curator_students_scoped_read on public.curator_students
   for select
@@ -51,19 +74,7 @@ create policy curator_students_scoped_read on public.curator_students
 drop policy if exists subscription_subjects_scoped_read on public.subscription_subjects;
 create policy subscription_subjects_scoped_read on public.subscription_subjects
   for select
-  using (
-    exists (
-      select 1
-      from public.subscriptions s
-      where s.id = subscription_id
-        and (
-          s.student_id = auth.uid()
-          or private.parent_of(s.student_id)
-          or private.curates_student(s.student_id)
-          or private.has_role('admin')
-        )
-    )
-  );
+  using (private.can_view_subscription_subjects(subscription_id));
 
 drop policy if exists programs_scoped_read on public.programs;
 create policy programs_scoped_read on public.programs
