@@ -231,7 +231,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
           <div className="v9-section-heading is-centered" data-reveal>
             <span className="v9-kicker">Тарифы</span>
             <h2>Выбери не «подороже».<br /><em>Выбери нужный уровень поддержки.</em></h2>
-            <p>{plans.some((plan) => plan.priceLabel) ? "Показываем актуальную стоимость активных пакетов." : "Состав пакетов уже виден. Точную стоимость посчитаем после выбора предметов."}</p>
+            <p>{plans.some((plan) => plan.priceLabel) ? "Показываем минимальную стоимость активных пакетов. Итог зависит от выбранных предметов." : "Состав пакетов уже виден. Ценовой ориентир появится после публикации тарифов в Supabase."}</p>
           </div>
           <div className="v9-plan-grid">
             {plans.map((plan, index) => (
@@ -239,7 +239,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
                 {index === 1 && <span className="v9-plan-badge"><Sparkles aria-hidden="true" /> рекомендуем</span>}
                 <span className="v9-plan-index">0{index + 1}</span>
                 <h3>{plan.name}</h3>
-                <p className="v9-plan-price">{plan.priceLabel ?? "Цена после выбора предметов"}</p>
+                <p className={`v9-plan-price ${plan.priceLabel ? "" : "is-pending"}`}>{plan.priceLabel ?? "Ориентир появится до открытия оплаты"}</p>
                 <ul>{plan.features.slice(0, 3).map((feature) => <li key={feature}><Check aria-hidden="true" /> {feature}</li>)}</ul>
                 {plan.features.length > 3 && (
                   <details className="v9-plan-details"><summary>Все возможности <ChevronDown aria-hidden="true" /></summary><ul>{plan.features.slice(3).map((feature) => <li key={feature}><Check aria-hidden="true" /> {feature}</li>)}</ul></details>

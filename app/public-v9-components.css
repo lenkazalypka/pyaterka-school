@@ -29,6 +29,7 @@
 .v9-plan-index { color: var(--brand-primary); font-size: 13px; font-weight: 850; }
 .v9-plan-card h3 { margin: 50px 0 12px; font-size: 34px; letter-spacing: -.045em; }
 .v9-plan-price { min-height: 50px; margin: 0; color: var(--brand-burgundy); font-size: 19px; font-weight: 850; }
+.v9-plan-price.is-pending { max-width: 260px; color: var(--text-muted); font-size: 15px; font-weight: 700; line-height: 1.4; }
 .v9-plan-card ul { display: grid; gap: 11px; margin: 24px 0; padding: 0; list-style: none; }
 .v9-plan-card li { display: flex; align-items: flex-start; gap: 8px; color: var(--text-muted); font-size: 14px; line-height: 1.42; }
 .v9-plan-card li svg { flex: 0 0 auto; width: 17px; color: var(--brand-primary); }

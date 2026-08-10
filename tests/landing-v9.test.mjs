@@ -47,7 +47,9 @@ test("marketing proof stays factual", () => {
   assert.match(sections, /Первые ученики уже готовятся/);
   assert.match(sections, /не подменяем первые результаты красивой статистикой/);
   assert.match(plans, /priceLabel: null/);
+  assert.match(plans, /`от \$\{value\} ₽\/мес`/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
+  assert.match(sections, /Ориентир появится до открытия оплаты/);
 });
 
 test("v9 interactions remain dependency-free and responsive", () => {

@@ -17,7 +17,7 @@ const labels: Record<string, string> = {
 
 function priceLabel(priceMinor: number, currency: string) {
   const value = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(priceMinor / 100);
-  return currency === "RUB" ? `${value} ₽` : `${value} ${currency}`;
+  return currency === "RUB" ? `от ${value} ₽/мес` : `от ${value} ${currency}/мес`;
 }
 
 export async function getPublicPlans(): Promise<PublicPlan[]> {
