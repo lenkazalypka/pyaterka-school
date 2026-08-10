@@ -12,7 +12,6 @@ import {
   ClipboardCheck,
   Clock3,
   GraduationCap,
-  HeartHandshake,
   MessageCircle,
   Route,
   ShieldCheck,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { CountUp } from "@/components/public/count-up";
 import { FaqAccordion } from "@/components/public/faq-accordion";
+import { TeacherCriterionCard } from "@/components/public/teacher-card";
 import { TestimonialsSection } from "@/components/public/testimonials";
 import type { PublicPlan } from "@/lib/public-site";
 
@@ -53,6 +53,13 @@ const comparisonRows: Array<{
   { label: "Пробники и разбор ошибок", tutor: "depends", solo: "depends", school: "yes" },
   { label: "Отчёт о прогрессе родителю", tutor: "depends", solo: "no", school: "depends" },
 ];
+
+const teacherCriteria = [
+  { index: "01", initials: "ЭК", title: "Знает актуальный экзамен", description: "Работает с форматом, критериями и изменениями по своему предмету.", tag: "экспертиза" },
+  { index: "02", initials: "ЯС", title: "Объясняет ход мысли", description: "Ученик понимает не только ответ, но и способ решения.", tag: "ясность" },
+  { index: "03", initials: "ОС", title: "Даёт нормальную обратную связь", description: "Разбирает ошибку спокойно и помогает попробовать ещё раз.", tag: "поддержка" },
+  { index: "04", initials: "ПР", title: "Следит за прогрессом", description: "Связывает урок, практику и результаты пробников в одну картину.", tag: "система" },
+] as const;
 
 const faq = [
   ["Можно готовиться сразу по нескольким предметам?", "Да. Можно выбрать от одного до четырёх предметов. Точный лимит зависит от тарифа, а итоговая стоимость рассчитывается после выбора."],
@@ -194,10 +201,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
             <p>Профили с именами и результатами публикуются только после проверки данных. Пока показываем критерии отбора — без выдуманных регалий.</p>
           </div>
           <div className="v9-teacher-rail" role="list" aria-label="Критерии отбора преподавателей">
-            <article role="listitem" data-reveal><span>01</span><BookOpenCheck aria-hidden="true" /><h3>Знает актуальный экзамен</h3><p>Работает с форматом, критериями и изменениями по своему предмету.</p><b>экспертиза</b></article>
-            <article role="listitem" data-reveal><span>02</span><MessageCircle aria-hidden="true" /><h3>Объясняет ход мысли</h3><p>Ученик понимает не только ответ, но и способ решения.</p><b>ясность</b></article>
-            <article role="listitem" data-reveal><span>03</span><HeartHandshake aria-hidden="true" /><h3>Даёт нормальную обратную связь</h3><p>Разбирает ошибку спокойно и помогает попробовать ещё раз.</p><b>поддержка</b></article>
-            <article role="listitem" data-reveal><span>04</span><ClipboardCheck aria-hidden="true" /><h3>Следит за прогрессом</h3><p>Связывает урок, практику и результаты пробников в одну картину.</p><b>система</b></article>
+            {teacherCriteria.map((criterion) => <TeacherCriterionCard criterion={criterion} key={criterion.index} />)}
           </div>
           <Link className="button button-dark button-large" href="/register">Выбрать предмет <ArrowRight aria-hidden="true" /></Link>
         </div>

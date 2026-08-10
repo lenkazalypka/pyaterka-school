@@ -120,7 +120,8 @@
 .v9-teacher-rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(300px, 1fr); gap: 14px; margin-bottom: 28px; overflow-x: auto; padding: 0 0 16px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
 .v9-teacher-rail article { min-height: 380px; position: relative; padding: 28px; border: 1px solid color-mix(in srgb, #fff 14%, transparent); border-radius: 30px 30px 7px 30px; background: color-mix(in srgb, #fff 7%, transparent); scroll-snap-align: start; }
 .v9-teacher-rail article > span { opacity: .45; font-weight: 850; }
-.v9-teacher-rail article > svg { display: block; width: 48px; height: 48px; margin-top: 92px; color: var(--accent-peach); }
+.v9-teacher-avatar { display: grid; place-items: center; width: 78px; height: 78px; margin-top: 58px; border: 1px solid color-mix(in srgb, var(--accent-peach) 52%, transparent); border-radius: 50%; color: var(--brand-burgundy); background: var(--accent-peach); font-size: 24px; font-weight: 900; letter-spacing: -.03em; box-shadow: 0 14px 34px color-mix(in srgb, #000 18%, transparent); }
+.v9-teacher-profile > img { width: 88px; height: 88px; margin-top: 48px; border-radius: 50%; object-fit: cover; }
 .v9-teacher-rail h3 { margin: 24px 0 10px; font-size: 28px; line-height: 1.03; }
 .v9-teacher-rail p { margin: 0; opacity: .65; line-height: 1.55; }
 .v9-teacher-rail b { position: absolute; left: 28px; bottom: 26px; padding: 7px 10px; border-radius: 99px; color: var(--brand-burgundy); background: var(--accent-peach); font-size: 11px; text-transform: uppercase; }
