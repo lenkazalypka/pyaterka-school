@@ -74,6 +74,7 @@
 .v9-testimonial-rail article { min-height: 300px; padding: 28px; border: 1px solid var(--border-soft); border-radius: 28px 28px 7px 28px; background: #fff; box-shadow: var(--shadow-card); scroll-snap-align: start; }
 .v9-testimonial-person { display: flex; align-items: center; gap: 14px; }
 .v9-testimonial-person img { border-radius: 50%; object-fit: cover; }
+.v9-testimonial-avatar { display: grid; place-items: center; flex: 0 0 56px; width: 56px; height: 56px; border-radius: 50%; color: #fff; background: var(--brand-primary); font-weight: 850; }
 .v9-testimonial-person div { display: grid; gap: 3px; }
 .v9-testimonial-person span { color: var(--text-muted); font-size: 13px; }
 .v9-testimonial-rail blockquote { margin: 34px 0 0; font-size: 20px; font-weight: 700; line-height: 1.45; letter-spacing: -.02em; }

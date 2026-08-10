@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import {
@@ -22,18 +21,11 @@ import {
 } from "lucide-react";
 import { CountUp } from "@/components/public/count-up";
 import { FaqAccordion } from "@/components/public/faq-accordion";
+import { TestimonialsSection } from "@/components/public/testimonials";
 import type { PublicPlan } from "@/lib/public-site";
 
 type RevealStyle = CSSProperties & { "--reveal-delay": string };
 type ComparisonState = "yes" | "no" | "depends";
-type Testimonial = {
-  name: string;
-  subject: string;
-  result: string;
-  quote: string;
-  avatar: string;
-};
-
 function revealStyle(index: number): RevealStyle {
   return { "--reveal-delay": `${Math.min(index, 6) * 70}ms` };
 }
@@ -62,9 +54,6 @@ const comparisonRows: Array<{
   { label: "Отчёт о прогрессе родителю", tutor: "depends", solo: "no", school: "depends" },
 ];
 
-// Публикуем отзывы только после проверки результата и согласия ученика на фото и цитату.
-const approvedTestimonials: Testimonial[] = [];
-
 const faq = [
   ["Можно готовиться сразу по нескольким предметам?", "Да. Можно выбрать от одного до четырёх предметов. Точный лимит зависит от тарифа, а итоговая стоимость рассчитывается после выбора."],
   ["Что делать, если пропустил занятие?", "После публикации запись появится вместе с материалами к уроку. Можно посмотреть её в удобное время и вернуться к нужному моменту."],
@@ -81,32 +70,6 @@ function FeatureMark({ value }: { value: ComparisonState }) {
     return <span className="v9-depends" aria-label="Зависит от формата"><CircleHelp aria-hidden="true" /><small>зависит</small></span>;
   }
   return <span className="v9-no" aria-label="Не включено"><CircleMinus aria-hidden="true" /><small>нет</small></span>;
-}
-
-function TestimonialsSection() {
-  if (approvedTestimonials.length === 0) return null;
-
-  return (
-    <section className="v2-section v9-testimonials" aria-labelledby="reviews-title">
-      <div className="public-container">
-        <div className="v9-section-heading" data-reveal>
-          <span className="v9-kicker">Результаты учеников</span>
-          <h2 id="reviews-title">Не рекламные обещания.<br /><em>Личный опыт подготовки.</em></h2>
-        </div>
-        <div className="v9-testimonial-rail" role="list" aria-label="Отзывы учеников">
-          {approvedTestimonials.map((testimonial, index) => (
-            <article role="listitem" data-reveal style={revealStyle(index)} key={`${testimonial.name}-${testimonial.subject}`}>
-              <div className="v9-testimonial-person">
-                <Image src={testimonial.avatar} alt="" width={56} height={56} />
-                <div><strong>{testimonial.name}</strong><span>{testimonial.subject} · {testimonial.result}</span></div>
-              </div>
-              <blockquote>«{testimonial.quote}»</blockquote>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
 }
 
 export function PublicSections({ plans }: { plans: PublicPlan[] }) {
