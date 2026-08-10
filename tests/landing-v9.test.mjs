@@ -35,6 +35,8 @@ test("marketing proof stays factual", () => {
   assert.doesNotMatch(source, /370K|370К|1197|каждый 3-й|80\+ баллов|средний балл учеников/i);
   assert.match(sections, /approvedTestimonials: Testimonial\[\] = \[\]/);
   assert.match(sections, /if \(approvedTestimonials\.length === 0\) return null/);
+  assert.match(sections, /Первые ученики уже готовятся/);
+  assert.match(sections, /не подменяем первые результаты красивой статистикой/);
   assert.match(plans, /priceLabel: null/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
 });

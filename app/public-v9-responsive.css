@@ -11,6 +11,7 @@
   .v9-hero-copy { max-width: 780px; }
   .v9-hero-media { min-height: 620px; }
   .v9-proof-grid { grid-template-columns: repeat(2, 1fr); }
+  .v9-launch-signals { grid-template-columns: 1fr; }
   .v9-section-heading { grid-template-columns: 1fr; }
   .v9-direction-grid, .v9-problem-grid, .v9-testimonials-panel, .v9-trust-panel, .v9-faq-grid { grid-template-columns: 1fr; }
   .v9-plan-grid { grid-template-columns: 1fr; }
@@ -32,6 +33,7 @@
   .v9-hero-reaction { position: relative; inset: auto; justify-self: start; width: fit-content; max-width: calc(100% - 24px); margin: -12px 12px 0; }
   .v9-proof-grid { grid-template-columns: 1fr; }
   .v9-proof-grid article { min-height: 124px; }
+  .v9-launch-signals article { min-height: 190px; }
   .v9-section-heading { margin-bottom: 30px; }
   .v9-direction-grid { grid-template-columns: 1fr; }
   .v9-direction-card { min-height: 400px; padding: 26px; }

@@ -56,6 +56,13 @@
 .v9-proof-grid article > span:last-of-type { display: block; max-width: 150px; margin-top: 10px; color: var(--text-muted); font-size: 14px; line-height: 1.35; }
 .v9-proof-grid svg { position: absolute; right: 20px; bottom: 20px; width: 25px; color: var(--brand-primary); }
 
+.v9-launch-proof { background: #fff; }
+.v9-launch-signals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.v9-launch-signals article { min-height: 220px; padding: 28px; border: 1px solid var(--border-soft); border-radius: 28px 28px 7px 28px; background: color-mix(in srgb, var(--surface-rose) 55%, #fff); }
+.v9-launch-signals span { color: var(--brand-primary); font-size: 12px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.v9-launch-signals strong { display: block; margin-top: 52px; font-size: 26px; line-height: 1.05; letter-spacing: -.035em; }
+.v9-launch-signals p { margin: 12px 0 0; color: var(--text-muted); line-height: 1.5; }
+
 .v9-section-heading { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .55fr); align-items: end; gap: 32px; margin-bottom: 44px; }
 .v9-section-heading .v9-kicker { grid-column: 1 / -1; }
 .v9-section-heading h2 { margin: 0; font-size: clamp(42px, 5.4vw, 76px); line-height: .98; letter-spacing: -.055em; }

@@ -128,6 +128,27 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
         </div>
       </section>
 
+      <section className="v2-section v9-launch-proof" aria-labelledby="launch-proof-title">
+        <div className="public-container">
+          <div className="v9-section-heading" data-reveal>
+            <span className="v9-kicker">Честно о старте</span>
+            <h2 id="launch-proof-title">Набор открыт.<br /><em>Первые ученики уже готовятся.</em></h2>
+            <p>Мы не подменяем первые результаты красивой статистикой. Опубликуем цифры только после проверки и с понятной методикой подсчёта.</p>
+          </div>
+          <div className="v9-launch-signals" role="list" aria-label="Проверяемые факты о школе">
+            <article role="listitem" data-reveal style={revealStyle(0)}>
+              <span>сейчас</span><strong>Идёт первый набор</strong><p>Можно выбрать ЕГЭ или ОГЭ и собрать план по нужным предметам.</p>
+            </article>
+            <article role="listitem" data-reveal style={revealStyle(1)}>
+              <span>без приписок</span><strong>Результаты проверяем</strong><p>Баллы и отзывы появятся после подтверждения учениками и родителями.</p>
+            </article>
+            <article role="listitem" data-reveal style={revealStyle(2)}>
+              <span>8 предметов</span><strong>Один учебный кабинет</strong><p>Расписание, материалы и прогресс собраны в одном месте.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section className="v2-section v9-directions" id="directions">
         <div className="public-container">
           <div className="v9-section-heading" data-reveal>
