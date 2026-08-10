@@ -26,7 +26,7 @@ test("v9 landing has a complete conversion path", () => {
 test("hero video is optional and keeps an approved image fallback", () => {
   assert.match(hero, /NEXT_PUBLIC_HERO_VIDEO_URL/);
   assert.match(hero, /<video/);
-  assert.match(hero, /poster="\/brand\/hero-student-v2\.png"/);
+  assert.match(hero, /poster="\/brand\/hero-study-illustration-v3\.webp"/);
   assert.match(hero, /<Image/);
 });
 

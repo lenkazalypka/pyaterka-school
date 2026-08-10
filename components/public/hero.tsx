@@ -39,15 +39,15 @@ export function PublicHero() {
                 loop
                 playsInline
                 preload="metadata"
-                poster="/brand/hero-student-v2.png"
+                poster="/brand/hero-study-illustration-v3.webp"
                 aria-label="Фрагмент онлайн-занятия в Пятёрке"
               >
                 <source src={heroVideoUrl} />
               </video>
             ) : (
               <Image
-                src="/brand/hero-student-v2.png"
-                alt="Старшеклассник готовится к экзаменам"
+                src="/brand/hero-study-illustration-v3.webp"
+                alt="Старшеклассник готовится к экзаменам за рабочим столом"
                 fill
                 priority
                 unoptimized
