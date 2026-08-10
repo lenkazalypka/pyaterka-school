@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { appUrl } from "@/lib/app-url";
 import { emailService } from "@/lib/email";
 import { hashInvitationToken } from "@/lib/invitations";
 import { requireIncompleteOnboarding } from "@/lib/onboarding";
@@ -215,17 +216,20 @@ export async function completeOnboarding(_: OnboardingActionState, formData: For
   const { data: parentDraft } = await db.from("onboarding_parent_drafts").select("invite_requested,email").maybeSingle();
   let token: string | null = null;
   let tokenHash: string | null = null;
+  let inviteUrl: string | null = null;
+  let mailer: ReturnType<typeof emailService> | null = null;
   if (parentDraft?.invite_requested) {
     token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replaceAll("-", "");
     try { tokenHash = await hashInvitationToken(token); } catch { return { error: "Не настроен безопасный ключ приглашений" }; }
+    mailer = emailService();
+    inviteUrl = `${appUrl()}/invite/parent?token=${token}`;
   }
   const { error } = await db.rpc("complete_student_onboarding", {
     p_idempotency_key: idempotencyKey.data, p_invitation_token_hash: tokenHash,
   });
   if (error) return { error: "Анкета не завершена или данные изменились. Проверьте шаги и повторите." };
-  if (token && parentDraft?.email) {
-    const origin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    await emailService().sendParentInvitation({ email: parentDraft.email, inviteUrl: `${origin}/invite/parent?token=${token}` });
+  if (mailer && inviteUrl && parentDraft?.email) {
+    await mailer.sendParentInvitation({ email: parentDraft.email, inviteUrl });
   }
   if (!onboarding) return { error: "Анкета не найдена" };
   redirect("/student?onboarding=completed");

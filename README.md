@@ -28,6 +28,12 @@ npm run dev
 
 После `supabase start` перенесите локальные URL и anon key в `.env.local`.
 
+### Переменные окружения
+
+`.env.example` содержит полный шаблон без секретов. Для production обязательны `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, canonical HTTPS `NEXT_PUBLIC_APP_URL`, уникальный серверный `INVITATION_TOKEN_PEPPER` длиной от 32 символов и выбранный production `EMAIL_PROVIDER`. `EMAIL_PROVIDER=console` разрешён только локально. `NEXT_PUBLIC_HERO_VIDEO_URL` необязателен.
+
+`CODEX_SANDBOX`, `WRANGLER_WRITE_LOGS`, `WRANGLER_LOG_PATH`, `MINIFLARE_REGISTRY_PATH` и `SITES_*` относятся только к optional Sites/Cloudflare development toolchain и не нужны Vercel runtime.
+
 ## Тестовые аккаунты
 
 Seed предназначен только для local. Пароль всех аккаунтов: `Demo123!`.
@@ -67,7 +73,7 @@ npm run check
 
 Финальная кнопка вызывает `complete_student_onboarding`: PostgreSQL-функция проверяет роль, полноту, активность экзамена/предметов/тарифа и лимит предметов, затем в одной транзакции создаёт pending manual subscription, её предметы, черновой учебный план, приглашение и audit log. Повторный вызов безопасен благодаря `onboarding_completion_key`.
 
-При `EMAIL_PROVIDER=console` ссылка приглашения выводится только в development-лог. В БД хранится SHA-256 hash с серверным pepper; срок действия — 72 часа. Для production подключите реальный адаптер в `lib/email.ts`.
+При `EMAIL_PROVIDER=console` ссылка приглашения выводится только в development-лог. В production отсутствие реального адаптера вызывает явную configuration error до завершения flow, а не молча теряет письмо. В БД хранится SHA-256 hash с серверным pepper; срок действия — 72 часа. Интерфейс `EmailService` и adapter registry в `lib/email.ts` позволяют подключить выбранную владельцем реализацию отдельным модулем и передать её в `emailService`; конкретный SaaS намеренно не выбран.
 
 ## Vercel + Supabase
 
@@ -76,6 +82,10 @@ npm run check
 3. В Supabase Auth URL Configuration добавьте production URL.
 4. До реальных учеников прогоните интеграционные RLS-тесты всех пяти ролей.
 5. Service-role никогда не отправляется в браузер.
+
+`app/chatgpt-auth.ts` оставлен только как compatibility helper optional OpenAI-hosted Sites runtime. Обычный Vercel-сайт использует Supabase auth из `lib/auth.ts` и database RLS; OpenAI-заголовки не являются его security boundary.
+
+Перед первым деплоем пройдите [production checklist](docs/PRODUCTION_CHECKLIST.md). Полноценный rate limit публичного signup требует настройки Supabase/edge platform, а production monitoring — внешнего операционного решения; фиктивные in-memory реализации в приложение не добавлены.
 
 ## Граница этапа
 

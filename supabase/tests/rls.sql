@@ -40,13 +40,25 @@ insert into auth.users(id,email,raw_user_meta_data) values
  ('22222222-2222-4222-8222-222222222222','s2@t','{"intended_role":"student","first_name":"S2"}'),
  ('33333333-3333-4333-8333-333333333333','p1@t','{"intended_role":"parent","first_name":"P1"}'),
  ('44444444-4444-4444-8444-444444444444','t1@t','{"intended_role":"student","first_name":"T1"}'),
- ('55555555-5555-4555-8555-555555555555','c1@t','{"intended_role":"student","first_name":"C1"}');
+ ('55555555-5555-4555-8555-555555555555','c1@t','{"intended_role":"student","first_name":"C1"}'),
+ ('66666666-6666-4666-8666-666666666666','c2@t','{"intended_role":"student","first_name":"C2"}'),
+ ('77777777-7777-4777-8777-777777777777','p2@t','{"intended_role":"parent","first_name":"P2"}'),
+ ('88888888-8888-4888-8888-888888888888','admin@t','{"intended_role":"student","first_name":"Admin"}');
 
 insert into public.teacher_profiles(user_id) values('44444444-4444-4444-8444-444444444444');
-insert into public.curator_profiles(user_id) values('55555555-5555-4555-8555-555555555555');
-delete from public.user_roles where user_id in ('44444444-4444-4444-8444-444444444444','55555555-5555-4555-8555-555555555555');
+insert into public.curator_profiles(user_id) values
+ ('55555555-5555-4555-8555-555555555555'),
+ ('66666666-6666-4666-8666-666666666666');
+delete from public.user_roles where user_id in (
+ '44444444-4444-4444-8444-444444444444',
+ '55555555-5555-4555-8555-555555555555',
+ '66666666-6666-4666-8666-666666666666',
+ '88888888-8888-4888-8888-888888888888'
+);
 insert into public.user_roles(user_id,role_id) select '44444444-4444-4444-8444-444444444444',id from public.roles where code='teacher';
 insert into public.user_roles(user_id,role_id) select '55555555-5555-4555-8555-555555555555',id from public.roles where code='curator';
+insert into public.user_roles(user_id,role_id) select '66666666-6666-4666-8666-666666666666',id from public.roles where code='curator';
+insert into public.user_roles(user_id,role_id) select '88888888-8888-4888-8888-888888888888',id from public.roles where code='admin';
 
 insert into public.parent_student_links(parent_id,student_id,relation,status)
 values('33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111','mother','pending');
@@ -87,6 +99,7 @@ values('aaaaaaaa-0000-4000-8000-000000000002','bbbbbbbb-0000-4000-8000-000000000
 
 reset request.jwt.claim.sub;
 set role anon;
+select test.assert_count('anon no subscription subjects','select count(*) from public.subscription_subjects',0);
 select test.assert_count('anon published program','select count(*) from public.programs where id=''cccccccc-0000-4000-8000-000000000001''',1);
 select test.assert_count('anon no draft program','select count(*) from public.programs where id=''cccccccc-0000-4000-8000-000000000002''',0);
 select test.assert_count('anon published module','select count(*) from public.modules where id=''eeeeeeee-0000-4000-8000-000000000001''',1);
@@ -114,6 +127,9 @@ select test.set_user('33333333-3333-4333-8333-333333333333');
 select test.assert_count('confirmed parent child','select count(*) from public.student_profiles where user_id=''11111111-1111-4111-8111-111111111111''',1);
 select test.assert_count('confirmed parent subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
 
+select test.set_user('77777777-7777-4777-8777-777777777777');
+select test.assert_count('unrelated parent no subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',0);
+
 select test.set_user('44444444-4444-4444-8444-444444444444');
 select test.assert_count('teacher own group','select count(*) from public.group_students where group_id=''dddddddd-0000-4000-8000-00000000000a''',1);
 select test.assert_count('teacher no foreign group','select count(*) from public.group_students where group_id=''dddddddd-0000-4000-8000-00000000000b''',0);
@@ -125,6 +141,13 @@ select test.set_user('55555555-5555-4555-8555-555555555555');
 select test.assert_count('curator own assignment','select count(*) from public.curator_students',1);
 select test.assert_count('curator no unassigned student','select count(*) from public.student_profiles where user_id=''22222222-2222-4222-8222-222222222222''',0);
 select test.assert_count('curator assigned subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
+select test.assert_count('curator no subscription financial row','select count(*) from public.subscriptions where id=''aaaaaaaa-0000-4000-8000-000000000002''',0);
+
+select test.set_user('66666666-6666-4666-8666-666666666666');
+select test.assert_count('unrelated curator no subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',0);
+
+select test.set_user('88888888-8888-4888-8888-888888888888');
+select test.assert_count('admin subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
 
 select test.set_user('11111111-1111-4111-8111-111111111111');
 select test.assert_uid('11111111-1111-4111-8111-111111111111');
