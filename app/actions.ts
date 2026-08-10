@@ -7,8 +7,8 @@ import { configured, supabase } from "@/lib/supabase";
 export type State = { error: string | null; success?: string | null };
 
 const credentials = z.object({
-  email: z.string().email("Проверьте email"),
-  password: z.string().min(8, "Минимум 8 символов"),
+  email: z.string().trim().email("Проверьте email").max(254, "Email слишком длинный"),
+  password: z.string().min(8, "Минимум 8 символов").max(128, "Пароль слишком длинный"),
 });
 
 export async function login(_: State, formData: FormData): Promise<State> {
@@ -24,7 +24,7 @@ export async function login(_: State, formData: FormData): Promise<State> {
 export async function register(_: State, formData: FormData): Promise<State> {
   if (!configured()) return { error: "Регистрация откроется после подключения базы школы" };
   const parsed = credentials.extend({
-    name: z.string().trim().min(2, "Укажите имя"),
+    name: z.string().trim().min(2, "Укажите имя").max(80, "Имя слишком длинное"),
     consent: z.literal("on"),
   }).safeParse({
     email: formData.get("email"), password: formData.get("password"),

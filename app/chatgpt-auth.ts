@@ -1,6 +1,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Compatibility helper for the optional OpenAI-hosted Sites runtime only.
+// Vercel production routes authenticate with Supabase through lib/auth.ts and
+// remain protected by database RLS; these headers are not a security boundary.
+
 export type ChatGPTUser = {
   displayName: string;
   email: string;
