@@ -41,7 +41,7 @@
   .v9-learning-steps { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(270px, 82vw); grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; }
   .v9-learning-steps li { min-height: 310px; scroll-snap-align: start; }
   .v9-subject-grid { grid-template-columns: repeat(2, 1fr); }
-  .v9-subject-card { min-height: 190px; }
+  .v9-subject-card { min-height: 230px; }
   .v9-subject-card > strong { font-size: 42px; }
   .v9-teacher-rail { grid-auto-columns: minmax(270px, 84vw); }
   .v9-testimonials-panel { padding: 28px 20px; }
@@ -57,7 +57,7 @@
   .v9-media-caption > svg { width: 40px; height: 40px; padding: 12px; }
   .v9-media-caption strong { font-size: 15px; }
   .v9-subject-grid { grid-template-columns: 1fr; }
-  .v9-subject-card { min-height: 170px; }
+  .v9-subject-card { min-height: 210px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .v9-subject-card, .v9-plan-details summary svg { transition: none; }

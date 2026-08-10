@@ -22,6 +22,7 @@ import { CountUp } from "@/components/public/count-up";
 import { FaqAccordion } from "@/components/public/faq-accordion";
 import { TeacherCriterionCard } from "@/components/public/teacher-card";
 import { TestimonialsSection } from "@/components/public/testimonials";
+import { diagnosticSubjects, diagnosticSubjectSlugs } from "@/lib/diagnostic-tests";
 import type { PublicPlan } from "@/lib/public-site";
 
 type RevealStyle = CSSProperties & { "--reveal-delay": string };
@@ -29,17 +30,6 @@ type ComparisonState = "yes" | "no" | "depends";
 function revealStyle(index: number): RevealStyle {
   return { "--reveal-delay": `${Math.min(index, 6) * 70}ms` };
 }
-
-const subjects = [
-  ["Математика", "math", "x²"],
-  ["Русский язык", "russian", "А"],
-  ["Обществознание", "social", "§"],
-  ["История", "history", "19"],
-  ["Информатика", "it", "</>"],
-  ["Биология", "biology", "DNA"],
-  ["Химия", "chemistry", "H₂"],
-  ["Английский", "english", "EN"],
-] as const;
 
 const comparisonRows: Array<{
   label: string;
@@ -184,11 +174,18 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
             <p>Один предмет или сразу четыре — всё остаётся в одном расписании и одном кабинете.</p>
           </div>
           <div className="v9-subject-grid">
-            {subjects.map(([name, tone, glyph], index) => (
-              <Link className={`v9-subject-card tone-${tone}`} href="/register" data-reveal key={name} style={revealStyle(index)}>
-                <span>{String(index + 1).padStart(2, "0")}</span><strong>{glyph}</strong><h3>{name}</h3><ArrowRight aria-hidden="true" />
-              </Link>
-            ))}
+            {diagnosticSubjectSlugs.map((slug, index) => {
+              const subject = diagnosticSubjects[slug];
+              return (
+                <article className={`v9-subject-card tone-${subject.tone}`} data-reveal key={subject.name} style={revealStyle(index)}>
+                  <span>{String(index + 1).padStart(2, "0")}</span><strong>{subject.glyph}</strong><h3>{subject.name}</h3>
+                  <div className="v9-subject-actions">
+                    <Link href={`/register?subject=${encodeURIComponent(subject.name)}`}>Начать <ArrowRight aria-hidden="true" /></Link>
+                    <Link href={`/test/${subject.slug}`}>Пройти тест</Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
