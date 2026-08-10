@@ -50,6 +50,9 @@
 .v9-proof-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--brand-primary) 15%, transparent); border-radius: 26px 26px 7px 26px; background: color-mix(in srgb, var(--brand-primary) 12%, transparent); }
 .v9-proof-grid article { min-height: 150px; position: relative; padding: 26px; background: #fff; }
 .v9-proof-grid strong, .v9-proof-grid [data-count-up] { display: block; color: var(--brand-burgundy); font-size: clamp(36px, 4vw, 62px); font-weight: 900; line-height: 1; letter-spacing: -.055em; }
+.v9-proof-grid [data-count-up] span { display: inline-block; transform-origin: left bottom; }
+.v9-proof-grid [data-count-up].is-active span { animation: v9-metric-in var(--count-duration, 700ms) var(--ease-out) both; }
+@keyframes v9-metric-in { from { opacity: .55; transform: translateY(8px) scale(.94); } to { opacity: 1; transform: none; } }
 .v9-proof-grid article > span:last-of-type { display: block; max-width: 150px; margin-top: 10px; color: var(--text-muted); font-size: 14px; line-height: 1.35; }
 .v9-proof-grid svg { position: absolute; right: 20px; bottom: 20px; width: 25px; color: var(--brand-primary); }
 
