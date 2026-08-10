@@ -3,10 +3,12 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [header, hero, sections, cssBase, cssComponents, cssResponsive, plans] = await Promise.all([
+const [header, hero, sections, testimonials, teachers, cssBase, cssComponents, cssResponsive, plans] = await Promise.all([
   read("../components/public/header.tsx"),
   read("../components/public/hero.tsx"),
   read("../components/public/sections.tsx"),
+  read("../components/public/testimonials.tsx"),
+  read("../components/public/teacher-card.tsx"),
   read("../app/public-v9-base.css"),
   read("../app/public-v9-components.css"),
   read("../app/public-v9-responsive.css"),
@@ -21,22 +23,35 @@ test("v9 landing has a complete conversion path", () => {
     assert.match(sections, new RegExp(`id=\\"${id}\\"`));
   }
   assert.match(sections, /action="\/register" method="get"/);
+  assert.equal(sections.match(/<FaqAccordion items=\{faq\}/g)?.length, 1);
+  assert.doesNotMatch(header, /<Link className="v9-brand-link"[^>]*>\s*<Brand/);
 });
 
 test("hero video is optional and keeps an approved image fallback", () => {
   assert.match(hero, /NEXT_PUBLIC_HERO_VIDEO_URL/);
   assert.match(hero, /<video/);
-  assert.match(hero, /poster="\/brand\/hero-student-v2\.png"/);
+  assert.match(hero, /poster="\/brand\/hero-study-illustration-v3\.webp"/);
   assert.match(hero, /<Image/);
 });
 
 test("marketing proof stays factual", () => {
   const source = `${hero}\n${sections}`;
   assert.doesNotMatch(source, /370K|370К|1197|каждый 3-й|80\+ баллов|средний балл учеников/i);
-  assert.match(sections, /approvedTestimonials: Testimonial\[\] = \[\]/);
-  assert.match(sections, /if \(approvedTestimonials\.length === 0\) return null/);
+  assert.match(testimonials, /approvedTestimonials: Testimonial\[\] = \[\]/);
+  assert.match(testimonials, /export function TestimonialCard/);
+  assert.match(testimonials, /Не публикуем отзывы заранее/);
+  assert.doesNotMatch(testimonials, /return null/);
+  assert.match(teachers, /export function TeacherProfileCard/);
+  assert.match(teachers, /name: string/);
+  assert.match(teachers, /experience: string/);
+  assert.match(teachers, /result: string/);
+  assert.match(sections, /initials: "ЭК"/);
+  assert.match(sections, /Первые ученики уже готовятся/);
+  assert.match(sections, /не подменяем первые результаты красивой статистикой/);
   assert.match(plans, /priceLabel: null/);
+  assert.match(plans, /`от \$\{value\} ₽\/мес`/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
+  assert.match(sections, /Ориентир появится до открытия оплаты/);
 });
 
 test("v9 interactions remain dependency-free and responsive", () => {
@@ -50,4 +65,11 @@ test("v9 interactions remain dependency-free and responsive", () => {
   assert.match(css, /@media \(max-width: 374px\)/);
   assert.match(css, /prefers-reduced-motion/);
   assert.doesNotMatch(css, /var\(--text-main\)/);
+});
+
+test("mobile hero caption and reaction use separate layout rows", () => {
+  assert.match(cssResponsive, /\.v9-hero-media \{ display: grid; min-height: 0; \}/);
+  assert.match(cssResponsive, /\.v9-hero-image-wrap \{ position: relative; inset: auto;/);
+  assert.match(cssResponsive, /\.v9-hero-reaction \{ position: relative; inset: auto;/);
+  assert.doesNotMatch(cssResponsive, /\.v9-hero-reaction \{ left: 10px; right: 10px; bottom: 0; \}/);
 });

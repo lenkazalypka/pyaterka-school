@@ -4,6 +4,7 @@ import "./public-v2.css";
 import "./public-v9-base.css";
 import "./public-v9-components.css";
 import "./public-v9-responsive.css";
+import "./diagnostic-test.css";
 
 export const metadata: Metadata = {
   title: { default: "Пятёрка — подготовка к ЕГЭ и ОГЭ", template: "%s · Пятёрка" },

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import {
@@ -13,7 +12,6 @@ import {
   ClipboardCheck,
   Clock3,
   GraduationCap,
-  HeartHandshake,
   MessageCircle,
   Route,
   ShieldCheck,
@@ -22,32 +20,16 @@ import {
 } from "lucide-react";
 import { CountUp } from "@/components/public/count-up";
 import { FaqAccordion } from "@/components/public/faq-accordion";
+import { TeacherCriterionCard } from "@/components/public/teacher-card";
+import { TestimonialsSection } from "@/components/public/testimonials";
+import { diagnosticSubjects, diagnosticSubjectSlugs } from "@/lib/diagnostic-tests";
 import type { PublicPlan } from "@/lib/public-site";
 
 type RevealStyle = CSSProperties & { "--reveal-delay": string };
 type ComparisonState = "yes" | "no" | "depends";
-type Testimonial = {
-  name: string;
-  subject: string;
-  result: string;
-  quote: string;
-  avatar: string;
-};
-
 function revealStyle(index: number): RevealStyle {
   return { "--reveal-delay": `${Math.min(index, 6) * 70}ms` };
 }
-
-const subjects = [
-  ["Математика", "math", "x²"],
-  ["Русский язык", "russian", "А"],
-  ["Обществознание", "social", "§"],
-  ["История", "history", "19"],
-  ["Информатика", "it", "</>"],
-  ["Биология", "biology", "DNA"],
-  ["Химия", "chemistry", "H₂"],
-  ["Английский", "english", "EN"],
-] as const;
 
 const comparisonRows: Array<{
   label: string;
@@ -62,8 +44,12 @@ const comparisonRows: Array<{
   { label: "Отчёт о прогрессе родителю", tutor: "depends", solo: "no", school: "depends" },
 ];
 
-// Публикуем отзывы только после проверки результата и согласия ученика на фото и цитату.
-const approvedTestimonials: Testimonial[] = [];
+const teacherCriteria = [
+  { index: "01", initials: "ЭК", title: "Знает актуальный экзамен", description: "Работает с форматом, критериями и изменениями по своему предмету.", tag: "экспертиза" },
+  { index: "02", initials: "ЯС", title: "Объясняет ход мысли", description: "Ученик понимает не только ответ, но и способ решения.", tag: "ясность" },
+  { index: "03", initials: "ОС", title: "Даёт нормальную обратную связь", description: "Разбирает ошибку спокойно и помогает попробовать ещё раз.", tag: "поддержка" },
+  { index: "04", initials: "ПР", title: "Следит за прогрессом", description: "Связывает урок, практику и результаты пробников в одну картину.", tag: "система" },
+] as const;
 
 const faq = [
   ["Можно готовиться сразу по нескольким предметам?", "Да. Можно выбрать от одного до четырёх предметов. Точный лимит зависит от тарифа, а итоговая стоимость рассчитывается после выбора."],
@@ -83,32 +69,6 @@ function FeatureMark({ value }: { value: ComparisonState }) {
   return <span className="v9-no" aria-label="Не включено"><CircleMinus aria-hidden="true" /><small>нет</small></span>;
 }
 
-function TestimonialsSection() {
-  if (approvedTestimonials.length === 0) return null;
-
-  return (
-    <section className="v2-section v9-testimonials" aria-labelledby="reviews-title">
-      <div className="public-container">
-        <div className="v9-section-heading" data-reveal>
-          <span className="v9-kicker">Результаты учеников</span>
-          <h2 id="reviews-title">Не рекламные обещания.<br /><em>Личный опыт подготовки.</em></h2>
-        </div>
-        <div className="v9-testimonial-rail" role="list" aria-label="Отзывы учеников">
-          {approvedTestimonials.map((testimonial, index) => (
-            <article role="listitem" data-reveal style={revealStyle(index)} key={`${testimonial.name}-${testimonial.subject}`}>
-              <div className="v9-testimonial-person">
-                <Image src={testimonial.avatar} alt="" width={56} height={56} />
-                <div><strong>{testimonial.name}</strong><span>{testimonial.subject} · {testimonial.result}</span></div>
-              </div>
-              <blockquote>«{testimonial.quote}»</blockquote>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function PublicSections({ plans }: { plans: PublicPlan[] }) {
   return (
     <>
@@ -125,6 +85,27 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
           <article data-reveal><CountUp to={8} /><span>понятных шагов до старта</span><Target aria-hidden="true" /></article>
           <article data-reveal><CountUp to={2} /><span>пробника в месяц по правилам тарифа</span><ClipboardCheck aria-hidden="true" /></article>
           <article data-reveal><strong>24/7</strong><span>доступ к опубликованным записям</span><Clock3 aria-hidden="true" /></article>
+        </div>
+      </section>
+
+      <section className="v2-section v9-launch-proof" aria-labelledby="launch-proof-title">
+        <div className="public-container">
+          <div className="v9-section-heading" data-reveal>
+            <span className="v9-kicker">Честно о старте</span>
+            <h2 id="launch-proof-title">Набор открыт.<br /><em>Первые ученики уже готовятся.</em></h2>
+            <p>Мы не подменяем первые результаты красивой статистикой. Опубликуем цифры только после проверки и с понятной методикой подсчёта.</p>
+          </div>
+          <div className="v9-launch-signals" role="list" aria-label="Проверяемые факты о школе">
+            <article role="listitem" data-reveal style={revealStyle(0)}>
+              <span>сейчас</span><strong>Идёт первый набор</strong><p>Можно выбрать ЕГЭ или ОГЭ и собрать план по нужным предметам.</p>
+            </article>
+            <article role="listitem" data-reveal style={revealStyle(1)}>
+              <span>без приписок</span><strong>Результаты проверяем</strong><p>Баллы и отзывы появятся после подтверждения учениками и родителями.</p>
+            </article>
+            <article role="listitem" data-reveal style={revealStyle(2)}>
+              <span>8 предметов</span><strong>Один учебный кабинет</strong><p>Расписание, материалы и прогресс собраны в одном месте.</p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -193,11 +174,18 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
             <p>Один предмет или сразу четыре — всё остаётся в одном расписании и одном кабинете.</p>
           </div>
           <div className="v9-subject-grid">
-            {subjects.map(([name, tone, glyph], index) => (
-              <Link className={`v9-subject-card tone-${tone}`} href="/register" data-reveal key={name} style={revealStyle(index)}>
-                <span>{String(index + 1).padStart(2, "0")}</span><strong>{glyph}</strong><h3>{name}</h3><ArrowRight aria-hidden="true" />
-              </Link>
-            ))}
+            {diagnosticSubjectSlugs.map((slug, index) => {
+              const subject = diagnosticSubjects[slug];
+              return (
+                <article className={`v9-subject-card tone-${subject.tone}`} data-reveal key={subject.name} style={revealStyle(index)}>
+                  <span>{String(index + 1).padStart(2, "0")}</span><strong>{subject.glyph}</strong><h3>{subject.name}</h3>
+                  <div className="v9-subject-actions">
+                    <Link href={`/register?subject=${encodeURIComponent(subject.name)}`}>Начать <ArrowRight aria-hidden="true" /></Link>
+                    <Link href={`/test/${subject.slug}`}>Пройти тест</Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -210,10 +198,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
             <p>Профили с именами и результатами публикуются только после проверки данных. Пока показываем критерии отбора — без выдуманных регалий.</p>
           </div>
           <div className="v9-teacher-rail" role="list" aria-label="Критерии отбора преподавателей">
-            <article role="listitem" data-reveal><span>01</span><BookOpenCheck aria-hidden="true" /><h3>Знает актуальный экзамен</h3><p>Работает с форматом, критериями и изменениями по своему предмету.</p><b>экспертиза</b></article>
-            <article role="listitem" data-reveal><span>02</span><MessageCircle aria-hidden="true" /><h3>Объясняет ход мысли</h3><p>Ученик понимает не только ответ, но и способ решения.</p><b>ясность</b></article>
-            <article role="listitem" data-reveal><span>03</span><HeartHandshake aria-hidden="true" /><h3>Даёт нормальную обратную связь</h3><p>Разбирает ошибку спокойно и помогает попробовать ещё раз.</p><b>поддержка</b></article>
-            <article role="listitem" data-reveal><span>04</span><ClipboardCheck aria-hidden="true" /><h3>Следит за прогрессом</h3><p>Связывает урок, практику и результаты пробников в одну картину.</p><b>система</b></article>
+            {teacherCriteria.map((criterion) => <TeacherCriterionCard criterion={criterion} key={criterion.index} />)}
           </div>
           <Link className="button button-dark button-large" href="/register">Выбрать предмет <ArrowRight aria-hidden="true" /></Link>
         </div>
@@ -243,7 +228,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
           <div className="v9-section-heading is-centered" data-reveal>
             <span className="v9-kicker">Тарифы</span>
             <h2>Выбери не «подороже».<br /><em>Выбери нужный уровень поддержки.</em></h2>
-            <p>{plans.some((plan) => plan.priceLabel) ? "Показываем актуальную стоимость активных пакетов." : "Состав пакетов уже виден. Точную стоимость посчитаем после выбора предметов."}</p>
+            <p>{plans.some((plan) => plan.priceLabel) ? "Показываем минимальную стоимость активных пакетов. Итог зависит от выбранных предметов." : "Состав пакетов уже виден. Ценовой ориентир появится после публикации тарифов в Supabase."}</p>
           </div>
           <div className="v9-plan-grid">
             {plans.map((plan, index) => (
@@ -251,7 +236,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
                 {index === 1 && <span className="v9-plan-badge"><Sparkles aria-hidden="true" /> рекомендуем</span>}
                 <span className="v9-plan-index">0{index + 1}</span>
                 <h3>{plan.name}</h3>
-                <p className="v9-plan-price">{plan.priceLabel ?? "Цена после выбора предметов"}</p>
+                <p className={`v9-plan-price ${plan.priceLabel ? "" : "is-pending"}`}>{plan.priceLabel ?? "Ориентир появится до открытия оплаты"}</p>
                 <ul>{plan.features.slice(0, 3).map((feature) => <li key={feature}><Check aria-hidden="true" /> {feature}</li>)}</ul>
                 {plan.features.length > 3 && (
                   <details className="v9-plan-details"><summary>Все возможности <ChevronDown aria-hidden="true" /></summary><ul>{plan.features.slice(3).map((feature) => <li key={feature}><Check aria-hidden="true" /> {feature}</li>)}</ul></details>
