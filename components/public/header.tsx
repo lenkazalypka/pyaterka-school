@@ -6,9 +6,7 @@ export function PublicHeader() {
   return (
     <header className="v9-header">
       <div className="public-container v9-header-inner">
-        <Link className="v9-brand-link" href="/" aria-label="Пятёрка — на главную">
-          <Brand />
-        </Link>
+        <div className="v9-brand-link"><Brand /></div>
         <nav className="v9-desktop-nav" aria-label="Основная навигация">
           <Link href="#format">Как учимся</Link>
           <Link href="#subjects">Предметы</Link>

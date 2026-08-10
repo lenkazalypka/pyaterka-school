@@ -23,6 +23,8 @@ test("v9 landing has a complete conversion path", () => {
     assert.match(sections, new RegExp(`id=\\"${id}\\"`));
   }
   assert.match(sections, /action="\/register" method="get"/);
+  assert.equal(sections.match(/<FaqAccordion items=\{faq\}/g)?.length, 1);
+  assert.doesNotMatch(header, /<Link className="v9-brand-link"[^>]*>\s*<Brand/);
 });
 
 test("hero video is optional and keeps an approved image fallback", () => {
