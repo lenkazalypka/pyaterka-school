@@ -51,3 +51,10 @@ test("v9 interactions remain dependency-free and responsive", () => {
   assert.match(css, /prefers-reduced-motion/);
   assert.doesNotMatch(css, /var\(--text-main\)/);
 });
+
+test("mobile hero caption and reaction use separate layout rows", () => {
+  assert.match(cssResponsive, /\.v9-hero-media \{ display: grid; min-height: 0; \}/);
+  assert.match(cssResponsive, /\.v9-hero-image-wrap \{ position: relative; inset: auto;/);
+  assert.match(cssResponsive, /\.v9-hero-reaction \{ position: relative; inset: auto;/);
+  assert.doesNotMatch(cssResponsive, /\.v9-hero-reaction \{ left: 10px; right: 10px; bottom: 0; \}/);
+});

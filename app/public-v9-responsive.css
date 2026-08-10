@@ -25,11 +25,11 @@
   .v9-hero h1 { font-size: clamp(48px, 15vw, 70px); }
   .v9-hero-actions { align-items: stretch; flex-direction: column; }
   .v9-hero-actions .button { justify-content: center; width: 100%; }
-  .v9-hero-media { min-height: 460px; }
-  .v9-hero-image-wrap { inset: 0 0 24px; border-radius: 28px 28px 7px 28px; }
+  .v9-hero-media { display: grid; min-height: 0; }
+  .v9-hero-image-wrap { position: relative; inset: auto; min-height: 430px; border-radius: 28px 28px 7px 28px; }
   .v9-score-card { top: 16px; right: -4px; min-width: 138px; }
   .v9-score-card strong { font-size: 42px; }
-  .v9-hero-reaction { left: 10px; right: 10px; bottom: 0; }
+  .v9-hero-reaction { position: relative; inset: auto; justify-self: start; width: fit-content; max-width: calc(100% - 24px); margin: -12px 12px 0; }
   .v9-proof-grid { grid-template-columns: 1fr; }
   .v9-proof-grid article { min-height: 124px; }
   .v9-section-heading { margin-bottom: 30px; }
@@ -50,7 +50,10 @@
 }
 @media (max-width: 374px) {
   .v9-hero h1 { font-size: 45px; }
-  .v9-hero-media { min-height: 420px; }
+  .v9-hero-image-wrap { min-height: 390px; }
+  .v9-media-caption { left: 18px; bottom: 20px; }
+  .v9-media-caption > svg { width: 40px; height: 40px; padding: 12px; }
+  .v9-media-caption strong { font-size: 15px; }
   .v9-subject-grid { grid-template-columns: 1fr; }
   .v9-subject-card { min-height: 170px; }
 }
