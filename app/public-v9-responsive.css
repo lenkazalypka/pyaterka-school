@@ -1,9 +1,11 @@
 @media (max-width: 1100px) {
   .v9-hero-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
-  .v9-hero-media { min-height: 540px; }
+  .v9-hero-media { min-height: 560px; }
   .v9-learning-steps { grid-template-columns: repeat(2, 1fr); }
+  .v9-learning-steps li:nth-child(2)::after { display: none; }
   .v9-subject-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
 @media (max-width: 1023px) {
   .v9-desktop-nav, .v9-header-actions { display: none; }
   .v9-mobile-menu { display: block; }
@@ -11,7 +13,12 @@
   .v9-hero-copy { max-width: 780px; }
   .v9-hero-media { min-height: 620px; }
   .v9-proof-grid { grid-template-columns: repeat(2, 1fr); }
+  .v9-honesty-statement { grid-template-columns: 1fr 180px; gap: 36px; }
+  .v9-verification-seal { width: 180px; }
   .v9-launch-signals { grid-template-columns: 1fr; }
+  .v9-launch-signals article, .v9-launch-signals article + article { min-height: 0; padding: 28px 0; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--text-on-dark) 14%, transparent); }
+  .v9-launch-signals article:last-child { border-bottom: 0; }
+  .v9-launch-signals strong { margin-top: 22px; }
   .v9-section-heading { grid-template-columns: 1fr; }
   .v9-direction-grid, .v9-problem-grid, .v9-testimonials-panel, .v9-trust-panel, .v9-faq-grid { grid-template-columns: 1fr; }
   .v9-plan-grid { grid-template-columns: 1fr; }
@@ -20,50 +27,65 @@
   .v9-comparison-head, .v9-comparison-row, .v9-comparison-price { min-width: 820px; }
   .v9-final-panel { align-items: flex-start; flex-direction: column; }
 }
+
 @media (max-width: 767px) {
   .v9-header-inner { min-height: 66px; }
   .v9-hero { padding-top: 42px; }
   .v9-hero h1 { font-size: clamp(48px, 15vw, 70px); }
   .v9-hero-actions { align-items: stretch; flex-direction: column; }
   .v9-hero-actions .button { justify-content: center; width: 100%; }
-  .v9-hero-media { display: grid; min-height: 0; }
-  .v9-hero-image-wrap { position: relative; inset: auto; min-height: 430px; border-radius: 28px 28px 7px 28px; }
-  .v9-score-card { top: 16px; right: -4px; min-width: 138px; }
-  .v9-score-card strong { font-size: 42px; }
-  .v9-hero-reaction { position: relative; inset: auto; justify-self: start; width: fit-content; max-width: calc(100% - 24px); margin: -12px 12px 0; }
+  .v9-hero-media { display: grid; min-height: 0; padding: 0; }
+  .v9-hero-image-wrap { position: relative; inset: auto; min-height: 450px; border-radius: 28px 28px 7px 28px; }
+  .v9-hero-marker { top: 25px; left: 14px; transform: rotate(-4deg) scale(.88); transform-origin: top left; }
+  .v9-hero-edition { position: relative; inset: auto; justify-self: end; width: fit-content; max-width: calc(100% - 24px); margin: -12px 12px 0; }
+  .v9-media-caption { left: 18px; bottom: 20px; }
   .v9-proof-grid { grid-template-columns: 1fr; }
-  .v9-proof-grid article { min-height: 124px; }
-  .v9-launch-signals article { min-height: 190px; }
-  .v9-section-heading { margin-bottom: 30px; }
+  .v9-proof-grid article { min-height: 144px; }
+  .v9-honesty-layout { gap: 44px; }
+  .v9-honesty-statement { grid-template-columns: 1fr; gap: 28px; }
+  .v9-honesty-statement h2 { font-size: clamp(42px, 13vw, 61px); }
+  .v9-honesty-statement p { font-size: 16px; }
+  .v9-verification-seal { width: 145px; justify-self: end; margin-top: -12px; }
+  .v9-section-heading { margin-bottom: 34px; }
   .v9-direction-grid { grid-template-columns: 1fr; }
   .v9-direction-card { min-height: 400px; padding: 26px; }
-  .v9-big-number { font-size: 82px; }
+  .v9-big-number { font-size: 78px; }
   .v9-learning-steps { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(270px, 82vw); grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; }
   .v9-learning-steps li { min-height: 310px; scroll-snap-align: start; }
+  .v9-learning-steps li::after { display: none; }
   .v9-subject-grid { grid-template-columns: repeat(2, 1fr); }
-  .v9-subject-card { min-height: 230px; }
-  .v9-subject-card > strong { font-size: 42px; }
+  .v9-subject-card { min-height: 270px; }
+  .v9-subject-icon { width: 56px; height: 56px; }
+  .v9-subject-actions { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .v9-subject-actions a:first-child { width: 100%; }
+  .v9-subject-actions a:last-child { min-height: 36px; }
   .v9-teacher-rail { grid-auto-columns: minmax(270px, 84vw); }
+  .v9-teacher-rail article { min-height: 440px; }
   .v9-testimonials-panel { padding: 28px 20px; }
   .v9-testimonial-empty { flex-direction: column; }
   .v9-final-panel { padding: 34px 24px; }
   .v9-final-panel form, .v9-final-panel button { width: 100%; }
   .v9-final-panel button { justify-content: center; }
 }
+
+@media (max-width: 460px) {
+  .v9-subject-grid { grid-template-columns: 1fr; }
+  .v9-subject-card { min-height: 235px; }
+}
+
 @media (max-width: 374px) {
   .v9-hero h1 { font-size: 45px; }
-  .v9-hero-image-wrap { min-height: 390px; }
-  .v9-media-caption { left: 18px; bottom: 20px; }
-  .v9-media-caption > svg { width: 40px; height: 40px; padding: 12px; }
+  .v9-hero-image-wrap { min-height: 410px; }
   .v9-media-caption strong { font-size: 15px; }
-  .v9-subject-grid { grid-template-columns: 1fr; }
-  .v9-subject-card { min-height: 210px; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .v9-subject-card, .v9-plan-details summary svg { transition: none; }
-  .v9-subject-card:hover, .v9-plan-card.is-featured, .v9-score-card, .v9-hero-reaction { transform: none; }
+  .v9-subject-card, .v9-subject-card::after, .v9-subject-actions svg, .v9-plan-details summary svg, .v9-learning-steps li::after { transition: none; }
+  .v9-subject-card:hover, .v9-plan-card.is-featured, .v9-hero-marker, .v9-hero-edition, .v9-verification-seal { transform: none; }
   .v9-teacher-rail, .v9-learning-steps { scroll-behavior: auto; }
+  .v9-proof-grid [data-count-up].is-active span { animation: none; }
 }
+
 @media (max-width: 767px) {
   .v9-testimonial-rail { display: grid; grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; }
 }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, Play, Sparkles } from "lucide-react";
+import { HeroMarkerNote } from "@/components/illustrations/brand-graphics";
 
 export function PublicHero() {
   const heroVideoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim();
@@ -55,14 +56,10 @@ export function PublicHero() {
               />
             )}
             <div className="v9-media-overlay" aria-hidden="true" />
-            <div className="v9-media-caption"><Play aria-hidden="true" /><span><small>живой урок</small><strong>вопрос → разбор → практика</strong></span></div>
+            <HeroMarkerNote />
+            <div className="v9-media-caption"><span>01</span><p><small>живой урок</small><strong>вопрос → разбор → практика</strong></p></div>
           </div>
-          <aside className="v2-score-card v9-score-card" aria-label="Формат подготовки">
-            <span>в одном плане</span>
-            <strong>1–4</strong>
-            <b>предмета</b>
-          </aside>
-          <div className="v9-hero-reaction" aria-hidden="true"><span>«Я не успеваю»</span><strong>→ теперь есть план 💪</strong></div>
+          <div className="v9-hero-edition" aria-hidden="true"><span>ПЯТЁРКА / 2026</span><b>экзамен — это маршрут</b></div>
         </div>
       </div>
     </section>

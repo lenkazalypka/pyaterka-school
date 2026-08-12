@@ -37,7 +37,7 @@ test("all eight diagnostics have editable, valid question data", () => {
 test("subject cards expose start and diagnostic actions", () => {
   assert.match(sections, /diagnosticSubjectSlugs\.map/);
   assert.match(sections, /href=\{`\/test\/\$\{subject\.slug\}`\}/);
-  assert.match(sections, />Пройти тест</);
+  assert.match(sections, />Пройти тест /);
   assert.match(sections, />Начать /);
 });
 

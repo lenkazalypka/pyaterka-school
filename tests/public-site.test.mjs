@@ -43,8 +43,9 @@ test("public motion is dependency-free, progressive and reduced-motion safe", ()
   assert.match(scrollReveal, /IntersectionObserver/);
   assert.match(scrollReveal, /threshold:\s*0\.15/);
   assert.match(countUp, /requestAnimationFrame/);
-  assert.match(countUp, /<span aria-hidden="true">\{to\}<\/span>/);
-  assert.doesNotMatch(countUp, /useState\(0\)/);
+  assert.match(countUp, /<span aria-hidden="true">\{value\}<\/span>/);
+  assert.match(countUp, /setValue\(Math\.round\(to \* eased\)\)/);
+  assert.match(countUp, /prefersReducedMotion[\s\S]*setValue\(to\)/);
   assert.match(publicSections, /<CountUp to=\{8\}/);
   assert.match(publicSections, /<CountUp to=\{2\}/);
   assert.match(faqAccordion, /aria-expanded=\{isOpen\}/);

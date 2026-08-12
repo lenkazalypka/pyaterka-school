@@ -3,12 +3,16 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [header, hero, sections, testimonials, teachers, cssBase, cssComponents, cssResponsive, plans] = await Promise.all([
+const [header, hero, sections, testimonials, teachers, subjectIcons, illustrations, countUp, globals, cssBase, cssComponents, cssResponsive, plans] = await Promise.all([
   read("../components/public/header.tsx"),
   read("../components/public/hero.tsx"),
   read("../components/public/sections.tsx"),
   read("../components/public/testimonials.tsx"),
   read("../components/public/teacher-card.tsx"),
+  read("../components/icons/subject-icons.tsx"),
+  read("../components/illustrations/brand-graphics.tsx"),
+  read("../components/public/count-up.tsx"),
+  read("../app/globals.css"),
   read("../app/public-v9-base.css"),
   read("../app/public-v9-components.css"),
   read("../app/public-v9-responsive.css"),
@@ -45,7 +49,9 @@ test("marketing proof stays factual", () => {
   assert.match(teachers, /name: string/);
   assert.match(teachers, /experience: string/);
   assert.match(teachers, /result: string/);
-  assert.match(sections, /initials: "ЭК"/);
+  assert.doesNotMatch(sections, /initials: "ЭК"/);
+  assert.match(sections, /illustration: "expert"/);
+  assert.match(teachers, /<TeacherIllustration/);
   assert.match(sections, /Первые ученики уже готовятся/);
   assert.match(sections, /не подменяем первые результаты красивой статистикой/);
   assert.match(plans, /priceLabel: null/);
@@ -67,9 +73,28 @@ test("v9 interactions remain dependency-free and responsive", () => {
   assert.doesNotMatch(css, /var\(--text-main\)/);
 });
 
-test("mobile hero caption and reaction use separate layout rows", () => {
-  assert.match(cssResponsive, /\.v9-hero-media \{ display: grid; min-height: 0; \}/);
+test("brand graphics replace icon-pack placeholders", () => {
+  assert.equal(sections.match(/<MetricGraphic kind=/g)?.length, 4);
+  assert.match(sections, /<SubjectIcon subject=\{slug\}/);
+  assert.match(hero, /<HeroMarkerNote/);
+  assert.match(illustrations, /export function VerificationSeal/);
+  assert.match(subjectIcons, /subject === "math"/);
+  assert.match(subjectIcons, /subject === "english"/);
+  assert.doesNotMatch(`${subjectIcons}\n${illustrations}`, /#[0-9a-f]{3,8}/i);
+});
+
+test("numeric voice, explanations and reduced-motion behavior are explicit", () => {
+  assert.match(globals, /--accent-ink:/);
+  assert.match(globals, /--font-accent:/);
+  assert.match(countUp, /requestAnimationFrame\(tick\)/);
+  assert.match(sections, /schoolDetail:/);
+  assert.match(sections, /v9-feature-explain/);
+  assert.match(cssResponsive, /prefers-reduced-motion/);
+});
+
+test("mobile hero art and edition label use separate layout rows", () => {
+  assert.match(cssResponsive, /\.v9-hero-media \{ display: grid; min-height: 0;/);
   assert.match(cssResponsive, /\.v9-hero-image-wrap \{ position: relative; inset: auto;/);
-  assert.match(cssResponsive, /\.v9-hero-reaction \{ position: relative; inset: auto;/);
-  assert.doesNotMatch(cssResponsive, /\.v9-hero-reaction \{ left: 10px; right: 10px; bottom: 0; \}/);
+  assert.match(cssResponsive, /\.v9-hero-edition \{ position: relative; inset: auto;/);
+  assert.doesNotMatch(hero, /v9-score-card|v9-hero-reaction/);
 });

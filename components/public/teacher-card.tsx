@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { TeacherIllustration } from "@/components/illustrations/brand-graphics";
 
 export type TeacherProfile = {
   name: string;
@@ -10,7 +11,7 @@ export type TeacherProfile = {
 
 type TeacherCriterion = {
   index: string;
-  initials: string;
+  illustration: "expert" | "clarity" | "support" | "progress";
   title: string;
   description: string;
   tag: string;
@@ -20,7 +21,7 @@ export function TeacherCriterionCard({ criterion }: { criterion: TeacherCriterio
   return (
     <article role="listitem" data-reveal>
       <span>{criterion.index}</span>
-      <div className="v9-teacher-avatar" aria-hidden="true">{criterion.initials}</div>
+      <TeacherIllustration kind={criterion.illustration} />
       <h3>{criterion.title}</h3>
       <p>{criterion.description}</p>
       <b>{criterion.tag}</b>

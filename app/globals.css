@@ -15,6 +15,21 @@
   --accent-mint: #bfead7;
   --accent-pink: #f8b5c2;
   --accent-plum: #9c78b8;
+  --accent-ink: #17324a;
+  --accent-ink-soft: #eaf0f3;
+  --surface-cream: #fffaf3;
+  --surface-white: #ffffff;
+  --text-on-dark: #ffffff;
+  --text-subtle: #8d878a;
+  --grain-color: rgba(255, 255, 255, .08);
+  --subject-math: #ff8f99;
+  --subject-russian: #c9b7ff;
+  --subject-social: #ffbd9d;
+  --subject-history: #f8b5c2;
+  --subject-it: #9c78b8;
+  --subject-biology: #bfead7;
+  --subject-chemistry: #ffd2c7;
+  --subject-english: #e1d7ff;
   --text-primary: #17151d;
   --text-muted: #6f6b75;
   --border-soft: #ece8ed;
@@ -22,6 +37,12 @@
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 30px;
+  --radius-button: 16px;
+  --radius-card-sm: 20px;
+  --radius-card-md: 28px;
+  --radius-card-lg: 40px;
+  --radius-brand: 40px 40px 12px 40px;
+  --font-accent: ui-monospace, "SFMono-Regular", "Cascadia Code", "Roboto Mono", monospace;
   --shadow-card: 0 18px 48px rgba(91, 31, 48, .09);
   --shadow-brand: 0 18px 42px rgba(185, 46, 66, .24);
 }

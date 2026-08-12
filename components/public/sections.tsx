@@ -9,8 +9,6 @@ import {
   ChevronDown,
   CircleMinus,
   CircleHelp,
-  ClipboardCheck,
-  Clock3,
   GraduationCap,
   MessageCircle,
   Route,
@@ -22,6 +20,8 @@ import { CountUp } from "@/components/public/count-up";
 import { FaqAccordion } from "@/components/public/faq-accordion";
 import { TeacherCriterionCard } from "@/components/public/teacher-card";
 import { TestimonialsSection } from "@/components/public/testimonials";
+import { MetricGraphic, VerificationSeal } from "@/components/illustrations/brand-graphics";
+import { SubjectIcon } from "@/components/icons/subject-icons";
 import { diagnosticSubjects, diagnosticSubjectSlugs } from "@/lib/diagnostic-tests";
 import type { PublicPlan } from "@/lib/public-site";
 
@@ -36,19 +36,20 @@ const comparisonRows: Array<{
   tutor: ComparisonState;
   solo: ComparisonState;
   school: ComparisonState;
+  schoolDetail: string;
 }> = [
-  { label: "Единый план по всем предметам", tutor: "depends", solo: "depends", school: "yes" },
-  { label: "Живые занятия и записи", tutor: "depends", solo: "no", school: "yes" },
-  { label: "Проверка работ", tutor: "yes", solo: "no", school: "yes" },
-  { label: "Пробники и разбор ошибок", tutor: "depends", solo: "depends", school: "yes" },
-  { label: "Отчёт о прогрессе родителю", tutor: "depends", solo: "no", school: "depends" },
+  { label: "Единый план по всем предметам", tutor: "depends", solo: "depends", school: "yes", schoolDetail: "Выбранные предметы собираются в одном расписании и кабинете." },
+  { label: "Живые занятия и записи", tutor: "depends", solo: "no", school: "yes", schoolDetail: "Занятие связано с материалами, а опубликованная запись остаётся в уроке." },
+  { label: "Проверка работ", tutor: "yes", solo: "no", school: "yes", schoolDetail: "Преподаватель задаёт ДЗ с дедлайном и разбирает ошибки по теме." },
+  { label: "Пробники и разбор ошибок", tutor: "depends", solo: "depends", school: "depends", schoolDetail: "Количество зависит от тарифа; условия видны до оплаты." },
+  { label: "Отчёт о прогрессе родителю", tutor: "depends", solo: "no", school: "depends", schoolDetail: "Доступ родителя подключается по приглашению; отчёты развиваются поэтапно." },
 ];
 
 const teacherCriteria = [
-  { index: "01", initials: "ЭК", title: "Знает актуальный экзамен", description: "Работает с форматом, критериями и изменениями по своему предмету.", tag: "экспертиза" },
-  { index: "02", initials: "ЯС", title: "Объясняет ход мысли", description: "Ученик понимает не только ответ, но и способ решения.", tag: "ясность" },
-  { index: "03", initials: "ОС", title: "Даёт нормальную обратную связь", description: "Разбирает ошибку спокойно и помогает попробовать ещё раз.", tag: "поддержка" },
-  { index: "04", initials: "ПР", title: "Следит за прогрессом", description: "Связывает урок, практику и результаты пробников в одну картину.", tag: "система" },
+  { index: "01", illustration: "expert", title: "Знает актуальный экзамен", description: "Работает с форматом, критериями и изменениями по своему предмету.", tag: "экспертиза" },
+  { index: "02", illustration: "clarity", title: "Объясняет ход мысли", description: "Ученик понимает не только ответ, но и способ решения.", tag: "ясность" },
+  { index: "03", illustration: "support", title: "Даёт нормальную обратную связь", description: "Разбирает ошибку спокойно и помогает попробовать ещё раз.", tag: "поддержка" },
+  { index: "04", illustration: "progress", title: "Следит за прогрессом", description: "Связывает урок, практику и результаты пробников в одну картину.", tag: "система" },
 ] as const;
 
 const faq = [
@@ -59,12 +60,28 @@ const faq = [
   ["Вы гарантируете поступление?", "Нет. Мы выстраиваем системную подготовку, разбираем ошибки и помогаем следить за прогрессом, но итог зависит и от работы самого ученика."],
 ] as const;
 
-function FeatureMark({ value }: { value: ComparisonState }) {
+function FeatureMark({ value, detail }: { value: ComparisonState; detail?: string }) {
+  const label = value === "yes" ? "включено" : value === "depends" ? "по условиям" : "нет";
+  const mark = value === "yes"
+    ? <CheckCircle2 aria-hidden="true" />
+    : value === "depends"
+      ? <CircleHelp aria-hidden="true" />
+      : <CircleMinus aria-hidden="true" />;
+
+  if (detail) {
+    return (
+      <details className={`v9-feature-explain is-${value}`}>
+        <summary aria-label={`${label}. Подробнее`}><span>{mark}<small>{label}</small></span><CircleHelp aria-hidden="true" /></summary>
+        <p>{detail}</p>
+      </details>
+    );
+  }
+
   if (value === "yes") {
-    return <span className="v9-yes" aria-label="Включено"><CheckCircle2 aria-hidden="true" /><small>да</small></span>;
+    return <span className="v9-yes" aria-label="Включено"><CheckCircle2 aria-hidden="true" /><small>включено</small></span>;
   }
   if (value === "depends") {
-    return <span className="v9-depends" aria-label="Зависит от формата"><CircleHelp aria-hidden="true" /><small>зависит</small></span>;
+    return <span className="v9-depends" aria-label="Зависит от формата"><CircleHelp aria-hidden="true" /><small>по условиям</small></span>;
   }
   return <span className="v9-no" aria-label="Не включено"><CircleMinus aria-hidden="true" /><small>нет</small></span>;
 }
@@ -81,29 +98,32 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
 
       <section className="v9-proof-strip" aria-label="Возможности платформы">
         <div className="public-container v9-proof-grid">
-          <article data-reveal><strong>1–4</strong><span>предмета в одном плане</span><Route aria-hidden="true" /></article>
-          <article data-reveal><CountUp to={8} /><span>понятных шагов до старта</span><Target aria-hidden="true" /></article>
-          <article data-reveal><CountUp to={2} /><span>пробника в месяц по правилам тарифа</span><ClipboardCheck aria-hidden="true" /></article>
-          <article data-reveal><strong>24/7</strong><span>доступ к опубликованным записям</span><Clock3 aria-hidden="true" /></article>
+          <article data-reveal><strong>1–4</strong><span>предмета в одном плане</span><MetricGraphic kind="subjects" /></article>
+          <article data-reveal><CountUp to={8} /><span>понятных шагов до старта</span><MetricGraphic kind="onboarding" /></article>
+          <article data-reveal><CountUp to={2} /><span>пробника в месяц по правилам тарифа</span><MetricGraphic kind="exams" /></article>
+          <article data-reveal><strong>24/7</strong><span>доступ к опубликованным записям</span><MetricGraphic kind="access" /></article>
         </div>
       </section>
 
       <section className="v2-section v9-launch-proof" aria-labelledby="launch-proof-title">
-        <div className="public-container">
-          <div className="v9-section-heading" data-reveal>
-            <span className="v9-kicker">Честно о старте</span>
-            <h2 id="launch-proof-title">Набор открыт.<br /><em>Первые ученики уже готовятся.</em></h2>
-            <p>Мы не подменяем первые результаты красивой статистикой. Опубликуем цифры только после проверки и с понятной методикой подсчёта.</p>
+        <div className="public-container v9-honesty-layout">
+          <div className="v9-honesty-statement" data-reveal>
+            <div>
+              <span className="v9-kicker">Честно о старте</span>
+              <h2 id="launch-proof-title">Набор открыт.<br /><em>Первые ученики уже готовятся.</em></h2>
+              <p>Мы не подменяем первые результаты красивой статистикой. Опубликуем цифры только после проверки и с понятной методикой подсчёта.</p>
+            </div>
+            <VerificationSeal />
           </div>
           <div className="v9-launch-signals" role="list" aria-label="Проверяемые факты о школе">
             <article role="listitem" data-reveal style={revealStyle(0)}>
-              <span>сейчас</span><strong>Идёт первый набор</strong><p>Можно выбрать ЕГЭ или ОГЭ и собрать план по нужным предметам.</p>
+              <span>01 / сейчас</span><strong>Идёт первый набор</strong><p>Можно выбрать ЕГЭ или ОГЭ и собрать план по нужным предметам.</p>
             </article>
             <article role="listitem" data-reveal style={revealStyle(1)}>
-              <span>без приписок</span><strong>Результаты проверяем</strong><p>Баллы и отзывы появятся после подтверждения учениками и родителями.</p>
+              <span>02 / без приписок</span><strong>Результаты проверяем</strong><p>Баллы и отзывы появятся после подтверждения учениками и родителями.</p>
             </article>
             <article role="listitem" data-reveal style={revealStyle(2)}>
-              <span>8 предметов</span><strong>Один учебный кабинет</strong><p>Расписание, материалы и прогресс собраны в одном месте.</p>
+              <span>03 / 8 предметов</span><strong>Один учебный кабинет</strong><p>Расписание, материалы и прогресс собраны в одном месте.</p>
             </article>
           </div>
         </div>
@@ -178,10 +198,10 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
               const subject = diagnosticSubjects[slug];
               return (
                 <article className={`v9-subject-card tone-${subject.tone}`} data-reveal key={subject.name} style={revealStyle(index)}>
-                  <span>{String(index + 1).padStart(2, "0")}</span><strong>{subject.glyph}</strong><h3>{subject.name}</h3>
+                  <span>{String(index + 1).padStart(2, "0")}</span><SubjectIcon subject={slug} /><h3>{subject.name}</h3>
                   <div className="v9-subject-actions">
                     <Link href={`/register?subject=${encodeURIComponent(subject.name)}`}>Начать <ArrowRight aria-hidden="true" /></Link>
-                    <Link href={`/test/${subject.slug}`}>Пройти тест</Link>
+                    <Link href={`/test/${subject.slug}`}>Пройти тест <ArrowRight aria-hidden="true" /></Link>
                   </div>
                 </article>
               );
@@ -212,8 +232,8 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
           </div>
           <div className="v9-comparison-wrap" data-reveal>
             <div className="v9-comparison-head"><span>Что получаешь</span><strong>Репетитор</strong><strong>Самостоятельно</strong><strong className="is-brand">Пятёрка</strong></div>
-            {comparisonRows.map(({ label, tutor, solo, school }) => (
-              <div className="v9-comparison-row" key={label}><span>{label}</span><FeatureMark value={tutor} /><FeatureMark value={solo} /><FeatureMark value={school} /></div>
+            {comparisonRows.map(({ label, tutor, solo, school, schoolDetail }) => (
+              <div className="v9-comparison-row" key={label}><span>{label}</span><FeatureMark value={tutor} /><FeatureMark value={solo} /><FeatureMark value={school} detail={schoolDetail} /></div>
             ))}
             <div className="v9-comparison-price"><span>Стоимость</span><b>зависит от предмета и преподавателя</b><b>можно начать бесплатно</b><b>по выбранному тарифу и предметам</b></div>
           </div>

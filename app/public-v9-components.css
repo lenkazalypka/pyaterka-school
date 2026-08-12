@@ -1,15 +1,27 @@
-.v9-comparison-head > *, .v9-comparison-row > *, .v9-comparison-price > * { min-height: 72px; display: grid; place-items: center; padding: 16px; border-right: 1px solid var(--border-soft); }
+.v9-comparison-head > *, .v9-comparison-row > *, .v9-comparison-price > * { min-height: 76px; display: grid; place-items: center; padding: 16px; border-right: 1px solid var(--border-soft); }
 .v9-comparison-head > *:first-child, .v9-comparison-row > *:first-child, .v9-comparison-price > *:first-child { place-items: center start; }
-.v9-comparison-head { background: #f9f7f7; }
+.v9-comparison-head { background: var(--surface-soft); }
 .v9-comparison-head strong { font-size: 17px; }
-.v9-comparison-head .is-brand { color: #fff; background: var(--brand-primary); }
+.v9-comparison-head .is-brand { color: var(--text-on-dark); background: var(--accent-ink); }
 .v9-comparison-row + .v9-comparison-row, .v9-comparison-price { border-top: 1px solid var(--border-soft); }
 .v9-comparison-row > span { font-weight: 720; }
+.v9-comparison-row > :last-child { background: color-mix(in srgb, var(--accent-ink-soft) 58%, var(--surface-white)); }
 .v9-yes svg { color: var(--brand-primary); }
-.v9-no svg { color: #bbb5b7; }
+.v9-no svg { color: var(--text-subtle); }
 .v9-comparison-price b { color: var(--text-muted); font-size: 13px; line-height: 1.35; text-align: center; }
 .v9-comparison-price b:last-child { color: var(--brand-burgundy); background: var(--surface-rose); }
 .v9-comparison-note { margin: 14px 0 0; color: var(--text-muted); font-size: 12px; text-align: center; }
+.v9-feature-explain { width: 100%; align-self: stretch; padding: 0; }
+.v9-feature-explain summary { min-height: 76px; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px; cursor: pointer; list-style: none; }
+.v9-feature-explain summary::-webkit-details-marker { display: none; }
+.v9-feature-explain summary > span { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--font-accent); font-size: 9px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.v9-feature-explain summary > span svg { width: 24px; height: 24px; }
+.v9-feature-explain summary > svg { width: 14px; color: var(--accent-ink); opacity: .55; transition: transform var(--dur-micro) var(--ease-out); }
+.v9-feature-explain.is-yes summary > span { color: var(--brand-primary); }
+.v9-feature-explain.is-depends summary > span { color: var(--accent-ink); }
+.v9-feature-explain p { display: none; max-width: 240px; margin: -5px auto 16px; padding: 0 14px; color: var(--text-muted); font-size: 11px; line-height: 1.45; text-align: center; }
+.v9-feature-explain[open] p, .v9-feature-explain:hover p, .v9-feature-explain:focus-within p { display: block; }
+.v9-feature-explain[open] summary > svg { transform: rotate(45deg); }
 
 .v9-testimonials { background: var(--surface-rose); }
 .v9-testimonials-panel { display: grid; grid-template-columns: .8fr 1.2fr; align-items: center; gap: 44px; padding: clamp(34px, 5vw, 68px); border-radius: 38px 38px 8px 38px; background: #fff; }
@@ -26,7 +38,7 @@
 .v9-plan-card.is-featured { border-color: var(--brand-primary); background: var(--surface-rose); box-shadow: var(--shadow-card); transform: translateY(-10px); }
 .v9-plan-badge { position: absolute; top: 20px; right: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 99px; color: #fff; background: var(--brand-primary); font-size: 11px; font-weight: 850; text-transform: uppercase; }
 .v9-plan-badge svg { width: 14px; }
-.v9-plan-index { color: var(--brand-primary); font-size: 13px; font-weight: 850; }
+.v9-plan-index { color: var(--brand-primary); font-family: var(--font-accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; }
 .v9-plan-card h3 { margin: 50px 0 12px; font-size: 34px; letter-spacing: -.045em; }
 .v9-plan-price { min-height: 50px; margin: 0; color: var(--brand-burgundy); font-size: 19px; font-weight: 850; }
 .v9-plan-price.is-pending { max-width: 260px; color: var(--text-muted); font-size: 15px; font-weight: 700; line-height: 1.4; }
@@ -41,7 +53,7 @@
 .v9-plan-details[open] summary svg { transform: rotate(180deg); }
 .v9-plan-details ul { margin: 8px 0 0; }
 
-.v9-trust { color: #fff; background: var(--brand-burgundy); }
+.v9-trust { position: relative; isolation: isolate; color: var(--text-on-dark); background: var(--brand-burgundy); }
 .v9-trust-panel { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: start; }
 .v9-trust .v9-kicker, .v9-trust h2 em { color: var(--accent-peach); }
 .v9-trust h2 { margin: 18px 0 0; font-size: clamp(40px, 5vw, 70px); line-height: .98; letter-spacing: -.055em; }
