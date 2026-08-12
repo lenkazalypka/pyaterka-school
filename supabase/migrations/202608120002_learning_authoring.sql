@@ -68,6 +68,23 @@ returns boolean language sql stable security definer set search_path = '' as $$
   );
 $$;
 
+create or replace function private.assignment_question_subject_matches(
+  target_assignment uuid,
+  target_question uuid
+)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1
+    from public.assignments a
+    join public.question_bank q on q.id = target_question
+    where a.id = target_assignment
+      and a.subject_id = q.subject_id
+  );
+$$;
+
+revoke all on function private.assignment_question_subject_matches(uuid, uuid) from public, anon, authenticated;
+grant execute on function private.assignment_question_subject_matches(uuid, uuid) to authenticated;
+
 create policy lessons_staff_insert on public.lessons for insert to authenticated with check (
   private.can_manage_group(group_id)
   and private.staff_can_manage_subject(subject_id)
@@ -216,11 +233,7 @@ create policy assignment_questions_scoped_read on public.assignment_questions fo
 );
 create policy assignment_questions_staff_insert on public.assignment_questions for insert to authenticated with check (
   private.can_manage_assignment(assignment_id)
-  and exists (
-    select 1 from public.assignments a
-    join public.question_bank q on q.id = question_id
-    where a.id = assignment_id and a.subject_id = q.subject_id
-  )
+  and private.assignment_question_subject_matches(assignment_id, question_id)
 );
 create policy assignment_questions_staff_update on public.assignment_questions for update to authenticated using (
   private.can_manage_assignment(assignment_id)

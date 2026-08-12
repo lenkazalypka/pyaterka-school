@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [migration, actions, page, studentLearning, studentLesson] = await Promise.all([
+const [migration, rlsTest, actions, page, studentLearning, studentLesson] = await Promise.all([
   read("../supabase/migrations/202608120002_learning_authoring.sql"),
+  read("../supabase/tests/rls.sql"),
   read("../app/staff/learning/actions.ts"),
   read("../app/staff/learning/page.tsx"),
   read("../lib/student-learning.ts"),
@@ -27,6 +28,16 @@ test("question bank supports create, update and delete with scoped RLS", () => {
   assert.match(migration, /question_bank_staff_insert/);
   assert.match(migration, /question_bank_staff_update/);
   assert.match(migration, /question_bank_staff_delete/);
+});
+
+test("assignment question subject validation avoids recursive RLS", () => {
+  assert.match(migration, /function private\.assignment_question_subject_matches[\s\S]*security definer/);
+  assert.match(migration, /private\.assignment_question_subject_matches\(assignment_id, question_id\)/);
+  assert.doesNotMatch(
+    migration,
+    /assignment_questions_staff_insert[\s\S]{0,300}join public\.question_bank/,
+  );
+  assert.match(rlsTest, /insert into public\.assignment_questions\(assignment_id,question_id,position\)/);
 });
 
 test("students see assigned prompts but never question answers", () => {
