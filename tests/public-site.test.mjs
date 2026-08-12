@@ -15,7 +15,7 @@ test("public home contains the complete conversion path without demo dashboard",
   const source = `${home}\n${publicSections}`;
   for (const section of ["directions", "subjects", "format", "plans", "faq"]) assert.match(source, new RegExp(`id=\"${section}\"`));
   assert.doesNotMatch(source, /lib\/demo|<Dashboard/);
-  assert.match(source, /action="\/register" method="get"/);
+  assert.match(source, /href="\/start/);
 });
 
 test("public plans prefer Supabase and never invent a fallback price", () => {

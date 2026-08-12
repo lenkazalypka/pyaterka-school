@@ -1,11 +1,11 @@
 import { configured, supabase } from "@/lib/supabase";
 
-export type PublicPlan = { code: string; name: string; priceLabel: string | null; features: string[] };
+export type PublicPlan = { code: string; name: string; priceLabel: string | null; features: string[]; maxSubjects: number };
 
 const fallbackPlans: PublicPlan[] = [
-  { code: "basic", name: "Базовый", priceLabel: null, features: ["Живые занятия и записи", "Материалы и домашние задания", "Два пробника в месяц", "Базовая статистика"] },
-  { code: "curator", name: "С куратором", priceLabel: null, features: ["Всё из Базового", "Личный куратор", "Контроль дедлайнов", "Отчёты родителю"] },
-  { code: "maximum", name: "Максимальный", priceLabel: null, features: ["Всё из пакета с куратором", "Индивидуальный учебный план", "Дополнительные разборы", "Помощь с поступлением"] },
+  { code: "basic", name: "Базовый", priceLabel: null, maxSubjects: 2, features: ["Живые занятия и записи", "Материалы и домашние задания", "Два пробника в месяц", "Базовая статистика"] },
+  { code: "curator", name: "С куратором", priceLabel: null, maxSubjects: 3, features: ["Всё из Базового", "Личный куратор", "Контроль дедлайнов", "Отчёты родителю"] },
+  { code: "maximum", name: "Максимальный", priceLabel: null, maxSubjects: 4, features: ["Всё из пакета с куратором", "Индивидуальный учебный план", "Дополнительные разборы", "Помощь с поступлением"] },
 ];
 
 const labels: Record<string, string> = {
@@ -39,7 +39,7 @@ export async function getPublicPlans(): Promise<PublicPlan[]> {
         return labels[feature.feature_code] ?? feature.feature_code;
       });
       if (rawLimit?.max_subjects) features.unshift(`До ${rawLimit.max_subjects} предметов`);
-      return { code: row.code, name: row.name, priceLabel: priceLabel(row.base_price_minor, row.currency), features: features.slice(0, 6) };
+      return { code: row.code, name: row.name, priceLabel: priceLabel(row.base_price_minor, row.currency), maxSubjects: rawLimit?.max_subjects ?? 1, features: features.slice(0, 6) };
     });
   } catch {
     return fallbackPlans;

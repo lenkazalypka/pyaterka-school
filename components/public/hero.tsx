@@ -22,7 +22,7 @@ export function PublicHero() {
             <li><Check aria-hidden="true" /> Прогресс виден ученику и родителю</li>
           </ul>
           <div className="v9-hero-actions">
-            <Link className="button button-primary button-large" href="/register">
+            <Link className="button button-primary button-large" href="/start">
               Собрать свой план <ArrowRight aria-hidden="true" />
             </Link>
             <a className="v9-text-link" href="#format"><Play aria-hidden="true" /> Посмотреть, как всё устроено</a>

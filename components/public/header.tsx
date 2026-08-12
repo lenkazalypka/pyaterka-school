@@ -16,7 +16,7 @@ export function PublicHeader() {
         </nav>
         <div className="v9-header-actions">
           <Link className="v9-login-link" href="/login">Войти</Link>
-          <Link className="button button-primary v9-header-cta" href="/register">
+          <Link className="button button-primary v9-header-cta" href="/start">
             Начать <ArrowRight aria-hidden="true" />
           </Link>
         </div>
@@ -29,7 +29,7 @@ export function PublicHeader() {
             <Link href="#plans">Тарифы</Link>
             <Link href="#faq">Вопросы</Link>
             <Link href="/login">Войти</Link>
-            <Link className="button button-primary" href="/register">Начать подготовку</Link>
+            <Link className="button button-primary" href="/start">Начать подготовку</Link>
           </nav>
         </details>
       </div>

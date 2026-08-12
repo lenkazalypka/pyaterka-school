@@ -26,6 +26,9 @@
   .v9-comparison-wrap { overflow-x: auto; }
   .v9-comparison-head, .v9-comparison-row, .v9-comparison-price { min-width: 820px; }
   .v9-final-panel { align-items: flex-start; flex-direction: column; }
+  .start-subject-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .start-plan-grid { grid-template-columns: 1fr; max-width: 680px; margin-inline: auto; }
+  .start-plan-grid > button { min-height: 0; }
 }
 
 @media (max-width: 767px) {
@@ -66,6 +69,45 @@
   .v9-final-panel { padding: 34px 24px; }
   .v9-final-panel form, .v9-final-panel button { width: 100%; }
   .v9-final-panel button { justify-content: center; }
+  .start-header-inner { min-height: 66px; }
+  .start-header .brand { font-size: 20px; }
+  .start-header .brand-mark { width: 34px; height: 34px; }
+  .start-back-link { font-size: 0; }
+  .start-back-link svg { width: 21px; }
+  .start-shell { width: 100%; padding: 24px 16px calc(104px + env(safe-area-inset-bottom)); }
+  .start-progress { margin-bottom: 24px; }
+  .start-progress::before { top: 17px; }
+  .start-progress button { gap: 7px; }
+  .start-progress button > span { width: 35px; height: 35px; box-shadow: 0 0 0 5px var(--surface-cream); }
+  .start-progress b { font-size: 8px; letter-spacing: .03em; }
+  .start-stage { min-height: 0; padding: 30px 18px; border-radius: 28px 28px 7px 28px; }
+  .start-stage-heading { margin-bottom: 28px; text-align: left; }
+  .start-stage-heading h1 { margin-block: 12px 14px; font-size: clamp(40px, 12vw, 56px); }
+  .start-stage-heading p { font-size: 15px; }
+  .start-exam-grid { grid-template-columns: 1fr; }
+  .start-exam-grid > button { min-height: 190px; padding: 22px; }
+  .start-exam-grid > button > span { font-size: 88px; }
+  .start-exam-grid > button > small { top: 82px; }
+  .start-exam-grid strong { margin-top: 56px; font-size: 29px; }
+  .start-exam-grid i { top: 20px; left: 20px; }
+  .start-grade { margin-top: 18px; }
+  .start-grade button { min-width: 0; flex: 1; }
+  .start-selection-counter { justify-content: flex-start; margin: -12px 0 15px; }
+  .start-subject-grid { gap: 9px; }
+  .start-subject-grid > button { min-height: 138px; padding: 14px; }
+  .start-subject-grid .v9-subject-icon { width: 46px; height: 46px; }
+  .start-subject-grid > button > span { font-size: 15px; }
+  .start-subject-grid i { top: 10px; right: 10px; width: 27px; height: 27px; }
+  .start-plan-grid > button { padding: 22px; }
+  .start-plan-grid h2 { margin-top: 24px; }
+  .start-summary { grid-template-columns: 1fr; }
+  .start-summary-main { padding: 28px 24px; }
+  .start-summary-main strong { margin-top: 30px; }
+  .start-summary-steps { padding: 26px 24px; }
+  .start-registration-panel { align-items: stretch; flex-direction: column; padding: 20px; }
+  .start-registration-panel .button { width: 100%; }
+  .start-controls { position: fixed; z-index: 25; right: 0; bottom: 0; left: 0; margin: 0; border-top: 1px solid color-mix(in srgb, var(--brand-burgundy) 12%, transparent); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--surface-white) 92%, transparent); backdrop-filter: blur(16px); }
+  .start-controls .button { min-width: 176px; margin-left: auto; }
 }
 
 @media (max-width: 460px) {
@@ -77,6 +119,14 @@
   .v9-hero h1 { font-size: 45px; }
   .v9-hero-image-wrap { min-height: 410px; }
   .v9-media-caption strong { font-size: 15px; }
+  .start-shell { padding-inline: 12px; }
+  .start-stage { padding-inline: 14px; }
+  .start-stage-heading h1 { font-size: 38px; }
+  .start-progress b { font-size: 7px; }
+  .start-subject-grid { grid-template-columns: 1fr; }
+  .start-subject-grid > button { min-height: 116px; }
+  .start-controls { padding-inline: 12px; }
+  .start-controls .button { min-width: 158px; padding-inline: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -84,6 +134,8 @@
   .v9-subject-card:hover, .v9-plan-card.is-featured, .v9-hero-marker, .v9-hero-edition, .v9-verification-seal { transform: none; }
   .v9-teacher-rail, .v9-learning-steps { scroll-behavior: auto; }
   .v9-proof-grid [data-count-up].is-active span { animation: none; }
+  .start-exam-grid > button, .start-subject-grid > button, .start-plan-grid > button { transition: none; }
+  .start-exam-grid > button:hover, .start-subject-grid > button:hover, .start-plan-grid > button:hover { transform: none; }
 }
 
 @media (max-width: 767px) {

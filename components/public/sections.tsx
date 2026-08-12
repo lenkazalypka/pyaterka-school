@@ -142,14 +142,14 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
               <span className="v9-card-tag">ЕГЭ</span>
               <h3>К баллам для поступления</h3>
               <p>Выбираешь предметы и вузы, ставишь целевой балл и видишь, какие темы нужно усилить.</p>
-              <Link href="/register">Собрать план ЕГЭ <ArrowRight aria-hidden="true" /></Link>
+              <Link href="/start?exam=ege&grade=11">Собрать план ЕГЭ <ArrowRight aria-hidden="true" /></Link>
             </article>
             <article className="v9-direction-card is-oge" data-reveal style={revealStyle(1)}>
               <div><span className="v9-big-number">9</span><small>класс</small></div>
               <span className="v9-card-tag">ОГЭ</span>
               <h3>К уверенной оценке</h3>
               <p>Закрываешь пробелы, привыкаешь к формату и тренируешься по шкале выбранного предмета.</p>
-              <Link href="/register">Собрать план ОГЭ <ArrowRight aria-hidden="true" /></Link>
+              <Link href="/start?exam=oge&grade=9">Собрать план ОГЭ <ArrowRight aria-hidden="true" /></Link>
             </article>
           </div>
         </div>
@@ -200,7 +200,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
                 <article className={`v9-subject-card tone-${subject.tone}`} data-reveal key={subject.name} style={revealStyle(index)}>
                   <span>{String(index + 1).padStart(2, "0")}</span><SubjectIcon subject={slug} /><h3>{subject.name}</h3>
                   <div className="v9-subject-actions">
-                    <Link href={`/register?subject=${encodeURIComponent(subject.name)}`}>Начать <ArrowRight aria-hidden="true" /></Link>
+                    <Link href={`/start?subject=${slug}`}>Начать <ArrowRight aria-hidden="true" /></Link>
                     <Link href={`/test/${subject.slug}`}>Пройти тест <ArrowRight aria-hidden="true" /></Link>
                   </div>
                 </article>
@@ -220,7 +220,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
           <div className="v9-teacher-rail" role="list" aria-label="Критерии отбора преподавателей">
             {teacherCriteria.map((criterion) => <TeacherCriterionCard criterion={criterion} key={criterion.index} />)}
           </div>
-          <Link className="button button-dark button-large" href="/register">Выбрать предмет <ArrowRight aria-hidden="true" /></Link>
+          <Link className="button button-dark button-large" href="/start">Выбрать предмет <ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
 
@@ -261,7 +261,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
                 {plan.features.length > 3 && (
                   <details className="v9-plan-details"><summary>Все возможности <ChevronDown aria-hidden="true" /></summary><ul>{plan.features.slice(3).map((feature) => <li key={feature}><Check aria-hidden="true" /> {feature}</li>)}</ul></details>
                 )}
-                <Link className={`button button-large ${index === 1 ? "button-primary" : "button-secondary"}`} href="/register">Выбрать тариф <ArrowRight aria-hidden="true" /></Link>
+                <Link className={`button button-large ${index === 1 ? "button-primary" : "button-secondary"}`} href={`/start?plan=${encodeURIComponent(plan.code)}`}>Выбрать тариф <ArrowRight aria-hidden="true" /></Link>
               </article>
             ))}
           </div>
@@ -289,7 +289,7 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
       <section className="v2-section v9-final-cta">
         <div className="public-container v9-final-panel" data-reveal>
           <div><span>Готов начать? 🎯</span><h2>Собери план подготовки<br />за 8 понятных шагов.</h2><p>Выбери экзамен, предметы и цель. Оплата на первом шаге не нужна.</p></div>
-          <form action="/register" method="get"><button className="button button-primary button-large" type="submit">Начать подготовку <ArrowRight aria-hidden="true" /></button></form>
+          <Link className="button button-primary button-large" href="/start">Начать подготовку <ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
     </>

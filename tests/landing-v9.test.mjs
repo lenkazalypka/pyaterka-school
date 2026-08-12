@@ -19,14 +19,15 @@ const [header, hero, sections, testimonials, teachers, subjectIcons, illustratio
   read("../lib/public-site.ts"),
 ]);
 
-test("v9 landing has a complete conversion path", () => {
+test("v9 landing sends paid-intent CTAs through the plan builder", () => {
   for (const anchor of ["#format", "#subjects", "#comparison", "#plans", "#faq"]) {
     assert.ok(header.includes(anchor), anchor);
   }
   for (const id of ["directions", "format", "subjects", "comparison", "plans", "faq"]) {
     assert.match(sections, new RegExp(`id=\\"${id}\\"`));
   }
-  assert.match(sections, /action="\/register" method="get"/);
+  assert.match(sections, /href="\/start/);
+  assert.doesNotMatch(`${header}\n${hero}\n${sections}`, /href="\/register(?:\?|\")/);
   assert.equal(sections.match(/<FaqAccordion items=\{faq\}/g)?.length, 1);
   assert.doesNotMatch(header, /<Link className="v9-brand-link"[^>]*>\s*<Brand/);
 });
