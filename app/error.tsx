@@ -1,6 +1,10 @@
 "use client";
 
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => { Sentry.captureException(error); }, [error]);
   return <main className="grid min-h-screen place-items-center px-6">
     <section className="card max-w-lg p-8">
       <h1 className="text-3xl font-extrabold">Что-то пошло не так</h1>

@@ -2,6 +2,7 @@ import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock3, 
 import Link from "next/link";
 import { StudentEventCard, eventTime, isEventToday } from "@/components/student-event-card";
 import { StudentShell } from "@/components/student-shell";
+import { beginSubscriptionPayment } from "@/app/student/payment/actions";
 import type { StudentLearningData } from "@/types/domain";
 
 const subscriptionLabels: Record<string, string> = {
@@ -19,7 +20,11 @@ function dueLabel(value: string, timezone: string) {
   return `${datePart}, ${eventTime(value, timezone)}`;
 }
 
-export function Dashboard({ data }: { data: StudentLearningData }) {
+function money(minor: number, currency: string) {
+  return new Intl.NumberFormat("ru-RU", { style: "currency", currency, maximumFractionDigits: 0 }).format(minor / 100);
+}
+
+export function Dashboard({ data, paymentError }: { data: StudentLearningData; paymentError?: string }) {
   const { identity } = data;
   const now = new Date(data.generatedAt).getTime();
   const upcoming = data.events.filter((event) => event.status !== "cancelled" && new Date(event.endsAt).getTime() >= now);
@@ -34,7 +39,9 @@ export function Dashboard({ data }: { data: StudentLearningData }) {
         {data.subscription && <div className={`student-subscription student-subscription-${data.subscription.status}`}><small>{data.subscription.planName}</small><b>{subscriptionLabels[data.subscription.status] ?? data.subscription.status}</b></div>}
       </header>
 
-      {data.subscription?.status !== "active" && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям ещё не активирован</b><p>Подписка создаётся без фиктивной оплаты. После ручного подтверждения администратором здесь появятся занятия купленных предметов.</p></div></section>}
+      {paymentError && <section className="student-notice" role="alert"><AlertCircle aria-hidden="true" /><div><b>Оплата не началась</b><p>{paymentError}</p></div></section>}
+      {data.subscription?.status === "pending" && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Подписка ждёт оплаты</b><p>Стоимость: {money(data.subscription.priceMinor, data.subscription.currency)}. После подтверждённого webhook доступ активируется автоматически.</p><form action={beginSubscriptionPayment} className="mt-4"><input type="hidden" name="subscriptionId" value={data.subscription.id} /><input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} /><button className="button button-primary">Перейти к безопасной оплате</button></form></div></section>}
+      {data.subscription && !["active", "pending"].includes(data.subscription.status) && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям не активирован</b><p>Статус подписки: {subscriptionLabels[data.subscription.status] ?? data.subscription.status}. Обратитесь в поддержку школы.</p></div></section>}
 
       <section className="student-dashboard-grid" aria-label="Главное на сегодня">
         <article className="student-next-card">

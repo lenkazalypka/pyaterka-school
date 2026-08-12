@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { appUrl } from "@/lib/app-url";
 import { hashInvitationToken } from "@/lib/invitations";
+import { logEvent, logWarning } from "@/lib/observability";
+import { assertRateLimit, publicRateLimitMessage, recordRateLimitAttempt } from "@/lib/rate-limit";
 import { configured, supabase } from "@/lib/supabase";
 
 export type InviteState = { error: string | null; success?: string | null };
@@ -14,6 +16,11 @@ export async function acceptParentInvitation(_: InviteState, formData: FormData)
   const token = tokenSchema.safeParse(formData.get("token"));
   if (!token.success) return { error: "Ссылка приглашения повреждена" };
   const db = await supabase();
+  const submittedEmail = String(formData.get("email") ?? "") || undefined;
+  try {
+    const identifiers = await assertRateLimit(db, "parent_invite", submittedEmail);
+    await recordRateLimitAttempt(db, "parent_invite", identifiers);
+  } catch (error) { logWarning("parent_invitation.rate_limited"); return { error: publicRateLimitMessage(error) }; }
   let { data: { user } } = await db.auth.getUser();
   if (!user) {
     const parsed = z.object({
@@ -32,6 +39,7 @@ export async function acceptParentInvitation(_: InviteState, formData: FormData)
   let tokenHash:string;
   try{tokenHash=await hashInvitationToken(token.data);}catch{return{error:"Сервис приглашений не настроен"};}
   const {data,error}=await db.rpc("accept_parent_invitation",{p_token_hash:tokenHash});
-  if(error||!data)return{error:"Приглашение недействительно, истекло или предназначено для другого email"};
+  if(error||!data){logWarning("parent_invitation.failed");return{error:"Приглашение недействительно, истекло или предназначено для другого email"};}
+  logEvent("parent_invitation.accepted");
   redirect("/parent");
 }

@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { requireStudent } from "@/lib/auth";
+import { logError } from "@/lib/observability";
 import { safeHttpsUrl } from "@/lib/safe-url";
 import type {
   StudentEvent,
+  StudentAssignment,
   StudentLearningData,
   StudentLesson,
   StudentMaterial,
@@ -63,7 +65,7 @@ async function loadEvents(db: Database): Promise<ScheduleRow[]> {
     .lte("starts_at", to)
     .order("starts_at")
     .limit(200);
-  if (error) throw new Error("Не удалось загрузить расписание");
+  if (error) { logError("rls.query.failed", error, { resource: "schedule_events" }); throw new Error("Не удалось загрузить расписание"); }
   return (data ?? []) as ScheduleRow[];
 }
 
@@ -74,7 +76,7 @@ async function loadTasks(db: Database): Promise<StudentTask[]> {
     .eq("status", "published")
     .order("due_at")
     .limit(30);
-  if (error) throw new Error("Не удалось загрузить учебные задачи");
+  if (error) { logError("rls.query.failed", error, { resource: "assignments" }); throw new Error("Не удалось загрузить учебные задачи"); }
   const rows = assignments ?? [];
   const subjectIds = unique(rows.map((row) => row.subject_id).filter((id): id is string => Boolean(id)));
   const assignmentIds = rows.map((row) => row.id);
@@ -109,14 +111,14 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     loadEvents(db),
     loadTasks(db),
     db.from("student_subjects").select("id,subject_id,target_score,score_unit").eq("student_id", user.id).eq("status", "active"),
-    db.from("subscriptions").select("status,plans(name)").eq("student_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    db.from("subscriptions").select("id,status,price_minor,plans(name,currency)").eq("student_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const lessonIds = unique(eventRows.map((event) => event.lesson_id).filter((id): id is string => Boolean(id)));
   const { data: lessonData, error: lessonError } = lessonIds.length
     ? await db.from("lessons").select("id,subject_id,teacher_id,title,description,status,objectives").in("id", lessonIds)
     : { data: [] as LessonRow[], error: null };
-  if (lessonError) throw new Error("Не удалось загрузить уроки");
+  if (lessonError) { logError("rls.query.failed", lessonError, { resource: "lessons" }); throw new Error("Не удалось загрузить уроки"); }
   const lessonRows = (lessonData ?? []) as LessonRow[];
 
   const subjectIds = unique([
@@ -133,6 +135,25 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     lessonIds.length ? db.from("lesson_recordings").select("id,lesson_id,title,duration_seconds").in("lesson_id", lessonIds).eq("status", "published").order("published_at", { ascending: false }) : Promise.resolve({ data: [] as { id: string; lesson_id: string; title: string | null; duration_seconds: number | null }[] }),
     lessonIds.length ? db.from("lesson_materials").select("lesson_id,material_id,position").in("lesson_id", lessonIds).order("position") : Promise.resolve({ data: [] as { lesson_id: string; material_id: string; position: number }[] }),
   ]);
+
+  const { data: assignmentRows, error: assignmentsError } = lessonIds.length
+    ? await db.from("assignments").select("id,lesson_id,title,description,due_at,max_score").in("lesson_id", lessonIds).eq("status", "published").order("due_at")
+    : { data: [] as { id: string; lesson_id: string; title: string; description: string | null; due_at: string; max_score: number }[], error: null };
+  if (assignmentsError) { logError("rls.query.failed", assignmentsError, { resource: "lesson_assignments" }); throw new Error("Не удалось загрузить домашние задания"); }
+  const assignmentIdsForLessons = (assignmentRows ?? []).map((assignment) => assignment.id);
+  const { data: assignmentQuestionRows, error: assignmentQuestionsError } = assignmentIdsForLessons.length
+    ? await db.from("assignment_questions").select("assignment_id,question_id,position").in("assignment_id", assignmentIdsForLessons).order("position")
+    : { data: [] as { assignment_id: string; question_id: string; position: number }[], error: null };
+  if (assignmentQuestionsError) { logError("rls.query.failed", assignmentQuestionsError, { resource: "assignment_questions" }); throw new Error("Не удалось загрузить задания из банка"); }
+  const questionIds = unique((assignmentQuestionRows ?? []).map((link) => link.question_id));
+  const { data: questionRows, error: questionsError } = questionIds.length
+    ? await db.from("question_bank").select("id,prompt,difficulty,topic_id").in("id", questionIds).eq("status", "published")
+    : { data: [] as { id: string; prompt: string; difficulty: number; topic_id: string | null }[], error: null };
+  if (questionsError) { logError("rls.query.failed", questionsError, { resource: "question_bank" }); throw new Error("Не удалось загрузить условия заданий"); }
+  const questionTopicIds = unique((questionRows ?? []).map((question) => question.topic_id).filter((id): id is string => Boolean(id)));
+  const { data: questionTopics } = questionTopicIds.length
+    ? await db.from("topics").select("id,title").in("id", questionTopicIds)
+    : { data: [] as { id: string; title: string }[] };
 
   const materialIds = unique((lessonMaterialsResponse.data ?? []).map((row) => row.material_id));
   const { data: materialRows } = materialIds.length
@@ -193,6 +214,31 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     });
   }
 
+  const topicNameMap = new Map((questionTopics ?? []).map((topic) => [topic.id, topic.title]));
+  const questionMap = new Map((questionRows ?? []).map((question) => [question.id, question]));
+  const assignmentsByLesson = new Map<string, StudentAssignment[]>();
+  for (const assignment of assignmentRows ?? []) {
+    const questions = (assignmentQuestionRows ?? [])
+      .filter((link) => link.assignment_id === assignment.id)
+      .map((link) => questionMap.get(link.question_id))
+      .filter((question): question is NonNullable<typeof question> => Boolean(question))
+      .map((question) => ({
+        id: question.id,
+        prompt: question.prompt,
+        difficulty: question.difficulty,
+        topic: question.topic_id ? topicNameMap.get(question.topic_id) ?? null : null,
+      }));
+    const item: StudentAssignment = {
+      id: assignment.id,
+      title: assignment.title,
+      description: assignment.description,
+      dueAt: assignment.due_at,
+      maxScore: Number(assignment.max_score),
+      questions,
+    };
+    assignmentsByLesson.set(assignment.lesson_id, [...(assignmentsByLesson.get(assignment.lesson_id) ?? []), item]);
+  }
+
   const lessons: StudentLesson[] = lessonRows
     .map((lesson) => ({
       id: lesson.id,
@@ -205,6 +251,7 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
       event: eventMap.get(lesson.id) ?? null,
       materials: materialsByLesson.get(lesson.id) ?? [],
       recording: recordingByLesson.get(lesson.id) ?? null,
+      assignments: assignmentsByLesson.get(lesson.id) ?? [],
     }))
     .sort((left, right) => {
       const leftDate = eventByLesson.get(left.id)?.starts_at ?? "";
@@ -226,7 +273,13 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     identity: { id: user.id, name: context.name, grade: context.grade, timezone: context.timezone },
     subjects,
     subscription: subscription
-      ? { planName: (subscription.plans as unknown as { name: string } | null)?.name ?? "Тариф", status: subscription.status }
+      ? {
+          id: subscription.id,
+          planName: (subscription.plans as unknown as { name: string; currency: string } | null)?.name ?? "Тариф",
+          status: subscription.status,
+          priceMinor: subscription.price_minor,
+          currency: (subscription.plans as unknown as { name: string; currency: string } | null)?.currency ?? "RUB",
+        }
       : null,
     events,
     lessons,

@@ -9,7 +9,7 @@ const navigation = [
   { key: "lessons", label: "Уроки", href: "/student/lessons", icon: BookOpen },
 ] as const;
 
-const future = ["Домашние задания", "Пробники", "Прогресс", "Сообщения"];
+const future = ["Пробники", "Прогресс", "Сообщения"];
 
 export function StudentShell({
   identity,

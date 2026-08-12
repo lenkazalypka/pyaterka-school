@@ -49,6 +49,22 @@ export type StudentRecording = {
   watchUrl: string;
 };
 
+export type StudentQuestion = {
+  id: string;
+  prompt: string;
+  difficulty: number;
+  topic: string | null;
+};
+
+export type StudentAssignment = {
+  id: string;
+  title: string;
+  description: string | null;
+  dueAt: string;
+  maxScore: number;
+  questions: StudentQuestion[];
+};
+
 export type StudentLesson = {
   id: string;
   title: string;
@@ -60,6 +76,7 @@ export type StudentLesson = {
   event: StudentEvent | null;
   materials: StudentMaterial[];
   recording: StudentRecording | null;
+  assignments: StudentAssignment[];
 };
 
 export type StudentTask = {
@@ -75,7 +92,7 @@ export type StudentLearningData = {
   generatedAt: string;
   identity: StudentIdentity;
   subjects: StudentSubjectSummary[];
-  subscription: null | { planName: string; status: string };
+  subscription: null | { id: string; planName: string; status: string; priceMinor: number; currency: string };
   events: StudentEvent[];
   lessons: StudentLesson[];
   tasks: StudentTask[];

@@ -19,6 +19,12 @@ export async function requireRole(role: RoleCode) {
   return context;
 }
 
+export async function requireAnyRole(roles: RoleCode[]) {
+  const context = await getAuthenticatedContext();
+  if (!roles.some((role) => context.roles.includes(role)) && !context.roles.includes("admin")) redirect("/unauthorized");
+  return context;
+}
+
 export async function requireStudent() {
   const context = await getAuthenticatedContext();
   if (!context.roles.includes("student")) redirect("/unauthorized");

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { appUrl } from "@/lib/app-url";
 import { emailService } from "@/lib/email";
 import { hashInvitationToken } from "@/lib/invitations";
+import { logError, logEvent } from "@/lib/observability";
 import { requireIncompleteOnboarding } from "@/lib/onboarding";
 import { supportedTimezones } from "@/lib/onboarding-config";
 
@@ -227,10 +228,12 @@ export async function completeOnboarding(_: OnboardingActionState, formData: For
   const { error } = await db.rpc("complete_student_onboarding", {
     p_idempotency_key: idempotencyKey.data, p_invitation_token_hash: tokenHash,
   });
-  if (error) return { error: "Анкета не завершена или данные изменились. Проверьте шаги и повторите." };
+  if (error) { logError("onboarding.completion.failed", error); return { error: "Анкета не завершена или данные изменились. Проверьте шаги и повторите." }; }
   if (mailer && inviteUrl && parentDraft?.email) {
-    await mailer.sendParentInvitation({ email: parentDraft.email, inviteUrl });
+    try { await mailer.sendParentInvitation({ email: parentDraft.email, inviteUrl }); }
+    catch (mailError) { logError("email.parent_invitation.failed", mailError); return { error: "Анкета сохранена, но приглашение родителю не отправлено. Сообщите поддержке." }; }
   }
   if (!onboarding) return { error: "Анкета не найдена" };
+  logEvent("onboarding.completed", { parent_invitation: Boolean(parentDraft?.invite_requested) });
   redirect("/student?onboarding=completed");
 }
