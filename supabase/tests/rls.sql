@@ -206,6 +206,7 @@ select public.finalize_yookassa_payment('provider_payment_test_001','succeeded',
 reset role;
 select test.assert_count('verified webhook activates pending subscription','select count(*) from public.subscriptions where id=''aaaaaaaa-0000-4000-8000-000000000003'' and status=''active'' and source=''yookassa''',1);
 
+set role authenticated;
 select test.set_user('11111111-1111-4111-8111-111111111111');
 select test.assert_uid('11111111-1111-4111-8111-111111111111');
 \set ON_ERROR_STOP off
