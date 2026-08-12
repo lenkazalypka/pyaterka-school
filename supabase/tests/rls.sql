@@ -149,6 +149,63 @@ select test.assert_count('unrelated curator no subscription subjects','select co
 select test.set_user('88888888-8888-4888-8888-888888888888');
 select test.assert_count('admin subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
 
+select test.set_user('44444444-4444-4444-8444-444444444444');
+insert into public.lessons(id,group_id,subject_id,teacher_id,topic_id,title,status,published_at)
+values('90000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','ffffffff-0000-4000-8000-000000000001','Авторский урок','scheduled',now());
+insert into public.question_bank(id,subject_id,topic_id,author_id,prompt,difficulty,status)
+values('91000000-0000-4000-8000-000000000001','bbbbbbbb-0000-4000-8000-000000000001','ffffffff-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Решите авторское задание',2,'published');
+insert into public.question_answers(question_id,answer)
+values('91000000-0000-4000-8000-000000000001','Секретный ответ');
+insert into public.assignments(id,lesson_id,group_id,subject_id,teacher_id,title,due_at,max_score,status)
+values('92000000-0000-4000-8000-000000000001','90000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Авторское ДЗ',now()+interval '2 days',10,'published');
+insert into public.assignment_questions(assignment_id,question_id,position)
+values('92000000-0000-4000-8000-000000000001','91000000-0000-4000-8000-000000000001',0);
+select test.assert_count('teacher creates lesson in assigned group','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('teacher creates scoped question','select count(*) from public.question_bank where id=''91000000-0000-4000-8000-000000000001''',1);
+
+\set ON_ERROR_STOP off
+insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
+values('94000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000b','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Чужая группа','scheduled');
+\set ON_ERROR_STOP on
+select test.assert_count('teacher cannot create lesson in foreign group','select count(*) from public.lessons where id=''94000000-0000-4000-8000-000000000001''',0);
+
+select test.set_user('55555555-5555-4555-8555-555555555555');
+insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
+values('93000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Урок куратора','scheduled');
+select test.assert_count('assigned curator creates lesson','select count(*) from public.lessons where id=''93000000-0000-4000-8000-000000000001''',1);
+
+select test.set_user('66666666-6666-4666-8666-666666666666');
+\set ON_ERROR_STOP off
+insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
+values('94000000-0000-4000-8000-000000000002','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Чужой куратор','scheduled');
+\set ON_ERROR_STOP on
+select test.assert_count('unrelated curator cannot create lesson','select count(*) from public.lessons where id=''94000000-0000-4000-8000-000000000002''',0);
+
+select test.set_user('11111111-1111-4111-8111-111111111111');
+select test.assert_count('student reads assigned question prompt','select count(*) from public.question_bank where id=''91000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('student cannot read question answer','select count(*) from public.question_answers where question_id=''91000000-0000-4000-8000-000000000001''',0);
+
+select test.set_user('22222222-2222-4222-8222-222222222222');
+select test.assert_count('foreign student cannot read question','select count(*) from public.question_bank where id=''91000000-0000-4000-8000-000000000001''',0);
+
+reset role;
+insert into public.subscriptions(id,student_id,plan_id,status,price_minor)
+values('aaaaaaaa-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000001','pending',10000);
+set role authenticated;
+select test.set_user('11111111-1111-4111-8111-111111111111');
+select * from public.prepare_subscription_payment('aaaaaaaa-0000-4000-8000-000000000003','00000000-0000-4000-8000-000000000001');
+select test.assert_count('payment amount comes from pending subscription','select count(*) from public.payments where subscription_id=''aaaaaaaa-0000-4000-8000-000000000003'' and amount_minor=10000 and status=''pending''',1);
+select public.attach_yookassa_payment(
+  (select id from public.payments where subscription_id='aaaaaaaa-0000-4000-8000-000000000003'),
+  'provider_payment_test_001',
+  '{"status":"pending"}'::jsonb
+);
+reset role;
+set role service_role;
+select public.finalize_yookassa_payment('provider_payment_test_001','succeeded',10000,'RUB','{"status":"succeeded"}'::jsonb);
+reset role;
+select test.assert_count('verified webhook activates pending subscription','select count(*) from public.subscriptions where id=''aaaaaaaa-0000-4000-8000-000000000003'' and status=''active'' and source=''yookassa''',1);
+
 select test.set_user('11111111-1111-4111-8111-111111111111');
 select test.assert_uid('11111111-1111-4111-8111-111111111111');
 \set ON_ERROR_STOP off
@@ -158,4 +215,39 @@ select '11111111-1111-4111-8111-111111111111',id from public.roles where code='a
 select test.assert_count('student cannot assign admin','select count(*) from public.user_roles ur join public.roles r on r.id=ur.role_id where ur.user_id=''11111111-1111-4111-8111-111111111111'' and r.code=''admin''',0);
 
 reset role;
+
+set role anon;
+select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
+select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
+select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
+select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
+select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
+do $$
+declare result record;
+begin
+  select * into result from public.check_auth_rate_limit('login', array[repeat('a', 64)]);
+  if result.allowed or result.retry_after_seconds <= 0 then
+    raise exception 'RATE LIMIT FAIL: five login failures must block';
+  end if;
+end;
+$$;
+reset role;
+
+update private.auth_rate_limits
+set blocked_until = clock_timestamp() - interval '1 second',
+    window_started_at = clock_timestamp() - interval '16 minutes'
+where action = 'login' and identifier_hash = repeat('a', 64);
+
+set role anon;
+do $$
+declare result record;
+begin
+  select * into result from public.check_auth_rate_limit('login', array[repeat('a', 64)]);
+  if not result.allowed then
+    raise exception 'RATE LIMIT FAIL: expired block must clear automatically';
+  end if;
+end;
+$$;
+reset role;
+
 select 'RLS integration suite passed';

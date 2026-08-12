@@ -3,25 +3,29 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [envExample, nextConfig, proxy, auth, actions, chatgptAuth, rlsHelper] = await Promise.all([
+const [envExample, nextConfig, proxy, auth, actions, rlsHelper] = await Promise.all([
   read("../.env.example"),
   read("../next.config.ts"),
   read("../lib/supabase-proxy.ts"),
   read("../lib/auth.ts"),
   read("../app/actions.ts"),
-  read("../app/chatgpt-auth.ts"),
   read("../supabase/migrations/202608100001_subscription_subjects_rls_helper.sql"),
 ]);
 
-test("production environment template contains no privileged credentials", () => {
+test("production environment template contains placeholders but no credential values", () => {
   for (const name of [
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
     "NEXT_PUBLIC_APP_URL",
     "INVITATION_TOKEN_PEPPER",
+    "RATE_LIMIT_PEPPER",
     "EMAIL_PROVIDER",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
   ]) assert.match(envExample, new RegExp(`^${name}=`, "m"));
-  assert.doesNotMatch(envExample, /SERVICE_ROLE|Demo123|eyJ[A-Za-z0-9_-]{20,}/);
+  assert.match(envExample, /SUPABASE_SERVICE_ROLE_KEY=replace-with-production-service-role-key/);
+  assert.doesNotMatch(envExample, /NEXT_PUBLIC_SUPABASE_SERVICE_ROLE|Demo123|eyJ[A-Za-z0-9_-]{20,}/);
 });
 
 test("baseline response headers prevent sniffing and cross-origin framing", () => {
@@ -39,7 +43,6 @@ test("Supabase refresh and route authorization remain separate controls", () => 
   assert.match(auth, /auth\.getUser\(\)/);
   assert.match(auth, /from\("user_roles"\)/);
   assert.match(auth, /roles\.includes\("admin"\)/);
-  assert.match(chatgptAuth, /optional OpenAI-hosted Sites runtime only/);
 });
 
 test("public signup uses bounded input and generic provider errors", () => {

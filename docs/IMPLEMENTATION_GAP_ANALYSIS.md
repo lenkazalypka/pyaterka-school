@@ -14,20 +14,20 @@
 | Route guards | реализовано | role check на server pages | добавить scoped policy services |
 | Онбординг | реализовано | 8 шагов, resume, Zod, Supabase | визуально улучшить после public DS |
 | Завершение онбординга | реализовано | security-definer RPC, rollback, idempotency | интеграционные DB-тесты |
-| Parent invitation | реализовано | token hash, expiry, invalidation, accept RPC | боевой email adapter |
+| Parent invitation | реализовано | token hash, expiry, invalidation, accept RPC и Resend adapter | настроить verified sender в production |
 | Student home | реализован первый срез | реальные profile/subjects/subscription, ближайшее занятие, задачи и empty states | добавить результаты после assessments |
 | Parent/teacher/curator/admin | только UI | role-protected `RoleHome` | поэтапные vertical slices |
 | Публичный сайт | реализовано | светлый самостоятельный бренд, Supabase-тарифы, legal routes, формы без вымышленных данных | подключить утверждённый production-контент |
 | Дизайн-система | реализован фундамент | единые tokens публичной части, auth, onboarding и спокойной LMS | выделять primitives по мере повторения |
 | shadcn/ui | отсутствует как registry | зависимости Radix нет, компоненты ручные | не ставить автоматически |
 | Курсы/модули/темы | только таблицы | CRUD и UI отсутствуют | расширить перед lessons stage |
-| Уроки/расписание | реализован student read flow | agenda, timezone, lesson detail, scoped RLS; staff editor отсутствует | teacher scheduling stage |
-| Материалы/записи | реализован student read flow | private buckets, metadata links, published-only RLS и signed URL endpoints | загрузка/публикация преподавателем |
-| ДЗ | только базовые таблицы | нет questions/attempt/review flow | отдельный этап |
+| Уроки/расписание | реализован MVP authoring flow | agenda, lesson detail и scoped staff-редактор создания урока | расширять редактирование по фактическим сценариям |
+| Материалы/записи | реализован базовый flow | private buckets, signed URL endpoints и публикация HTTPS-материала из редактора | добавить upload UI при необходимости |
+| ДЗ | реализован минимальный flow | ДЗ с дедлайном и заданиями банка отображается в уроке; submissions/review ещё нет | добавить сдачу и проверку |
 | Пробники | только базовые таблицы | нет version/attempt/timer/scale flow | отдельный этап |
 | Аналитика | только базовые таблицы | нет событий и реальных графиков | после assessments |
 | Коммуникации/отчёты | отсутствуют/частично в schema plan | нет UI/use cases | позднее |
-| Коммерция | частично | plans + pending manual subscription | admin activation later |
+| Коммерция | реализован первый платёжный flow | pending subscription + идемпотентный YooKassa checkout + проверяемый webhook activation | refunds/reconciliation later |
 | Public legal | отсутствует | нет policy/offer/consent pages | public site stage |
 | Runtime env | ограничение | production Supabase keys не настроены в Sites | требуется подключение владельца |
 
@@ -66,13 +66,13 @@
 - mock versions/attempts/scales;
 - notification deliveries/report recipients.
 
-## Требует внешней библиотеки
+## Внешние сервисы
 
-Сейчас — ничего. FullCalendar Standard только при staff scheduling; ECharts только при реальной аналитике. Video/email/payment — adapters к внешним сервисам, но не UI-библиотеки.
+Production использует Supabase, Resend, Sentry и YooKassa. FullCalendar и ECharts по-прежнему не нужны до появления соответствующих сценариев.
 
 ## Отложить
 
-Боевой payment gateway, маткапитал workflow, CRM, Telegram/SMS, AI, прокторинг, native apps, external calendar sync, video processing.
+Маткапитал workflow, CRM, Telegram/SMS, AI, прокторинг, native apps, external calendar sync, video processing, refunds и payment reconciliation reports.
 
 ## Не нужно проекту
 
