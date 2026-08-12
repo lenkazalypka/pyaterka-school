@@ -1,9 +1,9 @@
-import { Check } from "lucide-react";
 import Link from "next/link";
+import { BrandMark } from "@/components/icons/brand-mark";
 
 export function Brand({ inverse = false }: { inverse?: boolean }) {
   return <Link href="/" className={`brand ${inverse ? "brand-inverse" : ""}`} aria-label="Пятёрка — на главную">
-    <span className="brand-mark" aria-hidden="true"><b>5</b><Check /></span>
+    <BrandMark className="brand-mark" />
     <span>Пятёрка</span>
   </Link>;
 }

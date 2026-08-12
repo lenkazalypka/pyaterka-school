@@ -37,10 +37,7 @@ body {
 :focus-visible { outline-color: var(--focus-ring); }
 
 .brand { font-family: "Onest Variable", sans-serif; font-weight: 880; }
-.brand-mark { border-radius: 14px 14px 5px 14px; background: var(--brand-primary); box-shadow: 0 9px 23px rgba(185, 46, 66, .23); }
-.brand-mark svg { background: var(--accent-peach); }
-.brand-inverse .brand-mark { background: var(--accent-peach); }
-.brand-inverse .brand-mark svg { background: var(--text-primary); }
+.brand-mark { background: transparent; box-shadow: none; }
 
 .button { border-radius: 16px; font-weight: 820; }
 .button svg { transition: transform var(--dur-micro) var(--ease-out); }

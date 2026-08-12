@@ -71,7 +71,7 @@
   .v9-final-panel button { justify-content: center; }
   .start-header-inner { min-height: 66px; }
   .start-header .brand { font-size: 20px; }
-  .start-header .brand-mark { width: 34px; height: 34px; }
+  .start-header .brand-mark { width: 36px; height: 36px; }
   .start-back-link { font-size: 0; }
   .start-back-link svg { width: 21px; }
   .start-shell { width: 100%; padding: 24px 16px calc(104px + env(safe-area-inset-bottom)); }

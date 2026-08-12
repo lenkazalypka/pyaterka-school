@@ -60,12 +60,13 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 .tabular { font-variant-numeric: tabular-nums; }
 
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 900; letter-spacing: -.045em; line-height: 1; }
-.brand-mark { position: relative; display: grid; width: 38px; height: 38px; place-items: center; border-radius: 13px 13px 13px 6px; background: var(--brand-primary); color: #fff; box-shadow: 0 8px 22px rgba(185, 46, 66, .22); transform: rotate(-3deg); }
-.brand-mark b { font-size: 24px; transform: rotate(3deg); }
-.brand-mark svg { position: absolute; right: -6px; bottom: -5px; width: 17px; height: 17px; padding: 2px; border-radius: 50%; background: var(--accent-peach); color: var(--text-primary); stroke-width: 3; }
+.brand-mark { display: block; width: 42px; height: 42px; overflow: visible; filter: drop-shadow(0 7px 12px rgba(113, 31, 53, .16)); }
+.brand-mark-five { fill: var(--brand-burgundy); }
+.brand-mark-bar, .brand-mark-spark { fill: var(--accent-peach); }
 .brand-inverse { color: #fff; }
-.brand-inverse .brand-mark { background: var(--accent-peach); color: var(--text-primary); box-shadow: none; }
-.brand-inverse .brand-mark svg { background: var(--brand-primary); color: #fff; }
+.brand-inverse .brand-mark { filter: none; }
+.brand-inverse .brand-mark-five { fill: #fff; }
+.brand-inverse .brand-mark-bar, .brand-inverse .brand-mark-spark { fill: var(--accent-peach); }
 
 .button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 14px; padding: 0 20px; font-weight: 800; line-height: 1; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
 .button svg { width: 18px; height: 18px; }
@@ -381,8 +382,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   .public-container { width: min(100% - 28px, 620px); }
   .public-header { height: 68px; }
   .brand { font-size: 20px; }
-  .brand-mark { width: 34px; height: 34px; }
-  .brand-mark b { font-size: 21px; }
+  .brand-mark { width: 38px; height: 38px; }
   .public-hero { padding: 34px 0 56px; }
   .public-hero::before { display: none; }
   .hero-copy { padding: 10px 0; }
