@@ -32,11 +32,14 @@ test("v9 landing sends paid-intent CTAs through the plan builder", () => {
   assert.doesNotMatch(header, /<Link className="v9-brand-link"[^>]*>\s*<Brand/);
 });
 
-test("hero video is optional and keeps an approved image fallback", () => {
-  assert.match(hero, /NEXT_PUBLIC_HERO_VIDEO_URL/);
-  assert.match(hero, /<video/);
-  assert.match(hero, /poster="\/brand\/hero-study-illustration-v3\.webp"/);
-  assert.match(hero, /<Image/);
+test("redesign hero uses the five as the primary brand object", () => {
+  assert.match(hero, /className=\{styles\.five\}/);
+  assert.match(hero, />5<\/div>/);
+  assert.match(hero, /Профильная математика/);
+  assert.match(hero, /ДЗ проверено/);
+  assert.match(hero, /Твоя динамика/);
+  assert.doesNotMatch(hero, /NEXT_PUBLIC_HERO_VIDEO_URL/);
+  assert.doesNotMatch(hero, /hero-study-illustration-v3\.webp/);
 });
 
 test("marketing proof stays factual", () => {
@@ -74,10 +77,10 @@ test("v9 interactions remain dependency-free and responsive", () => {
   assert.doesNotMatch(css, /var\(--text-main\)/);
 });
 
-test("brand graphics replace icon-pack placeholders", () => {
+test("brand graphics remain available for the rest of the public system", () => {
   assert.equal(sections.match(/<MetricGraphic kind=/g)?.length, 4);
   assert.match(sections, /<SubjectIcon subject=\{slug\}/);
-  assert.match(hero, /<HeroMarkerNote/);
+  assert.match(illustrations, /export function HeroMarkerNote/);
   assert.match(illustrations, /export function VerificationSeal/);
   assert.match(subjectIcons, /subject === "math"/);
   assert.match(subjectIcons, /subject === "english"/);
