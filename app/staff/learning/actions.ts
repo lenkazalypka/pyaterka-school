@@ -15,7 +15,7 @@ function editorRedirect(kind: "status" | "error", message: string): never {
 }
 
 async function groupContext(groupId: string, requestedTeacherId: string | null) {
-  const context = await requireAnyRole(["teacher", "curator"]);
+  const context = await requireAnyRole(["teacher"]);
   const { db, user, roles } = context;
   const { data: group } = await db.from("groups").select("id,timezone,program_id").eq("id", groupId).maybeSingle();
   if (!group) editorRedirect("error", "Группа недоступна");
@@ -155,7 +155,7 @@ async function validateQuestionData(formData: FormData) {
     topicId: String(formData.get("topicId") ?? "") || undefined,
   });
   if (!parsed.success) editorRedirect("error", parsed.error.issues[0]?.message ?? "Проверьте задание");
-  const context = await requireAnyRole(["teacher", "curator"]);
+  const context = await requireAnyRole(["teacher"]);
   const { data: subject } = await context.db.from("subjects").select("id").eq("id", parsed.data.subjectId).maybeSingle();
   if (!subject) editorRedirect("error", "Предмет недоступен");
   if (parsed.data.topicId) {
@@ -207,7 +207,7 @@ export async function updateQuestion(formData: FormData) {
 export async function deleteQuestion(formData: FormData) {
   const questionId = uuid.safeParse(formData.get("questionId"));
   if (!questionId.success) editorRedirect("error", "Задание не найдено");
-  const { db } = await requireAnyRole(["teacher", "curator"]);
+  const { db } = await requireAnyRole(["teacher"]);
   const { error } = await db.from("question_bank").delete().eq("id", questionId.data);
   if (error) { logError("question.delete.failed", error); editorRedirect("error", "Нельзя удалить задание, уже включённое в ДЗ"); }
   logEvent("question.deleted");

@@ -163,6 +163,20 @@ values('92000000-0000-4000-8000-000000000001','91000000-0000-4000-8000-000000000
 select test.assert_count('teacher creates lesson in assigned group','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
 select test.assert_count('teacher creates scoped question','select count(*) from public.question_bank where id=''91000000-0000-4000-8000-000000000001''',1);
 
+insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
+values('90000000-0000-4000-8000-000000000002','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Урок для изменения','scheduled');
+update public.lessons set title='Урок преподавателя изменён' where id='90000000-0000-4000-8000-000000000002';
+select test.assert_count('teacher updates lesson in assigned group','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000002'' and title=''Урок преподавателя изменён''',1);
+delete from public.lessons where id='90000000-0000-4000-8000-000000000002';
+select test.assert_count('teacher deletes lesson in assigned group','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000002''',0);
+
+insert into public.assignments(id,group_id,subject_id,teacher_id,title,due_at,max_score,status)
+values('92000000-0000-4000-8000-000000000002','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','ДЗ для изменения',now()+interval '2 days',10,'published');
+update public.assignments set title='ДЗ преподавателя изменено' where id='92000000-0000-4000-8000-000000000002';
+select test.assert_count('teacher updates assignment in assigned group','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000002'' and title=''ДЗ преподавателя изменено''',1);
+delete from public.assignments where id='92000000-0000-4000-8000-000000000002';
+select test.assert_count('teacher deletes assignment in assigned group','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000002''',0);
+
 \set ON_ERROR_STOP off
 insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
 values('94000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000b','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Чужая группа','scheduled');
@@ -170,16 +184,42 @@ values('94000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-000000000
 select test.assert_count('teacher cannot create lesson in foreign group','select count(*) from public.lessons where id=''94000000-0000-4000-8000-000000000001''',0);
 
 select test.set_user('55555555-5555-4555-8555-555555555555');
+select test.assert_count('assigned curator reads assigned group','select count(*) from public.groups where id=''dddddddd-0000-4000-8000-00000000000a''',1);
+select test.assert_count('assigned curator reads assigned student','select count(*) from public.student_profiles where user_id=''11111111-1111-4111-8111-111111111111''',1);
+select test.assert_count('assigned curator reads lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('assigned curator reads assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001''',1);
+\set ON_ERROR_STOP off
 insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
 values('93000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Урок куратора','scheduled');
-select test.assert_count('assigned curator creates lesson','select count(*) from public.lessons where id=''93000000-0000-4000-8000-000000000001''',1);
+update public.lessons set title='Куратор изменил урок' where id='90000000-0000-4000-8000-000000000001';
+delete from public.lessons where id='90000000-0000-4000-8000-000000000001';
+insert into public.assignments(id,group_id,subject_id,teacher_id,title,due_at,max_score,status)
+values('93000000-0000-4000-8000-000000000002','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','ДЗ куратора',now()+interval '2 days',10,'published');
+update public.assignments set title='Куратор изменил ДЗ' where id='92000000-0000-4000-8000-000000000001';
+delete from public.assignments where id='92000000-0000-4000-8000-000000000001';
+\set ON_ERROR_STOP on
+select test.assert_count('assigned curator cannot create lesson','select count(*) from public.lessons where id=''93000000-0000-4000-8000-000000000001''',0);
+select test.assert_count('assigned curator cannot update lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001'' and title=''Авторский урок''',1);
+select test.assert_count('assigned curator cannot delete lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('assigned curator cannot create assignment','select count(*) from public.assignments where id=''93000000-0000-4000-8000-000000000002''',0);
+select test.assert_count('assigned curator cannot update assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001'' and title=''Авторское ДЗ''',1);
+select test.assert_count('assigned curator cannot delete assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001''',1);
 
 select test.set_user('66666666-6666-4666-8666-666666666666');
+select test.assert_count('unrelated curator cannot read assigned group','select count(*) from public.groups where id=''dddddddd-0000-4000-8000-00000000000a''',0);
+select test.assert_count('unrelated curator cannot read assigned lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',0);
+select test.assert_count('unrelated curator cannot read assigned assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001''',0);
 \set ON_ERROR_STOP off
 insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
 values('94000000-0000-4000-8000-000000000002','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Чужой куратор','scheduled');
 \set ON_ERROR_STOP on
 select test.assert_count('unrelated curator cannot create lesson','select count(*) from public.lessons where id=''94000000-0000-4000-8000-000000000002''',0);
+
+select test.set_user('88888888-8888-4888-8888-888888888888');
+update public.lessons set title='Урок обновлён администратором' where id='90000000-0000-4000-8000-000000000001';
+update public.assignments set title='ДЗ обновлено администратором' where id='92000000-0000-4000-8000-000000000001';
+select test.assert_count('admin updates lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001'' and title=''Урок обновлён администратором''',1);
+select test.assert_count('admin updates assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001'' and title=''ДЗ обновлено администратором''',1);
 
 select test.set_user('11111111-1111-4111-8111-111111111111');
 select test.assert_count('student reads assigned question prompt','select count(*) from public.question_bank where id=''91000000-0000-4000-8000-000000000001''',1);
