@@ -15,6 +15,18 @@ export type StudentSubjectSummary = {
   scoreUnit: "test_score" | "primary_score";
 };
 
+export type CourseOffering = {
+  id: string;
+  academicYear: string;
+  examTypeId: string;
+  subjectId: string;
+  programId: string;
+  startsAt: string;
+  endsAt: string;
+  enrollmentStatus: "draft" | "open" | "closed" | "archived";
+  deliveryModel: "live_group";
+};
+
 export type StudentEvent = {
   id: string;
   lessonId: string | null;

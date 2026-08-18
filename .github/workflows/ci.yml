@@ -55,3 +55,4 @@ jobs:
             psql -v ON_ERROR_STOP=1 -f "${migration}"
           done
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/course_offerings_rls.sql
