@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { RoleCode } from "@/types/domain";
 import { appUrl } from "@/lib/app-url";
+import { roleHomePath } from "@/lib/auth";
 import { logEvent, logWarning } from "@/lib/observability";
 import { assertRateLimit, clearRateLimit, publicRateLimitMessage, recordRateLimitAttempt } from "@/lib/rate-limit";
 import { configured, supabase } from "@/lib/supabase";
@@ -14,6 +16,13 @@ const credentials = z.object({
   password: z.string().min(8, "Минимум 8 символов").max(128, "Пароль слишком длинный"),
 });
 
+async function redirectToRoleHome(db: Awaited<ReturnType<typeof supabase>>, userId: string): Promise<never> {
+  const { data: roleRows } = await db.from("user_roles").select("roles(code)").eq("user_id", userId);
+  const roles = ((roleRows ?? []) as unknown as { roles: { code: RoleCode } | null }[])
+    .flatMap((row) => row.roles ? [row.roles.code] : []);
+  redirect(roleHomePath(roles));
+}
+
 export async function login(_: State, formData: FormData): Promise<State> {
   if (!configured()) return { error: "Вход откроется после подключения базы школы" };
   const parsed = credentials.safeParse({ email: formData.get("email"), password: formData.get("password") });
@@ -22,7 +31,7 @@ export async function login(_: State, formData: FormData): Promise<State> {
   let identifiers: string[];
   try { identifiers = await assertRateLimit(db, "login", parsed.data.email); }
   catch (error) { logWarning("auth.login.rate_limited"); return { error: publicRateLimitMessage(error) }; }
-  const { error } = await db.auth.signInWithPassword(parsed.data);
+  const { data, error } = await db.auth.signInWithPassword(parsed.data);
   if (error) {
     try { await recordRateLimitAttempt(db, "login", identifiers); }
     catch (rateLimitError) { return { error: publicRateLimitMessage(rateLimitError) }; }
@@ -32,7 +41,7 @@ export async function login(_: State, formData: FormData): Promise<State> {
   try { await clearRateLimit(db, "login", identifiers); }
   catch (error) { return { error: publicRateLimitMessage(error) }; }
   logEvent("auth.login.succeeded");
-  redirect("/student");
+  return redirectToRoleHome(db, data.user.id);
 }
 
 export async function register(_: State, formData: FormData): Promise<State> {
@@ -99,5 +108,7 @@ export async function updatePassword(_: State, formData: FormData): Promise<Stat
   const { error } = await db.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: "Ссылка истекла или уже использована. Запросите новую." };
   logEvent("auth.password.updated");
-  redirect("/student");
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) redirect("/login");
+  return redirectToRoleHome(db, user.id);
 }
