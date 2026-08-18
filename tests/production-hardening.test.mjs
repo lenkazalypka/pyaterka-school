@@ -53,6 +53,18 @@ test("public signup uses bounded input and generic provider errors", () => {
   assert.doesNotMatch(actions, /already registered|уже зарегистрирован/i);
 });
 
+test("login redirects to the highest-privilege role home without changing auth guards", () => {
+  assert.match(auth, /function roleHomePath/);
+  assert.match(auth, /includes\("admin"\).*"\/admin"/);
+  assert.match(auth, /includes\("teacher"\).*"\/teacher"/);
+  assert.match(auth, /includes\("curator"\).*"\/curator"/);
+  assert.match(auth, /includes\("parent"\).*"\/parent"/);
+  assert.match(actions, /function redirectToRoleHome/);
+  assert.match(actions, /from\("user_roles"\)\.select\("roles\(code\)"\)/);
+  assert.match(actions, /return redirectToRoleHome\(db, data\.user\.id\)/);
+  assert.match(actions, /return redirectToRoleHome\(db, user\.id\)/);
+});
+
 test("subscription subjects helper is a minimal boolean RLS bridge", () => {
   assert.match(rlsHelper, /returns boolean/);
   assert.match(rlsHelper, /security definer/);
