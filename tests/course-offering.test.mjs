@@ -3,13 +3,24 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [courseOfferingMigration, compatMigration, foundation, onboarding, payments, domain, rls, workflow] = await Promise.all([
+const [
+  courseOfferingMigration,
+  compatMigration,
+  foundation,
+  onboarding,
+  payments,
+  domain,
+  legacyRls,
+  rls,
+  workflow,
+] = await Promise.all([
   read("../supabase/migrations/202608160001_course_offerings.sql"),
   read("../supabase/migrations/202608160002_legacy_subscription_payment_compat.sql"),
   read("../supabase/migrations/202607310001_foundation.sql"),
   read("../supabase/migrations/202608010001_onboarding_stage2.sql"),
   read("../supabase/migrations/202608120003_yookassa_payments.sql"),
   read("../types/domain.ts"),
+  read("../supabase/tests/rls.sql"),
   read("../supabase/tests/course_offerings_rls.sql"),
   read("../.github/workflows/ci.yml"),
 ]);
@@ -58,6 +69,10 @@ test("payment activation uses CourseOffering dates while preserving legacy subje
   assert.match(migration, /ends_at = coalesce\(ends_at, v_access_end, now\(\) \+ interval '1 month'\)/);
   assert.match(migration, /v_has_legacy_subject_access/);
   assert.match(compatMigration, /no deterministic way to map those rows to a concrete CourseOffering/);
+  assert.match(legacyRls, /unscoped pending subscription cannot create payment/);
+  assert.match(legacyRls, /payment amount comes from scoped legacy pending subscription/);
+  assert.match(rls, /prepare_subscription_payment\('70707070-0000-4000-8000-000000000002'/);
+  assert.match(rls, /webhook activation uses offering dates/);
 });
 
 test("CourseOffering RLS allows scoped reads but reserves commercial and offering mutation for admin", () => {
@@ -76,6 +91,5 @@ test("CourseOffering RLS allows scoped reads but reserves commercial and offerin
   assert.match(rls, /teacher cannot create course offering/);
   assert.match(rls, /curator cannot delete course offering/);
   assert.match(rls, /unrelated curator cannot read closed course offering/);
-  assert.match(rls, /webhook activation uses offering dates/);
   assert.match(workflow, /course_offerings_rls\.sql/);
 });
