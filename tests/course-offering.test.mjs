@@ -73,6 +73,8 @@ test("payment activation uses CourseOffering dates while preserving legacy subje
   assert.match(legacyRls, /payment amount comes from scoped legacy pending subscription/);
   assert.match(rls, /prepare_subscription_payment\('70707070-0000-4000-8000-000000000002'/);
   assert.match(rls, /webhook activation uses offering dates/);
+  assert.match(rls, /unscoped subscription remains rejected/);
+  assert.match(rls, /valid subject-only legacy subscription remains payable/);
 });
 
 test("CourseOffering RLS allows scoped reads but reserves commercial and offering mutation for admin", () => {
@@ -88,8 +90,17 @@ test("CourseOffering RLS allows scoped reads but reserves commercial and offerin
   assert.match(migration, /subscription_offerings_admin_delete/);
   assert.doesNotMatch(migration, /private\.can_manage_group\(id\)/);
   assert.match(rls, /student cannot update course offering/);
+  assert.match(rls, /anon cannot access subscription offerings/);
+  assert.match(rls, /foreign student cannot read subscription offering/);
+  assert.match(rls, /unrelated parent cannot read subscription offering/);
   assert.match(rls, /teacher cannot create course offering/);
+  assert.match(rls, /teacher cannot manage commercial subscription mapping/);
+  assert.match(rls, /teacher cannot read commercial subscription offering/);
   assert.match(rls, /curator cannot delete course offering/);
+  assert.match(rls, /curator cannot manage commercial subscription mapping/);
   assert.match(rls, /unrelated curator cannot read closed course offering/);
+  assert.match(rls, /admin creates commercial subscription mapping/);
+  assert.match(rls, /admin updates commercial subscription mapping/);
+  assert.match(rls, /admin deletes commercial subscription mapping/);
   assert.match(workflow, /course_offerings_rls\.sql/);
 });
