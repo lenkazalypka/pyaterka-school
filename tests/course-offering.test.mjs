@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [migration, foundation, onboarding, payments, domain, rls, workflow] = await Promise.all([
+const [courseOfferingMigration, compatMigration, foundation, onboarding, payments, domain, rls, workflow] = await Promise.all([
   read("../supabase/migrations/202608160001_course_offerings.sql"),
+  read("../supabase/migrations/202608160002_legacy_subscription_payment_compat.sql"),
   read("../supabase/migrations/202607310001_foundation.sql"),
   read("../supabase/migrations/202608010001_onboarding_stage2.sql"),
   read("../supabase/migrations/202608120003_yookassa_payments.sql"),
@@ -12,6 +13,7 @@ const [migration, foundation, onboarding, payments, domain, rls, workflow] = awa
   read("../supabase/tests/course_offerings_rls.sql"),
   read("../.github/workflows/ci.yml"),
 ]);
+const migration = `${courseOfferingMigration}\n${compatMigration}`;
 
 test("CourseOffering is an additive academic domain between subject, program and group", () => {
   assert.match(migration, /create table if not exists public\.course_offerings/i);
@@ -46,14 +48,16 @@ test("student group access prefers exact offering access and keeps historical su
   assert.match(migration, /not exists \([\s\S]*from public\.subscription_offerings so[\s\S]*so\.subscription_id = sub\.id[\s\S]*so\.status = 'active'/);
 });
 
-test("payment activation uses CourseOffering dates instead of a hidden monthly duration", () => {
+test("payment activation uses CourseOffering dates while preserving legacy subject-only payments", () => {
   assert.match(payments, /now\(\) \+ interval '1 month'/);
   assert.match(migration, /create or replace function public\.prepare_subscription_payment/);
   assert.match(migration, /SUBSCRIPTION_OFFERINGS_REQUIRED/);
+  assert.match(migration, /SUBSCRIPTION_ACCESS_SCOPE_REQUIRED/);
   assert.match(migration, /select min\(co\.starts_at\), max\(co\.ends_at\)/);
-  assert.match(migration, /starts_at = coalesce\(starts_at, v_access_start\)/);
-  assert.match(migration, /ends_at = coalesce\(ends_at, v_access_end\)/);
-  assert.doesNotMatch(migration, /now\(\) \+ interval '1 month'/);
+  assert.match(migration, /starts_at = coalesce\(starts_at, v_access_start, now\(\)\)/);
+  assert.match(migration, /ends_at = coalesce\(ends_at, v_access_end, now\(\) \+ interval '1 month'\)/);
+  assert.match(migration, /v_has_legacy_subject_access/);
+  assert.match(compatMigration, /no deterministic way to map those rows to a concrete CourseOffering/);
 });
 
 test("CourseOffering RLS allows scoped reads but reserves commercial and offering mutation for admin", () => {
