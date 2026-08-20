@@ -128,8 +128,8 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
   const lessonRows = (lessonResult.data ?? []) as LessonRow[];
   const lessonIds = lessonRows.map((lesson) => lesson.id);
   const { data: lessonProgressRows, error: lessonProgressError } = lessonIds.length
-    ? await db.from("student_lesson_progress").select("lesson_id,status").in("lesson_id", lessonIds).eq("user_id", user.id)
-    : { data: [] as { lesson_id: string; status: "started" | "completed" }[], error: null };
+    ? await db.from("student_lesson_progress").select("lesson_id,status,last_position_seconds").in("lesson_id", lessonIds).eq("user_id", user.id)
+    : { data: [] as { lesson_id: string; status: "started" | "completed"; last_position_seconds: number | null }[], error: null };
   if (lessonProgressError) { logError("rls.query.failed", lessonProgressError, { resource: "student_lesson_progress" }); throw new Error("Не удалось загрузить прогресс уроков"); }
 
   const subjectIds = unique([
@@ -143,7 +143,7 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     subjectIds.length ? db.from("subjects").select("id,name").in("id", subjectIds) : Promise.resolve({ data: [] as { id: string; name: string }[] }),
     teacherIds.length ? db.from("profiles").select("id,first_name,last_name").in("id", teacherIds) : Promise.resolve({ data: [] as { id: string; first_name: string; last_name: string }[] }),
     lessonIds.length ? db.from("meeting_links").select("lesson_id,join_url").in("lesson_id", lessonIds) : Promise.resolve({ data: [] as { lesson_id: string; join_url: string }[] }),
-    lessonIds.length ? db.from("lesson_recordings").select("id,lesson_id,title,duration_seconds").in("lesson_id", lessonIds).eq("status", "published").order("published_at", { ascending: false }) : Promise.resolve({ data: [] as { id: string; lesson_id: string; title: string | null; duration_seconds: number | null }[] }),
+    lessonIds.length ? db.from("lesson_recordings").select("id,lesson_id,title,duration_seconds,storage_path,external_url").in("lesson_id", lessonIds).eq("status", "published").order("published_at", { ascending: false }) : Promise.resolve({ data: [] as { id: string; lesson_id: string; title: string | null; duration_seconds: number | null; storage_path: string | null; external_url: string | null }[] }),
     lessonIds.length ? db.from("lesson_materials").select("lesson_id,material_id,position").in("lesson_id", lessonIds).order("position") : Promise.resolve({ data: [] as { lesson_id: string; material_id: string; position: number }[] }),
   ]);
 
@@ -220,12 +220,15 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
   const recordingByLesson = new Map<string, StudentRecording>();
   for (const recording of recordingsResponse.data ?? []) {
     if (recordingByLesson.has(recording.lesson_id)) continue;
+    const sourceType = recording.storage_path ? "private_storage" : safeHttpsUrl(recording.external_url) ? "external" : null;
+    if (!sourceType) continue;
     recordingByLesson.set(recording.lesson_id, {
       id: recording.id,
       lessonId: recording.lesson_id,
       title: recording.title || "Запись занятия",
       durationSeconds: recording.duration_seconds,
       watchUrl: `/api/recordings/${recording.id}`,
+      sourceType,
     });
   }
 
@@ -263,7 +266,7 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     assignmentsByLesson.set(assignment.lesson_id, [...(assignmentsByLesson.get(assignment.lesson_id) ?? []), item]);
   }
 
-  const lessonProgressMap = new Map((lessonProgressRows ?? []).map((progress) => [progress.lesson_id, progress.status]));
+  const lessonProgressMap = new Map((lessonProgressRows ?? []).map((progress) => [progress.lesson_id, progress]));
   const lessons: StudentLesson[] = lessonRows
     .map((lesson) => ({
       id: lesson.id,
@@ -277,7 +280,8 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
       materials: materialsByLesson.get(lesson.id) ?? [],
       recording: recordingByLesson.get(lesson.id) ?? null,
       assignments: assignmentsByLesson.get(lesson.id) ?? [],
-      progressStatus: lessonProgressMap.get(lesson.id) ?? null,
+      progressStatus: lessonProgressMap.get(lesson.id)?.status ?? null,
+      progressPositionSeconds: lessonProgressMap.get(lesson.id)?.last_position_seconds ?? null,
     }))
     .sort((left, right) => {
       const leftDate = eventByLesson.get(left.id)?.starts_at ?? "";

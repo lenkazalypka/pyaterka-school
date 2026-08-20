@@ -48,6 +48,7 @@ export type StudentRecording = {
   title: string;
   durationSeconds: number | null;
   watchUrl: string;
+  sourceType: "private_storage" | "external";
 };
 
 export type StudentQuestion = {
@@ -80,6 +81,7 @@ export type StudentLesson = {
   recording: StudentRecording | null;
   assignments: StudentAssignment[];
   progressStatus: "started" | "completed" | null;
+  progressPositionSeconds: number | null;
 };
 
 export type StudentTask = {

@@ -3,7 +3,19 @@ import { safeHttpsUrl } from "@/lib/safe-url";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_: Request, { params }: { params: Promise<{ recordingId: string }> }) {
+function trustedStorageUrl(value: string | null | undefined) {
+  const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!value || !configuredUrl) return null;
+  try {
+    const candidate = new URL(value);
+    const project = new URL(configuredUrl);
+    return candidate.origin === project.origin && candidate.pathname.startsWith("/storage/v1/") ? candidate.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function GET(request: Request, { params }: { params: Promise<{ recordingId: string }> }) {
   if (!configured()) return new Response("Supabase is not configured", { status: 503 });
   const { recordingId } = await params;
   const db = await supabase();
@@ -26,5 +38,24 @@ export async function GET(_: Request, { params }: { params: Promise<{ recordingI
     .from("lesson-recordings")
     .createSignedUrl(recording.storage_path, 60);
   if (error || !data?.signedUrl) return new Response("Recording is unavailable", { status: 404 });
-  return Response.redirect(data.signedUrl, 302);
+  const signedUrl = trustedStorageUrl(data.signedUrl);
+  if (!signedUrl) return new Response("Recording is unavailable", { status: 404 });
+
+  const range = request.headers.get("range");
+  const upstream = await fetch(signedUrl, {
+    cache: "no-store",
+    headers: range ? { Range: range } : undefined,
+    signal: request.signal,
+  });
+  if (!upstream.ok) return new Response("Recording is unavailable", { status: upstream.status === 416 ? 416 : 502 });
+
+  const headers = new Headers({
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+  });
+  for (const name of ["accept-ranges", "content-length", "content-range", "content-type", "etag", "last-modified"]) {
+    const value = upstream.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  return new Response(upstream.body, { status: upstream.status, headers });
 }

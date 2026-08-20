@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [sql, seed, learning, dashboard, shell, schedule, lessons, lesson, materialRoute, recordingRoute, css] = await Promise.all([
+const [sql, seed, learning, dashboard, shell, schedule, lessons, lesson, player, materialRoute, recordingRoute, css] = await Promise.all([
   read("../supabase/migrations/202608010002_student_learning_stage.sql"),
   read("../supabase/seed.sql"),
   read("../lib/student-learning.ts"),
@@ -12,6 +12,7 @@ const [sql, seed, learning, dashboard, shell, schedule, lessons, lesson, materia
   read("../app/student/schedule/page.tsx"),
   read("../app/student/lessons/page.tsx"),
   read("../app/student/lessons/[lessonId]/page.tsx"),
+  read("../components/lesson-recording-player.tsx"),
   read("../app/api/materials/[materialId]/route.ts"),
   read("../app/api/recordings/[recordingId]/route.ts"),
   read("../app/globals.css"),
@@ -49,6 +50,22 @@ test("download endpoints authenticate, rely on RLS and use short-lived signed UR
   }
   assert.match(materialRoute, /safeHttpsUrl/);
   assert.match(recordingRoute, /\.eq\("status", "published"\)/);
+});
+
+test("private recording player streams through an authenticated range proxy and saves position", () => {
+  assert.match(recordingRoute, /trustedStorageUrl/);
+  assert.match(recordingRoute, /request\.headers\.get\("range"\)/);
+  assert.match(recordingRoute, /headers: range \? \{ Range: range \}/);
+  assert.match(recordingRoute, /Cache-Control": "private, no-store"/);
+  assert.doesNotMatch(recordingRoute, /Response\.redirect\(data\.signedUrl/);
+  assert.match(player, /saveLessonPosition/);
+  assert.match(player, /initialPositionSeconds/);
+  assert.match(player, /onTimeUpdate/);
+  assert.match(player, /onPause/);
+  assert.doesNotMatch(player, /localStorage|sessionStorage/);
+  assert.doesNotMatch(player, /aria-live="polite"/);
+  assert.match(lesson, /sourceType === "private_storage"/);
+  assert.doesNotMatch(css, /student-lesson-hero::after \{ content: "5"/);
 });
 
 test("student routes read Supabase data and expose honest empty states", () => {

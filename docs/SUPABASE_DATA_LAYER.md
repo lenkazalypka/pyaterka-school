@@ -16,7 +16,7 @@
 
 ## Мутации
 
-- Начало урока: `startLesson` → Zod UUID → `start_student_lesson` → idempotent progress + `lesson_started` activity.
+- Начало урока и позиция записи: `startLesson` / `saveLessonPosition` → Zod → `start_student_lesson` → idempotent progress + `lesson_started` activity. Приватное видео идёт через authenticated same-origin Range proxy; signed storage URL не возвращается клиенту.
 - Завершение урока: `completeLesson` → Zod UUID → `complete_student_lesson` → lesson/course progress + activity.
 - Начало ДЗ: `startHomework` → Zod UUID → `start_student_homework` → idempotent in-progress submission + `homework_started` activity.
 - Отправка ДЗ: `submitHomework` → Zod → `submit_student_homework` → submission + activity.

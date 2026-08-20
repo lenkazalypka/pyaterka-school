@@ -57,6 +57,8 @@ test("lesson and homework starts are persisted before completion", () => {
   assert.match(startEventsMigration, /assignment_submissions_record_start/);
   assert.match(actions, /start_student_lesson/);
   assert.match(actions, /start_student_homework/);
+  assert.match(actions, /saveLessonPosition/);
+  assert.match(actions, /positionSeconds: z\.number\(\)\.int\(\)\.min\(0\)\.max\(86400\)/);
   assert.match(learningActions, /StartLessonForm/);
   assert.match(learningActions, /StartHomeworkForm/);
   assert.match(lessonPage, /assignment\.submission \? <HomeworkSubmissionForm/);

@@ -305,9 +305,9 @@ reset role;
 
 set role authenticated;
 select test.set_user('11111111-1111-4111-8111-111111111111');
+select public.start_student_lesson('90000000-0000-4000-8000-000000000001',37);
 select public.start_student_lesson('90000000-0000-4000-8000-000000000001');
-select public.start_student_lesson('90000000-0000-4000-8000-000000000001');
-select test.assert_count('lesson start is persisted once','select count(*) from public.student_lesson_progress where user_id=''11111111-1111-4111-8111-111111111111'' and lesson_id=''90000000-0000-4000-8000-000000000001'' and status=''started''',1);
+select test.assert_count('lesson start and position are persisted once','select count(*) from public.student_lesson_progress where user_id=''11111111-1111-4111-8111-111111111111'' and lesson_id=''90000000-0000-4000-8000-000000000001'' and status=''started'' and last_position_seconds=37',1);
 select test.assert_count('lesson start activity is idempotent','select count(*) from public.student_activity where user_id=''11111111-1111-4111-8111-111111111111'' and activity_type=''lesson_started'' and source_id=''90000000-0000-4000-8000-000000000001''',1);
 select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
 select test.assert_count('lesson completion creates course progress','select count(*) from public.student_progress where user_id=''11111111-1111-4111-8111-111111111111'' and course_id=''cccccccc-0000-4000-8000-000000000001'' and completed_lessons=1',1);

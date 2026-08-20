@@ -7,6 +7,26 @@ import { logError, logEvent } from "@/lib/observability";
 
 export type LearningActionState = { error: string | null; success?: string | null };
 
+const lessonPosition = z.object({
+  lessonId: z.uuid(),
+  positionSeconds: z.number().int().min(0).max(86400),
+});
+
+export async function saveLessonPosition(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  const parsed = lessonPosition.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Некорректная позиция записи" };
+  const { db } = await requireStudent();
+  const { error } = await db.rpc("start_student_lesson", {
+    p_lesson_id: parsed.data.lessonId,
+    p_last_position_seconds: parsed.data.positionSeconds,
+  });
+  if (error) {
+    logError("learning.lesson_position.failed", error, { lesson_id: parsed.data.lessonId });
+    return { ok: false, error: "Не удалось сохранить позицию" };
+  }
+  return { ok: true };
+}
+
 export async function startLesson(_: LearningActionState, formData: FormData): Promise<LearningActionState> {
   const lessonId = z.uuid().safeParse(formData.get("lessonId"));
   if (!lessonId.success) return { error: "Урок не найден" };
