@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [sql, actions, onboardingGuard, onboardingIndex, stepPage, studentLearning, frame, inviteActions, seed, publicCss] = await Promise.all([
+const [sql, atomicDrafts, actions, onboardingGuard, onboardingIndex, stepPage, studentLearning, frame, inviteActions, seed, publicCss] = await Promise.all([
   read("../supabase/migrations/202608010001_onboarding_stage2.sql"),
+  read("../supabase/migrations/202608210001_onboarding_atomic_drafts.sql"),
   read("../app/onboarding/actions.ts"), read("../lib/onboarding.ts"), read("../app/onboarding/page.tsx"),
   read("../app/onboarding/[step]/page.tsx"), read("../lib/student-learning.ts"),
   read("../components/onboarding/frame.tsx"), read("../app/invite/parent/actions.ts"), read("../supabase/seed.sql"), read("../app/public-v2.css"),
@@ -23,7 +24,17 @@ test("completed student cannot reopen ordinary onboarding", () => {
 
 test("all eight steps have server-side persistence actions", () => {
   for (const action of ["saveProfileStep","saveExamStep","saveSubjectsStep","saveGoalsStep","saveScheduleStep","saveParentStep","savePlanStep","completeOnboarding"]) assert.match(actions, new RegExp(`function ${action}`));
-  for (const step of [2,3,4,5,6,7,8]) assert.match(actions, new RegExp(`(?:advance\\(${step}\\)|current_step: ${step})`));
+  for (const step of [2,3,7,8]) assert.match(actions, new RegExp(`(?:advance\\(${step}\\)|current_step: ${step})`));
+  for (const step of [4,5,6]) assert.match(atomicDrafts, new RegExp(`greatest\\(current_step, ${step}\\)`));
+});
+
+test("multi-row onboarding drafts are replaced atomically under caller RLS", () => {
+  for (const rpc of ["replace_onboarding_subjects", "replace_onboarding_goals", "replace_onboarding_schedule"]) {
+    assert.match(atomicDrafts, new RegExp(`function public\\.${rpc}`));
+    assert.match(actions, new RegExp(`db\\.rpc\\("${rpc}"`));
+  }
+  assert.equal((atomicDrafts.match(/security invoker/g) ?? []).length, 3);
+  assert.doesNotMatch(actions, /from\("(?:student_subjects|admission_goals|preferred_schedule_slots)"\)\.delete/);
 });
 
 test("future steps cannot be skipped while previous steps remain editable", () => {

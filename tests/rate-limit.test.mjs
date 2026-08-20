@@ -10,6 +10,8 @@ const [migration, actions, inviteActions, rateLimit] = await Promise.all([
   read("../lib/rate-limit.ts"),
 ]);
 
+const hardening = await read("../supabase/migrations/202608210002_rate_limit_hardening.sql");
+
 test("five attempts create a persistent fifteen-minute login block", () => {
   assert.match(migration, /current_attempts \+ 1 >= 5/);
   assert.match(migration, /when 'login' then interval '15 minutes'/);
@@ -19,14 +21,22 @@ test("five attempts create a persistent fifteen-minute login block", () => {
 
 test("public auth and parent invitation flows use the shared limiter", () => {
   for (const action of ["login", "register", "recover"]) {
-    assert.match(actions, new RegExp(`assertRateLimit\\(db, "${action}"`));
+    assert.match(actions, new RegExp(`assertRateLimit\\("${action}"`));
   }
-  assert.match(inviteActions, /assertRateLimit\(db, "parent_invite"/);
+  assert.match(inviteActions, /assertRateLimit\("parent_invite"/);
   assert.match(rateLimit, /x-forwarded-for/);
   assert.match(rateLimit, /RATE_LIMIT_PEPPER/);
 });
 
 test("successful login clears its failed-attempt window", () => {
-  assert.match(actions, /clearRateLimit\(db, "login", identifiers\)/);
+  assert.match(actions, /clearRateLimit\("login", identifiers\)/);
   assert.match(migration, /create or replace function public\.clear_auth_rate_limit/);
+});
+
+test("rate-limit mutation RPCs are service-role only and clean stale rows", () => {
+  assert.match(rateLimit, /supabaseAdmin\(\)/);
+  assert.match(hardening, /revoke all on function public\.record_auth_rate_limit_attempt[\s\S]*from public, anon, authenticated/i);
+  assert.match(hardening, /grant execute on function public\.record_auth_rate_limit_attempt[\s\S]*to service_role/i);
+  assert.match(hardening, /updated_at < clock_timestamp\(\) - interval '2 hours'/i);
+  assert.match(hardening, /auth_rate_limits_updated_at_idx/);
 });

@@ -217,7 +217,18 @@ select test.assert_count('student cannot assign admin','select count(*) from pub
 
 reset role;
 
-set role anon;
+do $$
+begin
+  if has_function_privilege('anon', 'public.record_auth_rate_limit_attempt(text,text[])', 'EXECUTE')
+    or has_function_privilege('authenticated', 'public.clear_auth_rate_limit(text,text[])', 'EXECUTE')
+    or not has_function_privilege('service_role', 'public.record_auth_rate_limit_attempt(text,text[])', 'EXECUTE')
+  then
+    raise exception 'RATE LIMIT FAIL: RPC privileges are not service-role only';
+  end if;
+end;
+$$;
+
+set role service_role;
 select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
 select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
 select public.record_auth_rate_limit_attempt('login', array[repeat('a', 64)]);
@@ -239,7 +250,7 @@ set blocked_until = clock_timestamp() - interval '1 second',
     window_started_at = clock_timestamp() - interval '16 minutes'
 where action = 'login' and identifier_hash = repeat('a', 64);
 
-set role anon;
+set role service_role;
 do $$
 declare result record;
 begin
@@ -249,6 +260,39 @@ begin
   end if;
 end;
 $$;
+reset role;
+
+insert into public.student_onboarding(student_id, exam_type_id, current_step)
+select '11111111-1111-4111-8111-111111111111', id, 3
+from public.exam_types where code = 'ege'
+on conflict (student_id) do update set exam_type_id = excluded.exam_type_id, current_step = 3, completed_at = null;
+
+set role authenticated;
+select test.set_user('11111111-1111-4111-8111-111111111111');
+select public.replace_onboarding_subjects('[{"subject_id":"bbbbbbbb-0000-4000-8000-000000000001","current_grade":5,"last_mock_score":20,"confidence":6,"target_score":80,"weak_topics":["аргументация"],"comment":"сохранить","score_unit":"test_score"}]'::jsonb);
+\set ON_ERROR_STOP off
+select public.replace_onboarding_subjects('[{"subject_id":"bbbbbbbb-0000-4000-8000-000000000001","current_grade":9,"last_mock_score":20,"confidence":6,"target_score":80,"weak_topics":[],"comment":"сломать","score_unit":"test_score"}]'::jsonb);
+\set ON_ERROR_STOP on
+select test.assert_count('subject draft rollback keeps prior row','select count(*) from public.student_subjects where student_id=''11111111-1111-4111-8111-111111111111'' and current_grade=5 and student_comment=''сохранить''',1);
+
+select public.replace_onboarding_goals('[{"institution_type":"university","institution_name":"Тестовый вуз","direction_name":"Филология","city":"Москва","funding_type":"budget","priority":1,"minimum_passing_score":70,"desired_score":85,"needs_admission_help":true,"needs_career_guidance":false}]'::jsonb);
+\set ON_ERROR_STOP off
+select public.replace_onboarding_goals('[{"institution_type":"university","institution_name":null,"direction_name":"Филология","city":"Москва","funding_type":"budget","priority":1,"minimum_passing_score":70,"desired_score":85,"needs_admission_help":true,"needs_career_guidance":false}]'::jsonb);
+\set ON_ERROR_STOP on
+select test.assert_count('goal draft rollback keeps prior row','select count(*) from public.admission_goals where student_id=''11111111-1111-4111-8111-111111111111'' and institution_name=''Тестовый вуз'' and status=''active''',1);
+
+select public.replace_onboarding_schedule(
+  '{"weekly_hours":6,"preferred_format":"group","strict_control":false,"daily_reminders":true,"other_courses":null,"current_weekly_load":20,"desired_start_date":"2026-09-01","timezone":"Europe/Moscow"}'::jsonb,
+  '[{"weekday":2,"starts_at":"17:00","ends_at":"19:00","timezone":"Europe/Moscow"}]'::jsonb
+);
+\set ON_ERROR_STOP off
+select public.replace_onboarding_schedule(
+  '{"weekly_hours":9,"preferred_format":"group","strict_control":false,"daily_reminders":true,"other_courses":null,"current_weekly_load":20,"desired_start_date":"2026-09-01","timezone":"Europe/Moscow"}'::jsonb,
+  '[{"weekday":2,"starts_at":"20:00","ends_at":"19:00","timezone":"Europe/Moscow"}]'::jsonb
+);
+\set ON_ERROR_STOP on
+select test.assert_count('schedule draft rollback keeps prior preferences','select count(*) from public.student_study_preferences where student_id=''11111111-1111-4111-8111-111111111111'' and weekly_hours=6',1);
+select test.assert_count('schedule draft rollback keeps prior slot','select count(*) from public.preferred_schedule_slots where student_id=''11111111-1111-4111-8111-111111111111'' and starts_at=''17:00''::time and ends_at=''19:00''::time',1);
 reset role;
 
 select 'RLS integration suite passed';

@@ -12,14 +12,14 @@ export type InviteState = { error: string | null; success?: string | null };
 const tokenSchema = z.string().min(64).max(200);
 
 export async function acceptParentInvitation(_: InviteState, formData: FormData): Promise<InviteState> {
-  if (!configured()) return { error: "Подключите Supabase" };
+  if (!configured()) return { error: "Приглашения временно недоступны. Попробуйте позже." };
   const token = tokenSchema.safeParse(formData.get("token"));
   if (!token.success) return { error: "Ссылка приглашения повреждена" };
   const db = await supabase();
   const submittedEmail = String(formData.get("email") ?? "") || undefined;
   try {
-    const identifiers = await assertRateLimit(db, "parent_invite", submittedEmail);
-    await recordRateLimitAttempt(db, "parent_invite", identifiers);
+    const identifiers = await assertRateLimit("parent_invite", submittedEmail);
+    await recordRateLimitAttempt("parent_invite", identifiers);
   } catch (error) { logWarning("parent_invitation.rate_limited"); return { error: publicRateLimitMessage(error) }; }
   let { data: { user } } = await db.auth.getUser();
   if (!user) {

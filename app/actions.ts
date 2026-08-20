@@ -20,16 +20,16 @@ export async function login(_: State, formData: FormData): Promise<State> {
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Проверьте поля" };
   const db = await supabase();
   let identifiers: string[];
-  try { identifiers = await assertRateLimit(db, "login", parsed.data.email); }
+  try { identifiers = await assertRateLimit("login", parsed.data.email); }
   catch (error) { logWarning("auth.login.rate_limited"); return { error: publicRateLimitMessage(error) }; }
   const { error } = await db.auth.signInWithPassword(parsed.data);
   if (error) {
-    try { await recordRateLimitAttempt(db, "login", identifiers); }
+    try { await recordRateLimitAttempt("login", identifiers); }
     catch (rateLimitError) { return { error: publicRateLimitMessage(rateLimitError) }; }
     logWarning("auth.login.failed");
     return { error: "Неверный email или пароль" };
   }
-  try { await clearRateLimit(db, "login", identifiers); }
+  try { await clearRateLimit("login", identifiers); }
   catch (error) { return { error: publicRateLimitMessage(error) }; }
   logEvent("auth.login.succeeded");
   redirect("/student");
@@ -56,8 +56,8 @@ export async function register(_: State, formData: FormData): Promise<State> {
   const db = await supabase();
   let identifiers: string[];
   try {
-    identifiers = await assertRateLimit(db, "register", parsed.data.email);
-    await recordRateLimitAttempt(db, "register", identifiers);
+    identifiers = await assertRateLimit("register", parsed.data.email);
+    await recordRateLimitAttempt("register", identifiers);
   } catch (error) { logWarning("auth.register.rate_limited"); return { error: publicRateLimitMessage(error) }; }
   const { data, error } = await db.auth.signUp({
     email: parsed.data.email,
@@ -83,8 +83,8 @@ export async function requestPasswordReset(_: State, formData: FormData): Promis
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Проверьте email" };
   const db = await supabase();
   try {
-    const identifiers = await assertRateLimit(db, "recover", parsed.data.email);
-    await recordRateLimitAttempt(db, "recover", identifiers);
+    const identifiers = await assertRateLimit("recover", parsed.data.email);
+    await recordRateLimitAttempt("recover", identifiers);
   } catch (error) { logWarning("auth.recover.rate_limited"); return { error: publicRateLimitMessage(error) }; }
   await db.auth.resetPasswordForEmail(parsed.data.email, { redirectTo: `${appUrl()}/reset-password` });
   logEvent("auth.recover.requested");

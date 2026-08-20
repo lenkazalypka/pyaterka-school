@@ -1,8 +1,7 @@
 import { headers } from "next/headers";
-import type { supabase } from "./supabase";
+import { supabaseAdmin } from "./supabase-admin";
 
 export type RateLimitAction = "login" | "register" | "recover" | "parent_invite";
-type DatabaseClient = Awaited<ReturnType<typeof supabase>>;
 
 export class RateLimitExceededError extends Error {
   constructor(readonly retryAfterSeconds: number) {
@@ -37,8 +36,9 @@ async function requestIdentifiers(action: RateLimitAction, email?: string) {
   return Promise.all(raw.slice(0, 2).map((value) => sha256(`${action}.${value}.${pepper}`)));
 }
 
-export async function assertRateLimit(db: DatabaseClient, action: RateLimitAction, email?: string) {
+export async function assertRateLimit(action: RateLimitAction, email?: string) {
   const identifiers = await requestIdentifiers(action, email);
+  const db = supabaseAdmin();
   const { data, error } = await db.rpc("check_auth_rate_limit", {
     p_action: action,
     p_identifier_hashes: identifiers,
@@ -49,10 +49,10 @@ export async function assertRateLimit(db: DatabaseClient, action: RateLimitActio
 }
 
 export async function recordRateLimitAttempt(
-  db: DatabaseClient,
   action: RateLimitAction,
   identifiers: string[],
 ) {
+  const db = supabaseAdmin();
   const { error } = await db.rpc("record_auth_rate_limit_attempt", {
     p_action: action,
     p_identifier_hashes: identifiers,
@@ -60,7 +60,8 @@ export async function recordRateLimitAttempt(
   if (error) throw new RateLimitUnavailableError();
 }
 
-export async function clearRateLimit(db: DatabaseClient, action: RateLimitAction, identifiers: string[]) {
+export async function clearRateLimit(action: RateLimitAction, identifiers: string[]) {
+  const db = supabaseAdmin();
   const { error } = await db.rpc("clear_auth_rate_limit", {
     p_action: action,
     p_identifier_hashes: identifiers,

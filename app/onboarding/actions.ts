@@ -83,7 +83,7 @@ export async function saveSubjectsStep(_: OnboardingActionState, formData: FormD
   try { payload = JSON.parse(String(formData.get("subjects") ?? "[]")); } catch { return { error: "Не удалось прочитать предметы" }; }
   const parsed = z.array(subjectDraftSchema).min(1, "Выберите хотя бы один предмет").max(4, "До выбора тарифа можно выбрать до четырёх предметов").safeParse(payload);
   if (!parsed.success) return resultError(parsed.error);
-  const { db, user, onboarding } = await requireIncompleteOnboarding();
+  const { db, onboarding } = await requireIncompleteOnboarding();
   if (!onboarding?.exam_type_id) return { error: "Сначала выберите направление" };
   const ids = parsed.data.map((item) => item.subjectId);
   if (new Set(ids).size !== ids.length) return { error: "Предмет не должен повторяться" };
@@ -99,19 +99,16 @@ export async function saveSubjectsStep(_: OnboardingActionState, formData: FormD
       return { error: "Баллы выходят за диапазон выбранного экзамена" };
     }
   }
-  const { error: deleteError } = await db.from("student_subjects").delete().eq("student_id", user.id);
-  if (deleteError) return { error: "Не удалось обновить предметы" };
-  const { error } = await db.from("student_subjects").insert(parsed.data.map((item) => {
+  const { error } = await db.rpc("replace_onboarding_subjects", { p_subjects: parsed.data.map((item) => {
     const rule = rules?.find((candidate) => candidate.subject_id === item.subjectId) ?? defaultRule;
     return {
-      student_id: user.id, subject_id: item.subjectId, current_grade: item.currentGrade,
-      self_reported_last_mock_score: item.lastMockScore, confidence: item.confidence,
-      target_score: item.targetScore, weak_topics: item.weakTopics, student_comment: item.comment || null,
-      score_unit: rule?.unit ?? "test_score", status: "active",
+      subject_id: item.subjectId, current_grade: item.currentGrade,
+      last_mock_score: item.lastMockScore, confidence: item.confidence,
+      target_score: item.targetScore, weak_topics: item.weakTopics, comment: item.comment,
+      score_unit: rule?.unit ?? "test_score",
     };
-  }));
+  }) });
   if (error) return { error: "Не удалось сохранить предметы" };
-  await advance(4);
   redirect("/onboarding/goals");
 }
 
@@ -130,17 +127,14 @@ export async function saveGoalsStep(_: OnboardingActionState, formData: FormData
   if (!parsed.success) return resultError(parsed.error);
   const priorities = parsed.data.map((goal) => goal.priority);
   if (new Set(priorities).size !== priorities.length) return { error: "Приоритеты целей не должны повторяться" };
-  const { db, user } = await requireIncompleteOnboarding();
-  const { error: deleteError } = await db.from("admission_goals").delete().eq("student_id", user.id).eq("status", "active");
-  if (deleteError) return { error: "Не удалось обновить цели" };
-  const { error } = await db.from("admission_goals").insert(parsed.data.map((goal) => ({
-    student_id: user.id, institution_type: goal.institutionType, institution_name: goal.institutionName,
+  const { db } = await requireIncompleteOnboarding();
+  const { error } = await db.rpc("replace_onboarding_goals", { p_goals: parsed.data.map((goal) => ({
+    institution_type: goal.institutionType, institution_name: goal.institutionName,
     direction_name: goal.directionName, city: goal.city, funding_type: goal.fundingType, priority: goal.priority,
     minimum_passing_score: goal.minimumPassingScore, desired_score: goal.desiredScore,
-    needs_admission_help: goal.needsAdmissionHelp, needs_career_guidance: goal.needsCareerGuidance, status: "active",
-  })));
+    needs_admission_help: goal.needsAdmissionHelp, needs_career_guidance: goal.needsCareerGuidance,
+  })) });
   if (error) return { error: "Не удалось сохранить цели" };
-  await advance(5);
   redirect("/onboarding/schedule");
 }
 
@@ -157,21 +151,19 @@ export async function saveScheduleStep(_: OnboardingActionState, formData: FormD
   try { payload = JSON.parse(String(formData.get("schedule") ?? "{}")); } catch { return { error: "Не удалось прочитать расписание" }; }
   const parsed = scheduleSchema.safeParse(payload);
   if (!parsed.success || parsed.data.slots.some((slot) => slot.startsAt >= slot.endsAt)) return { error: "Проверьте режим и временные интервалы" };
-  const { db, user } = await requireIncompleteOnboarding();
-  const { error: preferencesError } = await db.from("student_study_preferences").upsert({
-    student_id: user.id, weekly_hours: parsed.data.weeklyHours, preferred_format: parsed.data.preferredFormat,
-    strict_control: parsed.data.strictControl, daily_reminders: parsed.data.dailyReminders,
-    other_courses: parsed.data.otherCourses || null, current_weekly_load: parsed.data.currentWeeklyLoad,
-    desired_start_date: parsed.data.desiredStartDate, timezone: parsed.data.timezone, updated_at: new Date().toISOString(),
+  const { db } = await requireIncompleteOnboarding();
+  const { error } = await db.rpc("replace_onboarding_schedule", {
+    p_preferences: {
+      weekly_hours: parsed.data.weeklyHours, preferred_format: parsed.data.preferredFormat,
+      strict_control: parsed.data.strictControl, daily_reminders: parsed.data.dailyReminders,
+      other_courses: parsed.data.otherCourses || null, current_weekly_load: parsed.data.currentWeeklyLoad,
+      desired_start_date: parsed.data.desiredStartDate, timezone: parsed.data.timezone,
+    },
+    p_slots: parsed.data.slots.map((slot) => ({
+      weekday: slot.weekday, starts_at: slot.startsAt, ends_at: slot.endsAt, timezone: parsed.data.timezone,
+    })),
   });
-  if (preferencesError) return { error: "Не удалось сохранить режим" };
-  const { error: deleteError } = await db.from("preferred_schedule_slots").delete().eq("student_id", user.id);
-  if (deleteError) return { error: "Не удалось обновить интервалы" };
-  const { error } = await db.from("preferred_schedule_slots").insert(parsed.data.slots.map((slot) => ({
-    student_id: user.id, weekday: slot.weekday, starts_at: slot.startsAt, ends_at: slot.endsAt, timezone: parsed.data.timezone,
-  })));
   if (error) return { error: "Не удалось сохранить интервалы" };
-  await advance(6);
   redirect("/onboarding/parent");
 }
 
