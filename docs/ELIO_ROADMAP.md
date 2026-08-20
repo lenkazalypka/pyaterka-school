@@ -18,10 +18,10 @@
 
 ## 2. AI mentor
 
-- read-only mentor с server context;
-- streaming, history, rate/cost limits;
+- [x] feature-flagged read-only mentor с минимизированным server context;
+- [x] streaming, private history, hourly request limit и 90-дневный retention;
 - source-aware explanations и evals;
-- explicit consent/retention controls.
+- output moderation, cost budget/telemetry и explicit consent/export controls.
 
 ## 3. Family and staff
 

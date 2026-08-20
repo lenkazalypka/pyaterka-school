@@ -111,6 +111,9 @@ select test.set_user('11111111-1111-4111-8111-111111111111');
 select test.assert_count('student no foreign profile','select count(*) from public.student_profiles where user_id=''22222222-2222-4222-8222-222222222222''',0);
 select test.assert_count('student own profile','select count(*) from public.student_profiles where user_id=''11111111-1111-4111-8111-111111111111''',1);
 select test.assert_count('student own subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
+select test.assert_count('first AI mentor request is allowed','select count(*) from public.claim_ai_mentor_request() where allowed',1);
+do $$ begin for i in 1..19 loop perform * from public.claim_ai_mentor_request(); end loop; end $$;
+select test.assert_count('twenty-first AI mentor request is blocked','select count(*) from public.claim_ai_mentor_request() where not allowed and retry_after_seconds > 0',1);
 select test.assert_count('student published program','select count(*) from public.programs where id=''cccccccc-0000-4000-8000-000000000001''',1);
 select test.assert_count('student no draft module','select count(*) from public.modules where id=''eeeeeeee-0000-4000-8000-000000000002''',0);
 select test.assert_count('student no draft topic','select count(*) from public.topics where id=''ffffffff-0000-4000-8000-000000000002''',0);
@@ -340,6 +343,14 @@ insert into public.diagnostics(user_id,subject,questions,answers,result,weak_top
 values('11111111-1111-4111-8111-111111111111','math','["q1"]','[1]','{"correct":0,"total":1}',array['Алгебра'],array['Разобрать алгебру']);
 insert into public.ai_conversations(user_id,context,messages)
 values('11111111-1111-4111-8111-111111111111','{"goal":"ЕГЭ"}','[{"role":"user","content":"private"}]');
+
+set role authenticated;
+select test.set_user('11111111-1111-4111-8111-111111111111');
+insert into public.ai_conversations(id,user_id,context,messages)
+values('94000000-0000-4000-8000-000000000001','11111111-1111-4111-8111-111111111111','{}','[]');
+delete from public.ai_conversations where id='94000000-0000-4000-8000-000000000001';
+select test.assert_count('student can delete own AI conversation','select count(*) from public.ai_conversations where id=''94000000-0000-4000-8000-000000000001''',0);
+reset role;
 
 set role authenticated;
 select test.set_user('33333333-3333-4333-8333-333333333333');

@@ -21,7 +21,7 @@
 - Начало ДЗ: `startHomework` → Zod UUID → `start_student_homework` → idempotent in-progress submission + `homework_started` activity.
 - Отправка ДЗ: `submitHomework` → Zod → `submit_student_homework` → submission + activity.
 - Диагностика: ответы переносятся до регистрации без browser storage, сервер заново вычисляет результат по каноническому question set, auth trigger сохраняет snapshot.
-- AI history: `saveAiConversation` валидирует bounded messages и сохраняет вместе с server-only context.
+- AI history: `/api/ai/mentor` валидирует bounded messages и сохраняет server-only context только после завершения provider stream; история истекает через 90 дней и удаляется учеником.
 - Weekly goal: `saveWeeklyGoal` вычисляет начало недели в timezone профиля и upsert-ит цель; activity trigger отмечает `reached_at` только по реально набранным points.
 
 RPC повторно проверяют роль и scoped access. Прямая authenticated-вставка в `assignment_submissions` отозвана, поэтому frontend guard нельзя использовать как обход server boundary.

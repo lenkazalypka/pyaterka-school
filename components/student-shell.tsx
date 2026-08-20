@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, Home, LockKeyhole, LogOut } from "lucide-react";
+import { BookOpen, CalendarDays, Home, LockKeyhole, LogOut, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Brand } from "@/components/brand";
 import type { StudentIdentity } from "@/types/domain";
@@ -7,6 +7,7 @@ const navigation = [
   { key: "home", label: "Сегодня", href: "/student", icon: Home },
   { key: "schedule", label: "Расписание", href: "/student/schedule", icon: CalendarDays },
   { key: "lessons", label: "Уроки", href: "/student/lessons", icon: BookOpen },
+  { key: "ai", label: "AI-наставник", href: "/student/ai", icon: Sparkles },
 ] as const;
 
 const future = ["Пробники", "Прогресс", "Сообщения"];

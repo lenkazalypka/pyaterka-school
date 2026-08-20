@@ -17,6 +17,8 @@ AI mentor помогает ученику понять тему и выбрат�
 - произвольные database mutations;
 - скрытые ответы question bank до выполнения задания.
 
-AI не должен создавать ощущение готовой функции только из-за наличия `ai_conversations`. До публичного запуска необходимы provider boundary, streaming UI, rate/cost limits, moderation, retention policy и evals.
+Beta foundation включает server-only provider boundary, accessible streaming UI, Postgres rate limit, 90-дневное прекращение доступа и удаление истории учеником. Feature flag выключен по умолчанию; нет fake fallback и модель не получает write tools.
+
+До публичного запуска остаются обязательными: юридическое согласование обработки данных, стратегия output moderation для streaming, педагогические и privacy evals, cost telemetry/budget alerts и зелёный production RLS CI.
 
 Техническая схема: [AI_ARCHITECTURE.md](AI_ARCHITECTURE.md).
