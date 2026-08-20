@@ -43,6 +43,13 @@ test("student mutations use validated server actions and scoped RPC", () => {
   assert.match(learning, /from\("student_activity"\)/);
 });
 
+test("student lesson catalog reads published accessible lessons independently of schedule events", () => {
+  assert.match(learning, /from\("lessons"\)\.select\("id,subject_id,teacher_id,title,description,status,objectives"\)/);
+  assert.match(learning, /not\("published_at", "is", null\)/);
+  assert.match(learning, /const lessonIds = lessonRows\.map/);
+  assert.doesNotMatch(learning, /const lessonIds = unique\(eventRows/);
+});
+
 test("parent projection excludes private answers and AI dialogs", () => {
   assert.match(parent, /from\("parent_progress_view"\)/);
   assert.match(migration, /Parent access to submissions is deliberately removed/);

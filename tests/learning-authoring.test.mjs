@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [migration, rlsTest, actions, page, studentLearning, studentLesson] = await Promise.all([
+const [migration, curatorAuthorization, rlsTest, actions, page, studentLearning, studentLesson] = await Promise.all([
   read("../supabase/migrations/202608120002_learning_authoring.sql"),
+  read("../supabase/migrations/202608210004_curator_authoring_authorization.sql"),
   read("../supabase/tests/rls.sql"),
   read("../app/staff/learning/actions.ts"),
   read("../app/staff/learning/page.tsx"),
@@ -46,4 +47,17 @@ test("students see assigned prompts but never question answers", () => {
   assert.match(studentLesson, /Домашнее задание/);
   assert.match(studentLesson, /question\.prompt/);
   assert.match(migration, /create table public\.question_answers/);
+});
+
+test("curator visibility does not grant academic authoring", () => {
+  assert.match(curatorAuthorization, /function private\.can_manage_group/);
+  const helperStart = curatorAuthorization.indexOf("function private.can_manage_group");
+  const helperEnd = curatorAuthorization.indexOf("$$;", helperStart);
+  assert.doesNotMatch(curatorAuthorization.slice(helperStart, helperEnd), /curator_can_view_group/);
+  assert.match(curatorAuthorization, /assignment_questions_scoped_read[\s\S]{0,500}private\.curator_can_view_group/);
+  assert.match(rlsTest, /assigned curator reads assigned lesson/);
+  assert.match(rlsTest, /assigned curator cannot create lesson/);
+  assert.match(rlsTest, /assigned curator cannot update lesson/);
+  assert.match(rlsTest, /assigned curator cannot delete lesson/);
+  assert.doesNotMatch(actions, /requireAnyRole\(\["teacher", "curator"\]\)/);
 });

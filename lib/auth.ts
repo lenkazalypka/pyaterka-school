@@ -2,6 +2,14 @@ import { redirect } from "next/navigation";
 import type { RoleCode } from "@/types/domain";
 import { configured, supabase } from "./supabase";
 
+export function roleHomePath(roles: RoleCode[]) {
+  if (roles.includes("admin")) return "/admin";
+  if (roles.includes("teacher")) return "/teacher";
+  if (roles.includes("curator")) return "/curator";
+  if (roles.includes("parent")) return "/parent";
+  return "/student";
+}
+
 export async function getAuthenticatedContext() {
   if (!configured()) redirect("/login");
   const db = await supabase();

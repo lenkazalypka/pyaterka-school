@@ -170,9 +170,17 @@ values('94000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-000000000
 select test.assert_count('teacher cannot create lesson in foreign group','select count(*) from public.lessons where id=''94000000-0000-4000-8000-000000000001''',0);
 
 select test.set_user('55555555-5555-4555-8555-555555555555');
+select test.assert_count('assigned curator reads assigned lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('assigned curator reads assigned assignment','select count(*) from public.assignments where id=''92000000-0000-4000-8000-000000000001''',1);
+\set ON_ERROR_STOP off
 insert into public.lessons(id,group_id,subject_id,teacher_id,title,status)
 values('93000000-0000-4000-8000-000000000001','dddddddd-0000-4000-8000-00000000000a','bbbbbbbb-0000-4000-8000-000000000001','44444444-4444-4444-8444-444444444444','Урок куратора','scheduled');
-select test.assert_count('assigned curator creates lesson','select count(*) from public.lessons where id=''93000000-0000-4000-8000-000000000001''',1);
+update public.lessons set title='Куратор изменил урок' where id='90000000-0000-4000-8000-000000000001';
+delete from public.lessons where id='90000000-0000-4000-8000-000000000001';
+\set ON_ERROR_STOP on
+select test.assert_count('assigned curator cannot create lesson','select count(*) from public.lessons where id=''93000000-0000-4000-8000-000000000001''',0);
+select test.assert_count('assigned curator cannot update lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001'' and title=''Авторский урок''',1);
+select test.assert_count('assigned curator cannot delete lesson','select count(*) from public.lessons where id=''90000000-0000-4000-8000-000000000001''',1);
 
 select test.set_user('66666666-6666-4666-8666-666666666666');
 \set ON_ERROR_STOP off
@@ -312,7 +320,8 @@ select test.assert_count('foreign student cannot read weekly goal','select count
 select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
 select public.submit_student_homework('92000000-0000-4000-8000-000000000001','{"text":"Чужой ответ"}'::jsonb);
 \set ON_ERROR_STOP on
-select test.assert_count('foreign student cannot create progress','select count(*) from public.student_progress where user_id=''22222222-2222-4222-8222-222222222222'' and course_id=''cccccccc-0000-4000-8000-000000000001''',0);
+select test.assert_count('foreign lesson action leaves legitimate progress unchanged','select count(*) from public.student_progress where user_id=''22222222-2222-4222-8222-222222222222'' and course_id=''cccccccc-0000-4000-8000-000000000001'' and completed_lessons=0 and last_activity_at is null',1);
+select test.assert_count('foreign homework action creates no submission','select count(*) from public.assignment_submissions where student_id=''22222222-2222-4222-8222-222222222222'' and assignment_id=''92000000-0000-4000-8000-000000000001''',0);
 reset role;
 
 insert into public.diagnostics(user_id,subject,questions,answers,result,weak_topics,recommendations)

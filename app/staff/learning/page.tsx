@@ -13,7 +13,7 @@ export default async function StaffLearningPage({ searchParams }: { searchParams
   const [data, params] = await Promise.all([getStaffLearningEditorData(), searchParams]);
   const topicMap = new Map(data.topics.map((topic) => [topic.id, topic.title]));
   return <main className="min-h-screen px-6 py-10"><div className="mx-auto max-w-6xl">
-    <header className="flex flex-wrap items-center justify-between gap-4"><Brand /><nav className="flex gap-4 text-sm font-bold"><Link href={data.identity.roles.includes("teacher") ? "/teacher" : "/curator"}>В кабинет</Link><Link href="/">На сайт</Link></nav></header>
+    <header className="flex flex-wrap items-center justify-between gap-4"><Brand /><nav className="flex gap-4 text-sm font-bold"><Link href={data.identity.roles.includes("teacher") ? "/teacher" : "/admin"}>В кабинет</Link><Link href="/">На сайт</Link></nav></header>
     <div className="mt-12"><p className="student-eyebrow">Учебное ядро</p><h1 className="mt-3 text-4xl font-extrabold tracking-[-.04em]">Уроки, ДЗ и банк заданий</h1><p className="mt-3 max-w-3xl text-[var(--text-muted)]">Редактор показывает только назначенные группы и предметы. Опубликованные данные сразу появляются у учеников с активной подпиской.</p></div>
     {params.status && <p role="status" className="mt-6 rounded-xl bg-[var(--brand-soft)] p-4 text-[var(--brand-burgundy)]">{params.status}</p>}
     {params.error && <p role="alert" className="mt-6 rounded-xl bg-[var(--surface-rose)] p-4 text-[var(--brand-primary)]">{params.error}</p>}

@@ -11,6 +11,12 @@ Mobile-first edtech-платформа подготовки к ЕГЭ/ОГЭ. Р
 - [Аудит foundation и карта legacy](docs/ELIO_FOUNDATION_AUDIT.md)
 - [Журнал решений](docs/ELIO_DECISIONS.md)
 - [Матрица visual QA](docs/ELIO_VISUAL_QA.md)
+- [Независимый аудит](docs/ELIO_AUDIT.md)
+- [Архитектура ELIO](docs/ELIO_ARCHITECTURE.md)
+- [База данных ELIO](docs/ELIO_DATABASE.md)
+- [Продуктовый контракт AI](docs/ELIO_AI.md)
+- [AI architecture](docs/AI_ARCHITECTURE.md)
+- [Roadmap ELIO](docs/ELIO_ROADMAP.md)
 
 Полное проектирование до кода: [docs/PRODUCT_ARCHITECTURE.md](docs/PRODUCT_ARCHITECTURE.md).
 

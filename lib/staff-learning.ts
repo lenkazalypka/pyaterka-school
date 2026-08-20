@@ -2,7 +2,7 @@ import { requireAnyRole } from "@/lib/auth";
 import { logError } from "@/lib/observability";
 
 export async function getStaffLearningEditorData() {
-  const context = await requireAnyRole(["teacher", "curator"]);
+  const context = await requireAnyRole(["teacher"]);
   const { db } = context;
   const [groupsResult, teachersResult, programsResult, subjectsResult, modulesResult, topicsResult, questionsResult, answersResult, lessonsResult] = await Promise.all([
     db.from("groups").select("id,name,timezone,program_id").eq("status", "active").order("name"),

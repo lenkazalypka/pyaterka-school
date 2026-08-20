@@ -112,24 +112,21 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
   const currentWeekDay = (todayDate.getUTCDay() + 6) % 7;
   todayDate.setUTCDate(todayDate.getUTCDate() - currentWeekDay);
   const weekStartsOn = todayDate.toISOString().slice(0, 10);
-  const [eventRows, taskRows, subjectResult, subscriptionResult, progressResult, activityResult, weeklyGoalResult] = await Promise.all([
+  const [eventRows, taskRows, lessonResult, subjectResult, subscriptionResult, progressResult, activityResult, weeklyGoalResult] = await Promise.all([
     loadEvents(db),
     loadTasks(db),
+    db.from("lessons").select("id,subject_id,teacher_id,title,description,status,objectives").not("published_at", "is", null).neq("status", "cancelled").order("order_index", { ascending: true, nullsFirst: false }).limit(200),
     db.from("student_subjects").select("id,subject_id,target_score,score_unit").eq("student_id", user.id).eq("status", "active"),
     db.from("subscriptions").select("id,status,price_minor,plans(name,currency)").eq("student_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     db.from("student_progress").select("course_id,subject_id,progress_percent,completed_lessons,current_stage,last_activity_at").eq("user_id", user.id),
     db.from("student_activity").select("activity_date,activity_type,points").eq("user_id", user.id).order("activity_date", { ascending: false }).limit(90),
     db.from("student_weekly_goals").select("target_points").eq("user_id", user.id).eq("week_starts_on", weekStartsOn).maybeSingle(),
   ]);
-  const stateError = progressResult.error ?? activityResult.error ?? weeklyGoalResult.error;
+  const stateError = lessonResult.error ?? progressResult.error ?? activityResult.error ?? weeklyGoalResult.error;
   if (stateError) { logError("rls.query.failed", stateError, { resource: "student_learning_state" }); throw new Error("Не удалось загрузить учебный прогресс"); }
 
-  const lessonIds = unique(eventRows.map((event) => event.lesson_id).filter((id): id is string => Boolean(id)));
-  const { data: lessonData, error: lessonError } = lessonIds.length
-    ? await db.from("lessons").select("id,subject_id,teacher_id,title,description,status,objectives").in("id", lessonIds)
-    : { data: [] as LessonRow[], error: null };
-  if (lessonError) { logError("rls.query.failed", lessonError, { resource: "lessons" }); throw new Error("Не удалось загрузить уроки"); }
-  const lessonRows = (lessonData ?? []) as LessonRow[];
+  const lessonRows = (lessonResult.data ?? []) as LessonRow[];
+  const lessonIds = lessonRows.map((lesson) => lesson.id);
   const { data: lessonProgressRows, error: lessonProgressError } = lessonIds.length
     ? await db.from("student_lesson_progress").select("lesson_id,status").in("lesson_id", lessonIds).eq("user_id", user.id)
     : { data: [] as { lesson_id: string; status: "started" | "completed" }[], error: null };
