@@ -1,6 +1,16 @@
-# Пятёрка
+# elio
 
-Запускаемый MVP онлайн-школы ЕГЭ/ОГЭ. Реализованы Supabase SSR auth и scoped RLS, полный онбординг, публичный сайт, кабинет ученика, staff-редактор уроков/материалов/ДЗ, банк заданий, Resend, Sentry и оплата pending-подписки через ЮKassa.
+Mobile-first edtech-платформа подготовки к ЕГЭ/ОГЭ. Реализованы Supabase SSR auth и scoped RLS, полный онбординг, публичный сайт, кабинет ученика, staff-редактор уроков/материалов/ДЗ, банк заданий, Resend, Sentry и оплата pending-подписки через ЮKassa.
+
+Актуальный продуктовый и визуальный контракт:
+
+- [Манифест elio](docs/ELIO_MANIFESTO.md)
+- [Продуктовые принципы](docs/ELIO_PRODUCT_PRINCIPLES.md)
+- [Дизайн-система](docs/ELIO_DESIGN_SYSTEM.md)
+- [Mobile-паттерны](docs/ELIO_MOBILE_PATTERNS.md)
+- [Аудит foundation и карта legacy](docs/ELIO_FOUNDATION_AUDIT.md)
+- [Журнал решений](docs/ELIO_DECISIONS.md)
+- [Матрица visual QA](docs/ELIO_VISUAL_QA.md)
 
 Полное проектирование до кода: [docs/PRODUCT_ARCHITECTURE.md](docs/PRODUCT_ARCHITECTURE.md).
 
@@ -12,7 +22,7 @@
 - [Roadmap](docs/IMPLEMENTATION_ROADMAP.md)
 - [Визуальное направление](docs/DESIGN_DIRECTION.md)
 - [Visual reverse engineering Сотки](docs/SOTKA_VISUAL_REVERSE_ENGINEERING.md)
-- [Дизайн-система «Пятёрки»](docs/PYATERKA_DESIGN_SYSTEM.md)
+- [Legacy-дизайн-система «Пятёрки»](docs/PYATERKA_DESIGN_SYSTEM.md)
 
 ## Запуск
 
@@ -36,7 +46,7 @@ Sites/Cloudflare runtime удалён из основной ветки, пото
 
 ## Тестовые аккаунты
 
-Seed предназначен только для local. Пароль всех аккаунтов: `Demo123!`.
+Seed предназначен только для local. Пароль всех аккаунтов: `Demo123!`. Адреса `@pyaterka.local` сохранены как совместимые тестовые идентификаторы и не являются актуальным брендом.
 
 | Роль | Email |
 |---|---|
@@ -53,7 +63,7 @@ Seed предназначен только для local. Пароль всех �
 npm run check
 ```
 
-Команда выполняет TypeScript strict check, ESLint, тесты маршрутов/RLS/RPC и production build.
+Команда выполняет TypeScript strict check, ESLint, source/unit tests маршрутов, RLS/RPC contracts и production build.
 
 Если Supabase CLI недоступен, source-тесты и build всё равно выполняются, но интеграционную проверку RLS нужно отдельно запустить в локальном Supabase перед production.
 
@@ -84,7 +94,7 @@ npm run check
 4. До реальных учеников прогоните интеграционные RLS-тесты всех пяти ролей.
 5. Service-role никогда не отправляется в браузер.
 
-Перед первым деплоем пройдите [production checklist](docs/PRODUCTION_CHECKLIST.md). Приложение дополняет лимиты Supabase постоянным 5-attempt/TTL rate limit, отправляет ошибки и ключевые события в Sentry и не использует in-memory заглушки.
+Перед первым деплоем пройдите [production checklist](docs/PRODUCTION_CHECKLIST.md). Приложение дополняет лимиты Supabase постоянным 5-attempt/TTL rate limit; mutation RPC доступны только server-side service role, ошибки и ключевые события отправляются в Sentry, in-memory заглушки не используются.
 
 ## Оплата
 
