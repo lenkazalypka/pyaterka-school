@@ -51,9 +51,9 @@ export class ResendEmailService implements EmailService {
       body: JSON.stringify({
         from: this.from,
         to: [message.email],
-        subject: "Приглашение в «Пятёрку»",
-        html: `<p>Ученик пригласил вас в кабинет родителя онлайн-школы «Пятёрка».</p><p><a href="${safeUrl}">Принять приглашение</a></p><p>Ссылка действует 72 часа.</p>`,
-        text: `Ученик пригласил вас в кабинет родителя онлайн-школы «Пятёрка». Принять приглашение: ${message.inviteUrl}. Ссылка действует 72 часа.`,
+        subject: "Приглашение в elio",
+        html: `<p>Ученик пригласил вас в кабинет родителя образовательной платформы elio.</p><p><a href="${safeUrl}">Принять приглашение</a></p><p>Ссылка действует 72 часа.</p>`,
+        text: `Ученик пригласил вас в кабинет родителя образовательной платформы elio. Принять приглашение: ${message.inviteUrl}. Ссылка действует 72 часа.`,
         tags: [{ name: "message_type", value: "parent_invitation" }],
       }),
     });

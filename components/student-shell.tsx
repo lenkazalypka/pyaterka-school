@@ -33,7 +33,7 @@ export function StudentShell({
         <span aria-hidden="true">{identity.name.slice(0, 1).toUpperCase()}</span>
         <div><b>{identity.name}</b><small>{identity.grade} класс</small></div>
       </div>
-      <Link className="student-exit" href="/"><LogOut aria-hidden="true" />На сайт школы</Link>
+      <Link className="student-exit" href="/"><LogOut aria-hidden="true" />На сайт elio</Link>
     </aside>
     <main className="student-content">
       <header className="student-mobile-header"><Brand /><span>{identity.grade} класс</span></header>

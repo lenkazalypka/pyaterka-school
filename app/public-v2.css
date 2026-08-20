@@ -241,7 +241,6 @@ body {
 .auth-aside { background: var(--surface-rose); }
 .auth-aside::before { width: 620px; height: 620px; right: -230px; top: -250px; border: 0; background: var(--brand-primary); opacity: 1; }
 .auth-aside::after { width: 330px; height: 330px; left: -150px; bottom: -150px; border: 0; background: var(--accent-lilac); opacity: .58; }
-.auth-aside-five { right: 3%; top: 3%; color: rgba(113,31,53,.11); font-size: 420px; }
 .auth-aside-card { max-width: 470px; border: 1px solid rgba(113,31,53,.1); border-radius: 38px 38px 10px 38px; padding: 43px; background: rgba(255,255,255,.96); color: var(--text-primary); box-shadow: 0 28px 70px rgba(91,31,48,.16); backdrop-filter: blur(12px); }
 .auth-aside-card > svg { background: var(--brand-primary); color: #fff; }
 .auth-aside-card > p { color: rgba(17,22,44,.68); }

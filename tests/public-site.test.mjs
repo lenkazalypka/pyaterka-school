@@ -3,19 +3,24 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [home, publicSections, plans, legal, css, publicCss, reverseEngineering, scrollReveal, countUp, faqAccordion] = await Promise.all([
-  read("../app/page.tsx"), read("../components/public/sections.tsx"), read("../lib/public-site.ts"),
-  read("../app/legal/[document]/page.tsx"), read("../app/globals.css"), read("../app/public-v2.css"),
+const [home, publicSections, plans, legal, globals, moduleCss, reverseEngineering, notFound, layout] = await Promise.all([
+  read("../app/page.tsx"),
+  read("../components/public/sections.tsx"),
+  read("../lib/public-site.ts"),
+  read("../app/legal/[document]/page.tsx"),
+  read("../app/globals.css"),
+  read("../components/public/redesign-v1.module.css"),
   read("../docs/LMS_REVERSE_ENGINEERING.md"),
-  read("../components/public/scroll-reveal.tsx"), read("../components/public/count-up.tsx"),
-  read("../components/public/faq-accordion.tsx"),
+  read("../app/not-found.tsx"),
+  read("../app/layout.tsx"),
 ]);
 
-test("public home contains the complete conversion path without demo dashboard", () => {
+test("public home contains a complete product-first conversion path", () => {
   const source = `${home}\n${publicSections}`;
-  for (const section of ["directions", "subjects", "format", "plans", "faq"]) assert.match(source, new RegExp(`id=\"${section}\"`));
-  assert.doesNotMatch(source, /lib\/demo|<Dashboard/);
+  for (const section of ["platform", "rhythm", "subjects", "plans", "faq"]) assert.match(source, new RegExp(`id=\"${section}\"`));
+  assert.doesNotMatch(source, /lib\/demo|<Dashboard|ScoreComparison/);
   assert.match(source, /href="\/start/);
+  assert.match(layout, /id="main-content"/);
 });
 
 test("public plans prefer Supabase and never invent a fallback price", () => {
@@ -29,28 +34,26 @@ test("legal drafts are explicit and do not invent company details", () => {
   assert.doesNotMatch(legal, /ОГРН|ИНН|номер лицензии/i);
 });
 
-test("design system includes mobile and reduced-motion rules", () => {
-  const styles = `${css}\n${publicCss}`;
+test("design system includes mobile, focus and reduced-motion rules", () => {
+  const styles = `${globals}\n${moduleCss}`;
   assert.match(styles, /@media \(max-width: 374px\)/);
   assert.match(styles, /@media \(max-width: 767px\)/);
   assert.match(styles, /prefers-reduced-motion/);
+  assert.match(globals, /:focus-visible/);
+  assert.match(globals, /\.skip-link/);
 });
 
-test("public motion is dependency-free, progressive and reduced-motion safe", () => {
-  assert.match(publicCss, /--ease-out:\s*cubic-bezier\(\.16,\s*1,\s*\.3,\s*1\)/);
-  assert.match(publicCss, /--dur-micro:\s*250ms/);
-  assert.match(publicCss, /--dur-reveal:\s*500ms/);
-  assert.match(scrollReveal, /IntersectionObserver/);
-  assert.match(scrollReveal, /threshold:\s*0\.15/);
-  assert.match(countUp, /requestAnimationFrame/);
-  assert.match(countUp, /<span aria-hidden="true">\{value\}<\/span>/);
-  assert.match(countUp, /setValue\(Math\.round\(to \* eased\)\)/);
-  assert.match(countUp, /prefersReducedMotion[\s\S]*setValue\(to\)/);
-  assert.match(publicSections, /<CountUp to=\{8\}/);
-  assert.match(publicSections, /<CountUp to=\{2\}/);
-  assert.match(faqAccordion, /aria-expanded=\{isOpen\}/);
-  assert.match(publicCss, /grid-template-rows:\s*0fr/);
-  assert.match(publicCss, /\[data-reveal\], \[data-reveal\]\.is-visible \{ opacity: 1; transform: none; transition: none; \}/);
+test("public motion is dependency-free and state-motivated", () => {
+  assert.doesNotMatch(`${home}\n${publicSections}`, /framer-motion|gsap|IntersectionObserver|requestAnimationFrame/);
+  assert.match(moduleCss, /transition: transform 180ms ease/);
+  assert.match(moduleCss, /prefers-reduced-motion/);
+  assert.match(publicSections, /<details key=\{question\}>/);
+});
+
+test("navigation has a helpful branded fallback", () => {
+  assert.match(layout, /href="#main-content"/);
+  assert.match(notFound, /404 · маршрут не найден/);
+  assert.match(notFound, /href="\/login"/);
 });
 
 test("reverse engineering covers all requested sources and decisions", () => {

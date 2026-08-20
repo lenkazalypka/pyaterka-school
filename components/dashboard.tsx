@@ -41,7 +41,7 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
 
       {paymentError && <section className="student-notice" role="alert"><AlertCircle aria-hidden="true" /><div><b>Оплата не началась</b><p>{paymentError}</p></div></section>}
       {data.subscription?.status === "pending" && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Подписка ждёт оплаты</b><p>Стоимость: {money(data.subscription.priceMinor, data.subscription.currency)}. После подтверждённого webhook доступ активируется автоматически.</p><form action={beginSubscriptionPayment} className="mt-4"><input type="hidden" name="subscriptionId" value={data.subscription.id} /><input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} /><button className="button button-primary">Перейти к безопасной оплате</button></form></div></section>}
-      {data.subscription && !["active", "pending"].includes(data.subscription.status) && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям не активирован</b><p>Статус подписки: {subscriptionLabels[data.subscription.status] ?? data.subscription.status}. Обратитесь в поддержку школы.</p></div></section>}
+      {data.subscription && !["active", "pending"].includes(data.subscription.status) && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям не активирован</b><p>Статус подписки: {subscriptionLabels[data.subscription.status] ?? data.subscription.status}. Обратитесь в поддержку elio.</p></div></section>}
 
       <section className="student-dashboard-grid" aria-label="Главное на сегодня">
         <article className="student-next-card">

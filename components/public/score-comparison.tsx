@@ -62,7 +62,7 @@ export function ScoreComparison() {
           <div>
             <div className={styles.priceArea}>
               <article className={`${styles.priceCard} ${styles.priceCardPrimary}`}>
-                <span className={styles.cardLabel}>Пятёрка</span>
+                <span className={styles.cardLabel}>elio</span>
                 <div className={styles.price}>Тариф подбираем <small>по предметам</small></div>
                 <p className={styles.cardCopy}>Не подставляем выдуманную цену до утверждения тарифной сетки.</p>
                 <ul className={styles.checks}>
@@ -87,7 +87,7 @@ export function ScoreComparison() {
                 <div className={styles.savings}>
                   <div className={styles.savingsText}>
                     <h3>Сравниваем честно</h3>
-                    <p>Экономию покажем только после того, как утвердим реальные тарифы Пятёрки. Наша задача — продавать сильным продуктом, а не нарисованной математикой.</p>
+                    <p>Экономию покажем только после того, как утвердим реальные тарифы elio. Наша задача — продавать сильным продуктом, а не нарисованной математикой.</p>
                   </div>
                   <strong>{goal}+</strong>
                 </div>

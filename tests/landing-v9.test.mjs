@@ -3,102 +3,59 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [header, hero, sections, testimonials, teachers, subjectIcons, illustrations, countUp, globals, cssBase, cssComponents, cssResponsive, plans] = await Promise.all([
+const [header, hero, sections, moduleCss, globals, plans, subjectIcons] = await Promise.all([
   read("../components/public/header.tsx"),
   read("../components/public/hero.tsx"),
   read("../components/public/sections.tsx"),
-  read("../components/public/testimonials.tsx"),
-  read("../components/public/teacher-card.tsx"),
-  read("../components/icons/subject-icons.tsx"),
-  read("../components/illustrations/brand-graphics.tsx"),
-  read("../components/public/count-up.tsx"),
+  read("../components/public/redesign-v1.module.css"),
   read("../app/globals.css"),
-  read("../app/public-v9-base.css"),
-  read("../app/public-v9-components.css"),
-  read("../app/public-v9-responsive.css"),
   read("../lib/public-site.ts"),
+  read("../components/icons/subject-icons.tsx"),
 ]);
 
-test("v9 landing sends paid-intent CTAs through the plan builder", () => {
-  for (const anchor of ["#format", "#subjects", "#comparison", "#plans", "#faq"]) {
-    assert.ok(header.includes(anchor), anchor);
-  }
-  for (const id of ["directions", "format", "subjects", "comparison", "plans", "faq"]) {
-    assert.match(sections, new RegExp(`id=\\"${id}\\"`));
-  }
-  assert.match(sections, /href="\/start/);
+test("elio landing keeps the conversion path inside the plan builder", () => {
+  for (const anchor of ["#platform", "#rhythm", "#subjects", "#plans"]) assert.ok(header.includes(anchor), anchor);
+  for (const id of ["platform", "rhythm", "subjects", "plans", "faq"]) assert.match(sections, new RegExp(`id=\\"${id}\\"`));
+  assert.match(`${hero}\n${sections}`, /href="\/start/);
   assert.doesNotMatch(`${header}\n${hero}\n${sections}`, /href="\/register(?:\?|\")/);
-  assert.equal(sections.match(/<FaqAccordion items=\{faq\}/g)?.length, 1);
-  assert.doesNotMatch(header, /<Link className="v9-brand-link"[^>]*>\s*<Brand/);
 });
 
-test("redesign hero uses the five as the primary brand object", () => {
-  assert.match(hero, /className=\{styles\.five\}/);
-  assert.match(hero, />5<\/div>/);
-  assert.match(hero, /Профильная математика/);
-  assert.match(hero, /ДЗ проверено/);
-  assert.match(hero, /Твоя динамика/);
-  assert.doesNotMatch(hero, /NEXT_PUBLIC_HERO_VIDEO_URL/);
-  assert.doesNotMatch(hero, /hero-study-illustration-v3\.webp/);
+test("hero makes the product workspace the primary visual object", () => {
+  assert.match(hero, /styles\.productPreview/);
+  assert.match(hero, /Пример интерфейса ученика elio/);
+  assert.match(hero, /Главное на сегодня/);
+  assert.match(hero, /по вашему времени/);
+  assert.doesNotMatch(hero, /className=\{styles\.five\}|>5<\/div>|student\.(png|webp)/i);
+  assert.doesNotMatch(hero, /\+9 баллов|Твоя динамика|ДЗ проверено/);
 });
 
-test("marketing proof stays factual", () => {
+test("marketing claims remain factual and pricing stays server-owned", () => {
   const source = `${hero}\n${sections}`;
-  assert.doesNotMatch(source, /370K|370К|1197|каждый 3-й|80\+ баллов|средний балл учеников/i);
-  assert.match(testimonials, /approvedTestimonials: Testimonial\[\] = \[\]/);
-  assert.match(testimonials, /export function TestimonialCard/);
-  assert.match(testimonials, /Не публикуем отзывы заранее/);
-  assert.doesNotMatch(testimonials, /return null/);
-  assert.match(teachers, /export function TeacherProfileCard/);
-  assert.match(teachers, /name: string/);
-  assert.match(teachers, /experience: string/);
-  assert.match(teachers, /result: string/);
-  assert.doesNotMatch(sections, /initials: "ЭК"/);
-  assert.match(sections, /illustration: "expert"/);
-  assert.match(teachers, /<TeacherIllustration/);
-  assert.match(sections, /Первые ученики уже готовятся/);
-  assert.match(sections, /не подменяем первые результаты красивой статистикой/);
+  assert.doesNotMatch(source, /370K|370К|1197|каждый 3-й|80\+ баллов|средний балл учеников|гарантируем поступление/i);
+  assert.match(source, /Результат экзамена и поступление нельзя гарантировать|не обещает результат/);
   assert.match(plans, /priceLabel: null/);
   assert.match(plans, /`от \$\{value\} ₽\/мес`/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
-  assert.match(sections, /Ориентир появится до открытия оплаты/);
+  assert.match(sections, /Цена появится до оплаты/);
 });
 
-test("v9 interactions remain dependency-free and responsive", () => {
-  const css = `${cssBase}\n${cssComponents}\n${cssResponsive}`;
-  for (const selector of [".v9-hero", ".v9-teacher-rail", ".v9-comparison-wrap", ".v9-plan-details", ".v9-testimonial-rail"]) {
-    assert.ok(css.includes(selector), selector);
-  }
-  assert.match(css, /scroll-snap-type:\s*x mandatory/);
-  assert.match(css, /@media \(max-width: 1023px\)/);
-  assert.match(css, /@media \(max-width: 767px\)/);
-  assert.match(css, /@media \(max-width: 374px\)/);
-  assert.match(css, /prefers-reduced-motion/);
-  assert.doesNotMatch(css, /var\(--text-main\)/);
+test("elio visual system is responsive and anti-generic", () => {
+  assert.match(globals, /--brand-ink:\s*#183129/);
+  assert.match(globals, /--brand-primary:\s*#b34d33/i);
+  assert.match(moduleCss, /grid-template-columns:\s*1\.25fr \.75fr/);
+  assert.match(moduleCss, /\.planFeatured \{ grid-row: span 2/);
+  assert.match(moduleCss, /@media \(max-width: 1023px\)/);
+  assert.match(moduleCss, /@media \(max-width: 767px\)/);
+  assert.match(moduleCss, /@media \(max-width: 374px\)/);
+  assert.match(moduleCss, /prefers-reduced-motion/);
+  assert.doesNotMatch(moduleCss, /purple|#7c3aed|#4f46e5/i);
 });
 
-test("brand graphics remain available for the rest of the public system", () => {
-  assert.equal(sections.match(/<MetricGraphic kind=/g)?.length, 4);
+test("subject diagnostics and native disclosure remain accessible", () => {
   assert.match(sections, /<SubjectIcon subject=\{slug\}/);
-  assert.match(illustrations, /export function HeroMarkerNote/);
-  assert.match(illustrations, /export function VerificationSeal/);
   assert.match(subjectIcons, /subject === "math"/);
   assert.match(subjectIcons, /subject === "english"/);
-  assert.doesNotMatch(`${subjectIcons}\n${illustrations}`, /#[0-9a-f]{3,8}/i);
-});
-
-test("numeric voice, explanations and reduced-motion behavior are explicit", () => {
-  assert.match(globals, /--accent-ink:/);
-  assert.match(globals, /--font-accent:/);
-  assert.match(countUp, /requestAnimationFrame\(tick\)/);
-  assert.match(sections, /schoolDetail:/);
-  assert.match(sections, /v9-feature-explain/);
-  assert.match(cssResponsive, /prefers-reduced-motion/);
-});
-
-test("mobile hero art and edition label use separate layout rows", () => {
-  assert.match(cssResponsive, /\.v9-hero-media \{ display: grid; min-height: 0;/);
-  assert.match(cssResponsive, /\.v9-hero-image-wrap \{ position: relative; inset: auto;/);
-  assert.match(cssResponsive, /\.v9-hero-edition \{ position: relative; inset: auto;/);
-  assert.doesNotMatch(hero, /v9-score-card|v9-hero-reaction/);
+  assert.match(sections, /<details key=\{question\}>/);
+  assert.match(sections, /<summary>/);
+  assert.match(header, /aria-label="Мобильная навигация"/);
 });

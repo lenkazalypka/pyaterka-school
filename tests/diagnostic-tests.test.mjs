@@ -37,8 +37,8 @@ test("all eight diagnostics have editable, valid question data", () => {
 test("subject cards expose start and diagnostic actions", () => {
   assert.match(sections, /diagnosticSubjectSlugs\.map/);
   assert.match(sections, /href=\{`\/test\/\$\{subject\.slug\}`\}/);
-  assert.match(sections, />Пройти тест /);
-  assert.match(sections, />Начать /);
+  assert.match(sections, />Диагностика<\/Link>/);
+  assert.match(sections, /aria-label=\{`Выбрать \$\{subject\.name\}`\}/);
 });
 
 test("diagnostic flow gives progress, feedback and a personalized result", () => {
@@ -49,7 +49,7 @@ test("diagnostic flow gives progress, feedback and a personalized result", () =>
   assert.match(widget, /weakTopics/);
   assert.match(widget, /Что делать дальше/);
   assert.match(widget, /Собрать план подготовки/);
-  assert.match(widget, /localStorage\.setItem\("pyaterka:diagnostic"/);
+  assert.match(widget, /localStorage\.setItem\("elio:diagnostic"/);
   assert.doesNotMatch(widget, /localStorage\.setItem\([^)]*(email|phone)/s);
 });
 

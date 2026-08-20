@@ -84,7 +84,7 @@ export function StartWizard({ plans, initialExam, initialGrade, initialSubject, 
 
       <section className="start-stage" aria-live="polite">
         {step === 1 && <>
-          <div className="start-stage-heading"><span>Шаг 1 из 4</span><h1>Какой экзамен<br /><em>ты сдаёшь?</em></h1><p>Выбор нужен, чтобы дальше показать подходящий маршрут. Его можно будет уточнить в кабинете.</p></div>
+          <div className="start-stage-heading"><span>Шаг 1 из 4</span><h1>Какой экзамен<br /> <em>ты сдаёшь?</em></h1><p>Выбор нужен, чтобы дальше показать подходящий маршрут. Его можно будет уточнить в кабинете.</p></div>
           <div className="start-exam-grid">
             {(["ege", "oge"] as const).map((value) => <button className={exam === value ? "is-selected" : ""} type="button" aria-pressed={exam === value} onClick={() => chooseExam(value)} key={value}>
               <span>{value === "ege" ? "11" : "9"}</span><small>класс</small><strong>{value.toUpperCase()}</strong><p>{value === "ege" ? "Маршрут к баллам для поступления" : "Маршрут к уверенной итоговой оценке"}</p><i><Check aria-hidden="true" /></i>

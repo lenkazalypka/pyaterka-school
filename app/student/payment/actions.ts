@@ -27,7 +27,7 @@ export async function beginSubscriptionPayment(formData: FormData) {
       amountMinor: payment.amount_minor,
       currency: payment.currency,
       returnUrl: `${appUrl()}/student/payment/return?payment_id=${payment.payment_id}`,
-      description: `Тариф «${payment.plan_name}» онлайн-школы «Пятёрка»`,
+      description: `Тариф «${payment.plan_name}» образовательной платформы elio`,
       customerEmail: user.email,
       metadata: { payment_id: payment.payment_id, subscription_id: parsed.data.subscriptionId },
     });

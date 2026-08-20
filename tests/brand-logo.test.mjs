@@ -10,17 +10,19 @@ const [brand, mark, icon, styles] = await Promise.all([
   read("../app/globals.css"),
 ]);
 
-test("the approved five-and-spark mark is used by the shared brand", () => {
+test("the elio route-and-point mark is used by the shared brand", () => {
   assert.match(brand, /<BrandMark className="brand-mark"/);
   assert.doesNotMatch(brand, /lucide-react|<Check/);
-  assert.match(mark, /brand-mark-five/);
-  assert.match(mark, /brand-mark-bar/);
-  assert.match(mark, /brand-mark-spark/);
-  assert.match(styles, /\.brand-inverse \.brand-mark-five/);
+  assert.match(brand, />elio<\/span>/);
+  assert.match(mark, /brand-mark-field/);
+  assert.match(mark, /brand-mark-route/);
+  assert.match(mark, /brand-mark-point/);
+  assert.match(styles, /\.brand-inverse \.brand-mark-route/);
 });
 
-test("favicon carries the same three-part mark", () => {
-  assert.match(icon, /#711f35/i);
-  assert.equal((icon.match(/#ff9a78/gi) ?? []).length, 2);
+test("favicon carries the same route-and-point language", () => {
+  assert.match(icon, /#183129/i);
+  assert.match(icon, /#e5c888/i);
+  assert.match(icon, /stroke="#fff"/i);
   assert.match(icon, /viewBox="0 0 64 64"/);
 });

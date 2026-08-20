@@ -36,7 +36,7 @@ export function DiagnosticTest({ subject }: Props) {
   useEffect(() => {
     if (!complete) return;
     try {
-      localStorage.setItem("pyaterka:diagnostic", JSON.stringify({
+      localStorage.setItem("elio:diagnostic", JSON.stringify({
         subject: subject.slug,
         score: correctCount,
         total: subject.questions.length,

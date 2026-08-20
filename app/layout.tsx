@@ -7,11 +7,10 @@ import "./public-v9-responsive.css";
 import "./diagnostic-test.css";
 
 export const metadata: Metadata = {
-  title: { default: "Пятёрка — подготовка к ЕГЭ и ОГЭ", template: "%s · Пятёрка" },
-  description: "Подготовка к ЕГЭ и ОГЭ без хаоса: живые занятия, практика, записи и понятный план до цели.",
-  other: { "codex-preview": "development" },
+  title: { default: "elio — подготовка к ЕГЭ и ОГЭ", template: "%s · elio" },
+  description: "Подготовка к ЕГЭ и ОГЭ с понятным планом, живыми занятиями и следующим шагом на каждый день.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ru"><body>{children}</body></html>;
+  return <html lang="ru"><body><a className="skip-link" href="#main-content">Перейти к содержанию</a><div id="main-content">{children}</div></body></html>;
 }
