@@ -305,10 +305,18 @@ reset role;
 
 set role authenticated;
 select test.set_user('11111111-1111-4111-8111-111111111111');
+select public.start_student_lesson('90000000-0000-4000-8000-000000000001');
+select public.start_student_lesson('90000000-0000-4000-8000-000000000001');
+select test.assert_count('lesson start is persisted once','select count(*) from public.student_lesson_progress where user_id=''11111111-1111-4111-8111-111111111111'' and lesson_id=''90000000-0000-4000-8000-000000000001'' and status=''started''',1);
+select test.assert_count('lesson start activity is idempotent','select count(*) from public.student_activity where user_id=''11111111-1111-4111-8111-111111111111'' and activity_type=''lesson_started'' and source_id=''90000000-0000-4000-8000-000000000001''',1);
 select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
 select test.assert_count('lesson completion creates course progress','select count(*) from public.student_progress where user_id=''11111111-1111-4111-8111-111111111111'' and course_id=''cccccccc-0000-4000-8000-000000000001'' and completed_lessons=1',1);
 insert into public.student_weekly_goals(user_id,week_starts_on,target_points) values('11111111-1111-4111-8111-111111111111',date_trunc('week',current_date)::date,10);
 select test.assert_count('student stores own weekly goal','select count(*) from public.student_weekly_goals where user_id=''11111111-1111-4111-8111-111111111111'' and target_points=10',1);
+select public.start_student_homework('92000000-0000-4000-8000-000000000001');
+select public.start_student_homework('92000000-0000-4000-8000-000000000001');
+select test.assert_count('homework start is persisted once','select count(*) from public.assignment_submissions where assignment_id=''92000000-0000-4000-8000-000000000001'' and student_id=''11111111-1111-4111-8111-111111111111'' and status=''in_progress''',1);
+select test.assert_count('homework start activity is idempotent','select count(*) from public.student_activity where user_id=''11111111-1111-4111-8111-111111111111'' and activity_type=''homework_started'' and source_id=''92000000-0000-4000-8000-000000000001''',1);
 select public.submit_student_homework('92000000-0000-4000-8000-000000000001','{"text":"Проверяемый ответ ученика"}'::jsonb);
 select test.assert_count('homework action persists own answer','select count(*) from public.assignment_submissions where assignment_id=''92000000-0000-4000-8000-000000000001'' and answer->>''text''=''Проверяемый ответ ученика''',1);
 reset role;
@@ -317,10 +325,14 @@ set role authenticated;
 select test.set_user('22222222-2222-4222-8222-222222222222');
 select test.assert_count('foreign student cannot read weekly goal','select count(*) from public.student_weekly_goals where user_id=''11111111-1111-4111-8111-111111111111''',0);
 \set ON_ERROR_STOP off
+select public.start_student_lesson('90000000-0000-4000-8000-000000000001');
+select public.start_student_homework('92000000-0000-4000-8000-000000000001');
 select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
 select public.submit_student_homework('92000000-0000-4000-8000-000000000001','{"text":"Чужой ответ"}'::jsonb);
 \set ON_ERROR_STOP on
 select test.assert_count('foreign lesson action leaves legitimate progress unchanged','select count(*) from public.student_progress where user_id=''22222222-2222-4222-8222-222222222222'' and course_id=''cccccccc-0000-4000-8000-000000000001'' and completed_lessons=0 and last_activity_at is null',1);
+select test.assert_count('foreign lesson start creates no lesson progress','select count(*) from public.student_lesson_progress where user_id=''22222222-2222-4222-8222-222222222222'' and lesson_id=''90000000-0000-4000-8000-000000000001''',0);
+select test.assert_count('foreign starts create no activity','select count(*) from public.student_activity where user_id=''22222222-2222-4222-8222-222222222222'' and source_id in (''90000000-0000-4000-8000-000000000001'',''92000000-0000-4000-8000-000000000001'') and activity_type in (''lesson_started'',''homework_started'')',0);
 select test.assert_count('foreign homework action creates no submission','select count(*) from public.assignment_submissions where student_id=''22222222-2222-4222-8222-222222222222'' and assignment_id=''92000000-0000-4000-8000-000000000001''',0);
 reset role;
 

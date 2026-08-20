@@ -16,7 +16,9 @@
 
 ## Мутации
 
+- Начало урока: `startLesson` → Zod UUID → `start_student_lesson` → idempotent progress + `lesson_started` activity.
 - Завершение урока: `completeLesson` → Zod UUID → `complete_student_lesson` → lesson/course progress + activity.
+- Начало ДЗ: `startHomework` → Zod UUID → `start_student_homework` → idempotent in-progress submission + `homework_started` activity.
 - Отправка ДЗ: `submitHomework` → Zod → `submit_student_homework` → submission + activity.
 - Диагностика: ответы переносятся до регистрации без browser storage, сервер заново вычисляет результат по каноническому question set, auth trigger сохраняет snapshot.
 - AI history: `saveAiConversation` валидирует bounded messages и сохраняет вместе с server-only context.
@@ -53,6 +55,6 @@ npm run types:supabase
 
 ## Проверка сценариев
 
-RLS suite проверяет own/foreign lesson completion, homework answer persistence, запрет parent-доступа к answers/diagnostics/AI и safe parent projection. Source tests проверяют наличие migrations, indexes, RLS, Server Actions и отсутствие `localStorage` persistence.
+RLS suite проверяет idempotent own/foreign lesson и homework starts, lesson completion, homework answer persistence, запрет parent-доступа к answers/diagnostics/AI и safe parent projection. Source tests проверяют наличие migrations, indexes, RLS, Server Actions и отсутствие `localStorage` persistence.
 
 Ограничение: публичный анонимный тест не может создать строку с `user_id` до появления пользователя. Его ответы живут только в состоянии открытой формы и сохраняются в Supabase транзакцией auth trigger при создании аккаунта; долговременного browser storage нет.

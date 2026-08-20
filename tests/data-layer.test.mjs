@@ -3,10 +3,13 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [migration, learning, actions, parent, diagnostic, seed] = await Promise.all([
+const [migration, startEventsMigration, learning, actions, learningActions, lessonPage, parent, diagnostic, seed] = await Promise.all([
   read("../supabase/migrations/202608210003_learning_data_layer.sql"),
+  read("../supabase/migrations/202608210005_learning_start_events.sql"),
   read("../lib/student-learning.ts"),
   read("../app/student/lessons/actions.ts"),
+  read("../components/student-learning-actions.tsx"),
+  read("../app/student/lessons/[lessonId]/page.tsx"),
   read("../lib/parent-learning.ts"),
   read("../components/diagnostic/diagnostic-test.tsx"),
   read("../supabase/seed.sql"),
@@ -41,6 +44,22 @@ test("student mutations use validated server actions and scoped RPC", () => {
   assert.match(migration, /private\.student_can_view_group/);
   assert.match(learning, /from\("student_progress"\)/);
   assert.match(learning, /from\("student_activity"\)/);
+});
+
+test("lesson and homework starts are persisted before completion", () => {
+  assert.match(startEventsMigration, /function public\.start_student_lesson/);
+  assert.match(startEventsMigration, /function public\.start_student_homework/);
+  assert.match(startEventsMigration, /private\.can_view_lesson/);
+  assert.match(startEventsMigration, /private\.student_can_view_group/);
+  assert.match(startEventsMigration, /'lesson_started'/);
+  assert.match(startEventsMigration, /'homework_started'/);
+  assert.match(startEventsMigration, /student_lesson_progress_record_start/);
+  assert.match(startEventsMigration, /assignment_submissions_record_start/);
+  assert.match(actions, /start_student_lesson/);
+  assert.match(actions, /start_student_homework/);
+  assert.match(learningActions, /StartLessonForm/);
+  assert.match(learningActions, /StartHomeworkForm/);
+  assert.match(lessonPage, /assignment\.submission \? <HomeworkSubmissionForm/);
 });
 
 test("student lesson catalog reads published accessible lessons independently of schedule events", () => {
