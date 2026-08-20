@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from "lucide-react";
 import type { DiagnosticSubject } from "@/lib/diagnostic-tests";
 
@@ -32,21 +32,6 @@ export function DiagnosticTest({ subject }: Props) {
     .filter((item, index) => answers[index] !== item.correctIndex)
     .map((item) => item.topic)
     .filter((topic, index, all) => all.indexOf(topic) === index), [answers, subject.questions]);
-
-  useEffect(() => {
-    if (!complete) return;
-    try {
-      localStorage.setItem("elio:diagnostic", JSON.stringify({
-        subject: subject.slug,
-        score: correctCount,
-        total: subject.questions.length,
-        weakTopics,
-        completedAt: new Date().toISOString(),
-      }));
-    } catch {
-      // Результат остаётся на экране, даже если браузер запрещает локальное хранилище.
-    }
-  }, [complete, correctCount, subject.questions.length, subject.slug, weakTopics]);
 
   if (!question || subject.questions.length === 0) {
     return (
@@ -89,9 +74,8 @@ export function DiagnosticTest({ subject }: Props) {
     const params = new URLSearchParams({
       subject: subject.name,
       diagnostic: subject.slug,
-      score: `${correctCount}/${subject.questions.length}`,
+      answers: answers.join("."),
     });
-    if (weakTopics.length) params.set("weak", weakTopics.join(", "));
     if (email.trim()) params.set("email", email.trim());
     if (phone.trim()) params.set("phone", phone.trim());
 

@@ -295,4 +295,37 @@ select test.assert_count('schedule draft rollback keeps prior preferences','sele
 select test.assert_count('schedule draft rollback keeps prior slot','select count(*) from public.preferred_schedule_slots where student_id=''11111111-1111-4111-8111-111111111111'' and starts_at=''17:00''::time and ends_at=''19:00''::time',1);
 reset role;
 
+set role authenticated;
+select test.set_user('11111111-1111-4111-8111-111111111111');
+select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
+select test.assert_count('lesson completion creates course progress','select count(*) from public.student_progress where user_id=''11111111-1111-4111-8111-111111111111'' and course_id=''cccccccc-0000-4000-8000-000000000001'' and completed_lessons=1',1);
+insert into public.student_weekly_goals(user_id,week_starts_on,target_points) values('11111111-1111-4111-8111-111111111111',date_trunc('week',current_date)::date,10);
+select test.assert_count('student stores own weekly goal','select count(*) from public.student_weekly_goals where user_id=''11111111-1111-4111-8111-111111111111'' and target_points=10',1);
+select public.submit_student_homework('92000000-0000-4000-8000-000000000001','{"text":"Проверяемый ответ ученика"}'::jsonb);
+select test.assert_count('homework action persists own answer','select count(*) from public.assignment_submissions where assignment_id=''92000000-0000-4000-8000-000000000001'' and answer->>''text''=''Проверяемый ответ ученика''',1);
+reset role;
+
+set role authenticated;
+select test.set_user('22222222-2222-4222-8222-222222222222');
+select test.assert_count('foreign student cannot read weekly goal','select count(*) from public.student_weekly_goals where user_id=''11111111-1111-4111-8111-111111111111''',0);
+\set ON_ERROR_STOP off
+select public.complete_student_lesson('90000000-0000-4000-8000-000000000001');
+select public.submit_student_homework('92000000-0000-4000-8000-000000000001','{"text":"Чужой ответ"}'::jsonb);
+\set ON_ERROR_STOP on
+select test.assert_count('foreign student cannot create progress','select count(*) from public.student_progress where user_id=''22222222-2222-4222-8222-222222222222'' and course_id=''cccccccc-0000-4000-8000-000000000001''',0);
+reset role;
+
+insert into public.diagnostics(user_id,subject,questions,answers,result,weak_topics,recommendations)
+values('11111111-1111-4111-8111-111111111111','math','["q1"]','[1]','{"correct":0,"total":1}',array['Алгебра'],array['Разобрать алгебру']);
+insert into public.ai_conversations(user_id,context,messages)
+values('11111111-1111-4111-8111-111111111111','{"goal":"ЕГЭ"}','[{"role":"user","content":"private"}]');
+
+set role authenticated;
+select test.set_user('33333333-3333-4333-8333-333333333333');
+select test.assert_count('parent cannot read homework answer','select count(*) from public.assignment_submissions where student_id=''11111111-1111-4111-8111-111111111111''',0);
+select test.assert_count('parent cannot read diagnostics','select count(*) from public.diagnostics where user_id=''11111111-1111-4111-8111-111111111111''',0);
+select test.assert_count('parent cannot read AI conversations','select count(*) from public.ai_conversations where user_id=''11111111-1111-4111-8111-111111111111''',0);
+select test.assert_count('confirmed parent sees safe progress view','select count(*) from public.parent_progress_view where student_id=''11111111-1111-4111-8111-111111111111''',1);
+reset role;
+
 select 'RLS integration suite passed';

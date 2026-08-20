@@ -76,6 +76,8 @@ npm run check
 - `/staff/learning` — scoped-редактор уроков, материалов, ДЗ и банка заданий для преподавателя/куратора;
 - `/api/materials/:id` и `/api/recordings/:id` — проверка сессии/RLS и временная signed URL либо безопасный HTTPS redirect.
 
+Persistent progress, homework submissions, diagnostics, activity/streak, AI context и privacy-safe parent projection описаны в [Supabase data layer](docs/SUPABASE_DATA_LAYER.md).
+
 Миграция `202608010002_student_learning_stage.sql` убирает role-only доступ teacher/curator, проверяет назначенную группу и активную подписку на предмет, скрывает host secret видеовстречи и добавляет RLS для приватных файлов.
 
 ## Онбординг

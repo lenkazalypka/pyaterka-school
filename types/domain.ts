@@ -10,6 +10,7 @@ export type StudentIdentity = {
 
 export type StudentSubjectSummary = {
   id: string;
+  subjectId: string;
   name: string;
   target: number;
   scoreUnit: "test_score" | "primary_score";
@@ -63,6 +64,7 @@ export type StudentAssignment = {
   dueAt: string;
   maxScore: number;
   questions: StudentQuestion[];
+  submission: null | { status: string; answer: string; score: number | null; checkedAt: string | null };
 };
 
 export type StudentLesson = {
@@ -77,6 +79,7 @@ export type StudentLesson = {
   materials: StudentMaterial[];
   recording: StudentRecording | null;
   assignments: StudentAssignment[];
+  progressStatus: "started" | "completed" | null;
 };
 
 export type StudentTask = {
@@ -96,4 +99,6 @@ export type StudentLearningData = {
   events: StudentEvent[];
   lessons: StudentLesson[];
   tasks: StudentTask[];
+  progress: { courseId: string; subjectId: string; percent: number; completedLessons: number; currentStage: string | null; lastActivityAt: string | null }[];
+  activity: { streakDays: number; weeklyPoints: number; weeklyGoalPoints: number | null; achievements: string[] };
 };

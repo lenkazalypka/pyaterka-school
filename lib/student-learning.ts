@@ -107,12 +107,22 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
   const generatedAt = new Date().toISOString();
   const context = await requireCompletedStudent();
   const { db, user } = context;
-  const [eventRows, taskRows, subjectResult, subscriptionResult] = await Promise.all([
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: context.timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(generatedAt));
+  const todayDate = new Date(`${today}T00:00:00Z`);
+  const currentWeekDay = (todayDate.getUTCDay() + 6) % 7;
+  todayDate.setUTCDate(todayDate.getUTCDate() - currentWeekDay);
+  const weekStartsOn = todayDate.toISOString().slice(0, 10);
+  const [eventRows, taskRows, subjectResult, subscriptionResult, progressResult, activityResult, weeklyGoalResult] = await Promise.all([
     loadEvents(db),
     loadTasks(db),
     db.from("student_subjects").select("id,subject_id,target_score,score_unit").eq("student_id", user.id).eq("status", "active"),
     db.from("subscriptions").select("id,status,price_minor,plans(name,currency)").eq("student_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    db.from("student_progress").select("course_id,subject_id,progress_percent,completed_lessons,current_stage,last_activity_at").eq("user_id", user.id),
+    db.from("student_activity").select("activity_date,activity_type,points").eq("user_id", user.id).order("activity_date", { ascending: false }).limit(90),
+    db.from("student_weekly_goals").select("target_points").eq("user_id", user.id).eq("week_starts_on", weekStartsOn).maybeSingle(),
   ]);
+  const stateError = progressResult.error ?? activityResult.error ?? weeklyGoalResult.error;
+  if (stateError) { logError("rls.query.failed", stateError, { resource: "student_learning_state" }); throw new Error("Не удалось загрузить учебный прогресс"); }
 
   const lessonIds = unique(eventRows.map((event) => event.lesson_id).filter((id): id is string => Boolean(id)));
   const { data: lessonData, error: lessonError } = lessonIds.length
@@ -120,6 +130,10 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     : { data: [] as LessonRow[], error: null };
   if (lessonError) { logError("rls.query.failed", lessonError, { resource: "lessons" }); throw new Error("Не удалось загрузить уроки"); }
   const lessonRows = (lessonData ?? []) as LessonRow[];
+  const { data: lessonProgressRows, error: lessonProgressError } = lessonIds.length
+    ? await db.from("student_lesson_progress").select("lesson_id,status").in("lesson_id", lessonIds).eq("user_id", user.id)
+    : { data: [] as { lesson_id: string; status: "started" | "completed" }[], error: null };
+  if (lessonProgressError) { logError("rls.query.failed", lessonProgressError, { resource: "student_lesson_progress" }); throw new Error("Не удалось загрузить прогресс уроков"); }
 
   const subjectIds = unique([
     ...(subjectResult.data ?? []).map((row) => row.subject_id),
@@ -141,6 +155,10 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     : { data: [] as { id: string; lesson_id: string; title: string; description: string | null; due_at: string; max_score: number }[], error: null };
   if (assignmentsError) { logError("rls.query.failed", assignmentsError, { resource: "lesson_assignments" }); throw new Error("Не удалось загрузить домашние задания"); }
   const assignmentIdsForLessons = (assignmentRows ?? []).map((assignment) => assignment.id);
+  const { data: submissionRows, error: submissionsError } = assignmentIdsForLessons.length
+    ? await db.from("assignment_submissions").select("assignment_id,status,answer,score,reviewed_at").in("assignment_id", assignmentIdsForLessons).eq("student_id", user.id)
+    : { data: [] as { assignment_id: string; status: string; answer: unknown; score: number | null; reviewed_at: string | null }[], error: null };
+  if (submissionsError) { logError("rls.query.failed", submissionsError, { resource: "assignment_submissions" }); throw new Error("Не удалось загрузить ответы на задания"); }
   const { data: assignmentQuestionRows, error: assignmentQuestionsError } = assignmentIdsForLessons.length
     ? await db.from("assignment_questions").select("assignment_id,question_id,position").in("assignment_id", assignmentIdsForLessons).order("position")
     : { data: [] as { assignment_id: string; question_id: string; position: number }[], error: null };
@@ -216,6 +234,7 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
 
   const topicNameMap = new Map((questionTopics ?? []).map((topic) => [topic.id, topic.title]));
   const questionMap = new Map((questionRows ?? []).map((question) => [question.id, question]));
+  const submissionMap = new Map((submissionRows ?? []).map((submission) => [submission.assignment_id, submission]));
   const assignmentsByLesson = new Map<string, StudentAssignment[]>();
   for (const assignment of assignmentRows ?? []) {
     const questions = (assignmentQuestionRows ?? [])
@@ -235,10 +254,19 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
       dueAt: assignment.due_at,
       maxScore: Number(assignment.max_score),
       questions,
+      submission: submissionMap.has(assignment.id) ? {
+        status: submissionMap.get(assignment.id)?.status ?? "not_started",
+        answer: typeof (submissionMap.get(assignment.id)?.answer as { text?: unknown } | null)?.text === "string"
+          ? String((submissionMap.get(assignment.id)?.answer as { text: string }).text)
+          : "",
+        score: submissionMap.get(assignment.id)?.score === null || submissionMap.get(assignment.id)?.score === undefined ? null : Number(submissionMap.get(assignment.id)?.score),
+        checkedAt: submissionMap.get(assignment.id)?.reviewed_at ?? null,
+      } : null,
     };
     assignmentsByLesson.set(assignment.lesson_id, [...(assignmentsByLesson.get(assignment.lesson_id) ?? []), item]);
   }
 
+  const lessonProgressMap = new Map((lessonProgressRows ?? []).map((progress) => [progress.lesson_id, progress.status]));
   const lessons: StudentLesson[] = lessonRows
     .map((lesson) => ({
       id: lesson.id,
@@ -252,6 +280,7 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
       materials: materialsByLesson.get(lesson.id) ?? [],
       recording: recordingByLesson.get(lesson.id) ?? null,
       assignments: assignmentsByLesson.get(lesson.id) ?? [],
+      progressStatus: lessonProgressMap.get(lesson.id) ?? null,
     }))
     .sort((left, right) => {
       const leftDate = eventByLesson.get(left.id)?.starts_at ?? "";
@@ -262,11 +291,28 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
   const subjectNameMap = subjectMap;
   const subjects = (subjectResult.data ?? []).map((row) => ({
     id: row.id,
+    subjectId: row.subject_id,
     name: subjectNameMap.get(row.subject_id) ?? "Предмет",
     target: row.target_score,
     scoreUnit: row.score_unit as "test_score" | "primary_score",
   }));
   const subscription = subscriptionResult.data;
+  const activityDates = new Set((activityResult.data ?? []).map((row) => row.activity_date));
+  const localDate = (offsetDays: number) => {
+    const date = new Date(Date.now() + offsetDays * 86400000);
+    return new Intl.DateTimeFormat("en-CA", { timeZone: context.timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  };
+  let streakOffset = activityDates.has(localDate(0)) ? 0 : -1;
+  let streakDays = 0;
+  while (activityDates.has(localDate(streakOffset))) { streakDays += 1; streakOffset -= 1; }
+  const weeklyDates = new Set(Array.from({ length: currentWeekDay + 1 }, (_, index) => localDate(-index)));
+  const weeklyPoints = (activityResult.data ?? []).reduce((total, row) => total + (weeklyDates.has(row.activity_date) ? Number(row.points) : 0), 0);
+  const activityTypes = new Set((activityResult.data ?? []).map((row) => row.activity_type));
+  const achievements = [
+    activityTypes.has("diagnostic_completed") ? "Диагностика пройдена" : null,
+    activityTypes.has("lesson_completed") ? "Первый урок пройден" : null,
+    activityTypes.has("homework_submitted") ? "Первое задание отправлено" : null,
+  ].filter((achievement): achievement is string => Boolean(achievement));
 
   return {
     generatedAt,
@@ -284,6 +330,11 @@ export async function getStudentLearningData(): Promise<StudentLearningData> {
     events,
     lessons,
     tasks: taskRows,
+    progress: (progressResult.data ?? []).map((progress) => ({
+      courseId: progress.course_id, subjectId: progress.subject_id, percent: Number(progress.progress_percent),
+      completedLessons: progress.completed_lessons, currentStage: progress.current_stage, lastActivityAt: progress.last_activity_at,
+    })),
+    activity: { streakDays, weeklyPoints, weeklyGoalPoints: weeklyGoalResult.data?.target_points ?? null, achievements },
   };
 }
 

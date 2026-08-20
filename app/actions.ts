@@ -6,6 +6,7 @@ import { appUrl } from "@/lib/app-url";
 import { logEvent, logWarning } from "@/lib/observability";
 import { assertRateLimit, clearRateLimit, publicRateLimitMessage, recordRateLimitAttempt } from "@/lib/rate-limit";
 import { configured, supabase } from "@/lib/supabase";
+import { diagnosticSubjects, evaluateDiagnostic, parseDiagnosticAnswers } from "@/lib/diagnostic-tests";
 
 export type State = { error: string | null; success?: string | null };
 
@@ -42,17 +43,22 @@ export async function register(_: State, formData: FormData): Promise<State> {
     consent: z.literal("on"),
     phone: z.string().trim().max(30).regex(/^[+\d()\s-]*$/).optional(),
     diagnostic: z.enum(["math", "russian", "social", "history", "informatics", "biology", "chemistry", "english"]).optional(),
-    weak: z.string().trim().max(400).optional(),
-    diagnosticScore: z.string().trim().max(20).regex(/^\d{1,2}\/\d{1,2}$/).optional(),
+    diagnosticAnswers: z.string().trim().max(80).optional(),
   }).safeParse({
     email: formData.get("email"), password: formData.get("password"),
     name: formData.get("name"), consent: formData.get("consent"),
     phone: String(formData.get("phone") ?? "") || undefined,
     diagnostic: String(formData.get("diagnostic") ?? "") || undefined,
-    weak: String(formData.get("weak") ?? "") || undefined,
-    diagnosticScore: String(formData.get("diagnosticScore") ?? "") || undefined,
+    diagnosticAnswers: String(formData.get("diagnosticAnswers") ?? "") || undefined,
   });
   if (!parsed.success) return { error: "Проверьте поля и согласие" };
+  const diagnosticAnswers = parsed.data.diagnostic
+    ? parseDiagnosticAnswers(parsed.data.diagnosticAnswers, diagnosticSubjects[parsed.data.diagnostic].questions.length)
+    : null;
+  const diagnosticResult = parsed.data.diagnostic && diagnosticAnswers
+    ? evaluateDiagnostic(parsed.data.diagnostic, diagnosticAnswers)
+    : null;
+  if (parsed.data.diagnostic && !diagnosticResult) return { error: "Диагностика повреждена. Пройдите тест ещё раз" };
   const db = await supabase();
   let identifiers: string[];
   try {
@@ -68,8 +74,7 @@ export async function register(_: State, formData: FormData): Promise<State> {
       consent_version: "2026-07-31",
       ...(parsed.data.phone ? { phone: parsed.data.phone } : {}),
       ...(parsed.data.diagnostic ? { diagnostic_subject: parsed.data.diagnostic } : {}),
-      ...(parsed.data.weak ? { diagnostic_weak_topics: parsed.data.weak.split(",").map((topic) => topic.trim()).filter(Boolean).slice(0, 8) } : {}),
-      ...(parsed.data.diagnosticScore ? { diagnostic_score: parsed.data.diagnosticScore } : {}),
+      ...(diagnosticResult ? { diagnostic_result: diagnosticResult } : {}),
     } },
   });
   if (error) { logWarning("auth.register.failed"); return { error: "Не удалось создать аккаунт" }; }

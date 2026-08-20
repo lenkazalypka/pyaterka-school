@@ -2,6 +2,7 @@ import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock3, 
 import Link from "next/link";
 import { StudentEventCard, eventTime, isEventToday } from "@/components/student-event-card";
 import { StudentShell } from "@/components/student-shell";
+import { StudentWeeklyGoal } from "@/components/student-weekly-goal";
 import { beginSubscriptionPayment } from "@/app/student/payment/actions";
 import type { StudentLearningData } from "@/types/domain";
 
@@ -36,12 +37,14 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
     <div className="student-page student-dashboard">
       <header className="student-page-heading">
         <div><span className="student-eyebrow">Сегодня · <span className="capitalize">{date}</span></span><h1>Здравствуйте, {identity.name}</h1><p>Сначала — ближайшее действие. Остальная статистика не мешает учиться.</p></div>
-        {data.subscription && <div className={`student-subscription student-subscription-${data.subscription.status}`}><small>{data.subscription.planName}</small><b>{subscriptionLabels[data.subscription.status] ?? data.subscription.status}</b></div>}
+        <div className="flex flex-wrap justify-end gap-2">{data.activity.streakDays > 0 && <div className="student-subscription"><small>Ритм</small><b>{data.activity.streakDays} дн. подряд · {data.activity.weeklyPoints} б. за неделю</b></div>}{data.subscription && <div className={`student-subscription student-subscription-${data.subscription.status}`}><small>{data.subscription.planName}</small><b>{subscriptionLabels[data.subscription.status] ?? data.subscription.status}</b></div>}</div>
       </header>
 
       {paymentError && <section className="student-notice" role="alert"><AlertCircle aria-hidden="true" /><div><b>Оплата не началась</b><p>{paymentError}</p></div></section>}
       {data.subscription?.status === "pending" && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Подписка ждёт оплаты</b><p>Стоимость: {money(data.subscription.priceMinor, data.subscription.currency)}. После подтверждённого webhook доступ активируется автоматически.</p><form action={beginSubscriptionPayment} className="mt-4"><input type="hidden" name="subscriptionId" value={data.subscription.id} /><input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} /><button className="button button-primary">Перейти к безопасной оплате</button></form></div></section>}
       {data.subscription && !["active", "pending"].includes(data.subscription.status) && <section className="student-notice" role="status"><AlertCircle aria-hidden="true" /><div><b>Доступ к занятиям не активирован</b><p>Статус подписки: {subscriptionLabels[data.subscription.status] ?? data.subscription.status}. Обратитесь в поддержку elio.</p></div></section>}
+      <StudentWeeklyGoal points={data.activity.weeklyPoints} target={data.activity.weeklyGoalPoints} />
+      {data.activity.achievements.length > 0 && <p className="student-achievements" aria-label="Достигнутые этапы">{data.activity.achievements.join(" · ")}</p>}
 
       <section className="student-dashboard-grid" aria-label="Главное на сегодня">
         <article className="student-next-card">
@@ -62,7 +65,7 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
 
       <section className="student-section">
         <div className="student-section-heading"><div><span className="student-eyebrow">Ваши цели</span><h2>Предметы</h2></div></div>
-        {data.subjects.length ? <div className="student-subject-grid">{data.subjects.map((subject) => <article key={subject.id}><small>{subject.scoreUnit === "primary_score" ? "Первичный балл" : "Тестовый балл"}</small><h3>{subject.name}</h3><div><b>{subject.target}</b><span>цель</span></div><p>Фактический прогресс появится после проверенных работ и пробников.</p></article>)}</div> : <div className="student-empty student-empty-wide"><BookOpen aria-hidden="true" /><b>Предметы пока не назначены</b><p>Выбранные и оплаченные предметы появятся после завершения онбординга и активации подписки.</p></div>}
+        {data.subjects.length ? <div className="student-subject-grid">{data.subjects.map((subject) => { const progress = data.progress.find((item) => item.subjectId === subject.subjectId); return <article key={subject.id}><small>{subject.scoreUnit === "primary_score" ? "Первичный балл" : "Тестовый балл"}</small><h3>{subject.name}</h3><div><b>{subject.target}</b><span>цель</span></div>{progress ? <><p>{progress.completedLessons} уроков пройдено · {progress.percent}% курса</p>{progress.currentStage && <p>Следующий шаг: {progress.currentStage}</p>}</> : <p>Прогресс начнёт считаться после назначения активного курса.</p>}</article>; })}</div> : <div className="student-empty student-empty-wide"><BookOpen aria-hidden="true" /><b>Предметы пока не назначены</b><p>Выбранные и оплаченные предметы появятся после завершения онбординга и активации подписки.</p></div>}
       </section>
     </div>
   </StudentShell>;

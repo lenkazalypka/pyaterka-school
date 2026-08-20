@@ -49,8 +49,8 @@ test("diagnostic flow gives progress, feedback and a personalized result", () =>
   assert.match(widget, /weakTopics/);
   assert.match(widget, /Что делать дальше/);
   assert.match(widget, /Собрать план подготовки/);
-  assert.match(widget, /localStorage\.setItem\("elio:diagnostic"/);
-  assert.doesNotMatch(widget, /localStorage\.setItem\([^)]*(email|phone)/s);
+  assert.doesNotMatch(widget, /localStorage|sessionStorage/);
+  assert.match(widget, /answers\.join\("\."\)/);
 });
 
 test("contacts are requested only after completion and passed to registration", () => {
@@ -61,9 +61,9 @@ test("contacts are requested only after completion and passed to registration", 
   assert.match(widget, /params\.set\("email"/);
   assert.match(widget, /params\.set\("phone"/);
   assert.match(authForm, /name="diagnostic" type="hidden"/);
-  assert.match(authForm, /name="weak" type="hidden"/);
-  assert.match(actions, /diagnostic_subject/);
-  assert.match(actions, /diagnostic_weak_topics/);
+  assert.match(authForm, /name="diagnosticAnswers" type="hidden"/);
+  assert.match(actions, /evaluateDiagnostic/);
+  assert.match(actions, /diagnostic_result/);
 });
 
 test("diagnostic routes have static params plus loading and error states", () => {

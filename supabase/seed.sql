@@ -96,8 +96,8 @@ update public.subscriptions
 set status='active',starts_at=now()-interval '1 day',ends_at=now()+interval '9 months',updated_at=now()
 where onboarding_completion_key='77777777-7777-4777-8777-777777777777';
 
-insert into public.programs(id,subject_id,title,status)
-select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',s.id,'Демо: ЕГЭ по русскому языку','published'
+insert into public.programs(id,subject_id,title,description,level,duration_minutes,icon,status)
+select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',s.id,'Демо: ЕГЭ по русскому языку','Безопасный локальный курс для проверки учебных сценариев.','ЕГЭ',5400,'book-open','published'
 from public.subjects s join public.exam_types e on e.id=s.exam_type_id
 where e.code='ege'and s.code='russian'
 on conflict(id)do update set subject_id=excluded.subject_id,title=excluded.title,status='published',updated_at=now();
@@ -125,15 +125,15 @@ insert into public.parent_student_links(parent_id,student_id,relation,status,con
 values('22222222-2222-4222-8222-222222222222','11111111-1111-4111-8111-111111111111','Мама','confirmed',now())
 on conflict(parent_id,student_id)do update set relation=excluded.relation,status='confirmed',confirmed_at=coalesce(public.parent_student_links.confirmed_at,now()),updated_at=now();
 
-insert into public.lessons(id,group_id,subject_id,teacher_id,topic_id,title,description,status,objectives,published_at)
+insert into public.lessons(id,group_id,subject_id,teacher_id,topic_id,title,description,status,objectives,order_index,duration_minutes,published_at)
 select 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','dddddddd-dddd-4ddd-8ddd-dddddddddddd',s.id,'33333333-3333-4333-8333-333333333333','cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-  'Демо: как построить аргументацию','Учебная запись создана только локальным seed и показывает реальный сценарий кабинета.','scheduled',array['Выделять позицию автора','Подбирать корректный пример','Проверять логические связи'],now()
+  'Демо: как построить аргументацию','Учебная запись создана только локальным seed и показывает реальный сценарий кабинета.','scheduled',array['Выделять позицию автора','Подбирать корректный пример','Проверять логические связи'],2,90,now()
 from public.subjects s join public.exam_types e on e.id=s.exam_type_id where e.code='ege'and s.code='russian'
 on conflict(id)do update set title=excluded.title,description=excluded.description,status='scheduled',objectives=excluded.objectives,published_at=excluded.published_at,updated_at=now();
 
-insert into public.lessons(id,group_id,subject_id,teacher_id,topic_id,title,description,status,objectives,published_at)
+insert into public.lessons(id,group_id,subject_id,teacher_id,topic_id,title,description,status,objectives,order_index,duration_minutes,published_at)
 select 'ffffffff-ffff-4fff-8fff-ffffffffffff','dddddddd-dddd-4ddd-8ddd-dddddddddddd',s.id,'33333333-3333-4333-8333-333333333333','cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-  'Демо: анализ исходного текста','Завершённый урок без вымышленной видеозаписи.','completed',array['Определять проблему текста','Формулировать комментарий'],now()-interval '2 days'
+  'Демо: анализ исходного текста','Завершённый урок без вымышленной видеозаписи.','completed',array['Определять проблему текста','Формулировать комментарий'],1,90,now()-interval '2 days'
 from public.subjects s join public.exam_types e on e.id=s.exam_type_id where e.code='ege'and s.code='russian'
 on conflict(id)do update set title=excluded.title,description=excluded.description,status='completed',objectives=excluded.objectives,updated_at=now();
 
@@ -153,7 +153,18 @@ insert into public.lesson_materials(lesson_id,material_id,position,visible_from)
 values('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','abababab-abab-4bab-8bab-abababababab',1,now())
 on conflict(lesson_id,material_id)do update set position=excluded.position,visible_from=excluded.visible_from,updated_at=now();
 
-insert into public.assignments(id,group_id,subject_id,teacher_id,title,due_at,max_score,status)
-select 'acacacac-acac-4cac-8cac-acacacacacac','dddddddd-dddd-4ddd-8ddd-dddddddddddd',s.id,'33333333-3333-4333-8333-333333333333','Демо: план сочинения',now()+interval '2 days',10,'published'
+insert into public.assignments(id,lesson_id,group_id,subject_id,teacher_id,title,description,assignment_type,due_at,max_score,status)
+select 'acacacac-acac-4cac-8cac-acacacacacac','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','dddddddd-dddd-4ddd-8ddd-dddddddddddd',s.id,'33333333-3333-4333-8333-333333333333','Демо: план сочинения','Составьте тезис и план аргументации.','text',now()+interval '2 days',10,'published'
 from public.subjects s join public.exam_types e on e.id=s.exam_type_id where e.code='ege'and s.code='russian'
-on conflict(id)do update set due_at=excluded.due_at,status='published',updated_at=now();
+on conflict(id)do update set lesson_id=excluded.lesson_id,description=excluded.description,due_at=excluded.due_at,status='published',updated_at=now();
+
+insert into public.student_lesson_progress(user_id,lesson_id,status,completed_at)
+values('11111111-1111-4111-8111-111111111111','ffffffff-ffff-4fff-8fff-ffffffffffff','completed',now()-interval '2 days')
+on conflict(user_id,lesson_id)do update set status='completed',completed_at=excluded.completed_at,updated_at=now();
+insert into public.student_progress(user_id,subject_id,course_id,progress_percent,completed_lessons,current_stage,last_activity_at)
+select '11111111-1111-4111-8111-111111111111',s.id,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',50,1,'Демо: как построить аргументацию',now()-interval '2 days'
+from public.subjects s join public.exam_types e on e.id=s.exam_type_id where e.code='ege'and s.code='russian'
+on conflict(user_id,course_id)do update set progress_percent=50,completed_lessons=1,current_stage=excluded.current_stage,last_activity_at=excluded.last_activity_at,updated_at=now();
+insert into public.student_activity(user_id,activity_date,activity_type,points,source_type,source_id,created_at)
+values('11111111-1111-4111-8111-111111111111',current_date-2,'lesson_completed',10,'lesson','ffffffff-ffff-4fff-8fff-ffffffffffff',now()-interval '2 days')
+on conflict do nothing;

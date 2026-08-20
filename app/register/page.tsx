@@ -1,8 +1,8 @@
 import { AuthScreen } from "@/components/auth-screen";
-import { diagnosticSubjects, isDiagnosticSubjectSlug } from "@/lib/diagnostic-tests";
+import { diagnosticSubjects, evaluateDiagnostic, isDiagnosticSubjectSlug, parseDiagnosticAnswers } from "@/lib/diagnostic-tests";
 import { getPublicPlans } from "@/lib/public-site";
 
-type RegisterParams = { name?: string; email?: string; phone?: string; diagnostic?: string; subject?: string; weak?: string; score?: string; exam?: string; grade?: string; subjects?: string; plan?: string };
+type RegisterParams = { name?: string; email?: string; phone?: string; diagnostic?: string; answers?: string; subject?: string; exam?: string; grade?: string; subjects?: string; plan?: string };
 
 export default async function Page({ searchParams }: { searchParams: Promise<RegisterParams> }) {
   const params = await searchParams;
@@ -10,6 +10,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Reg
   const diagnostic = params.diagnostic?.slice(0, 32) ?? "";
   const diagnosticSubject = isDiagnosticSubjectSlug(diagnostic) ? diagnostic : undefined;
   const diagnosticSubjectName = diagnosticSubject ? diagnosticSubjects[diagnosticSubject].name : params.subject?.slice(0, 80);
+  const diagnosticAnswers = diagnosticSubject
+    ? parseDiagnosticAnswers(params.answers, diagnosticSubjects[diagnosticSubject].questions.length)
+    : null;
+  const diagnosticResult = diagnosticSubject && diagnosticAnswers ? evaluateDiagnostic(diagnosticSubject, diagnosticAnswers) : null;
   const selectedSubjects = (params.subjects ?? "").split(",").filter(isDiagnosticSubjectSlug).slice(0, 4);
   const selectedPlan = plans.find((plan) => plan.code === params.plan);
   const exam = params.exam === "oge" ? "ОГЭ" : params.exam === "ege" ? "ЕГЭ" : undefined;
@@ -29,8 +33,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Reg
     initialPhone={params.phone?.slice(0, 30)}
     diagnosticSubject={diagnosticSubject}
     diagnosticSubjectName={diagnosticSubjectName}
-    diagnosticWeakTopics={params.weak?.slice(0, 400)}
-    diagnosticScore={params.score?.slice(0, 20)}
+    diagnosticWeakTopics={diagnosticResult?.weak_topics.join(", ")}
+    diagnosticScore={diagnosticResult ? `${diagnosticResult.result.correct}/${diagnosticResult.result.total}` : undefined}
+    diagnosticAnswers={diagnosticAnswers?.join(".")}
     selectionSummary={selectionSummary}
   />;
 }

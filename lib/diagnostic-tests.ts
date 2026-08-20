@@ -115,3 +115,33 @@ export const diagnosticSubjectSlugs = Object.keys(diagnosticSubjects) as Diagnos
 export function isDiagnosticSubjectSlug(value: string): value is DiagnosticSubjectSlug {
   return value in diagnosticSubjects;
 }
+
+export function parseDiagnosticAnswers(value: string | undefined, expectedLength: number): number[] | null {
+  if (!value || value.length > 80) return null;
+  const answers = value.split(".").map(Number);
+  if (answers.length !== expectedLength || answers.some((answer) => !Number.isInteger(answer) || answer < 0 || answer > 9)) return null;
+  return answers;
+}
+
+export function evaluateDiagnostic(slug: DiagnosticSubjectSlug, answers: number[]) {
+  const diagnostic = diagnosticSubjects[slug];
+  if (answers.length !== diagnostic.questions.length) return null;
+  if (answers.some((answer, index) => answer < 0 || answer >= diagnostic.questions[index].options.length)) return null;
+  const correct = answers.reduce((total, answer, index) => total + Number(answer === diagnostic.questions[index].correctIndex), 0);
+  const weakTopics = diagnostic.questions
+    .filter((question, index) => answers[index] !== question.correctIndex)
+    .map((question) => question.topic)
+    .filter((topic, index, topics) => topics.indexOf(topic) === index);
+  const recommendations = weakTopics.map((topic) => `Разобрать тему «${topic}»`);
+  const nextStep = weakTopics[0] ? `Начать с темы «${weakTopics[0]}»` : "Перейти к полному пробному варианту";
+  return {
+    subject: slug,
+    questions: diagnostic.questions.map((question) => question.id),
+    answers,
+    result: { correct, total: diagnostic.questions.length, percent: Math.round(correct * 100 / diagnostic.questions.length) },
+    weak_topics: weakTopics,
+    roadmap: weakTopics.map((topic, index) => ({ order: index + 1, topic })),
+    recommendations,
+    next_step: nextStep,
+  };
+}
