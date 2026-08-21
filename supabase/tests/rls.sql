@@ -224,10 +224,18 @@ select test.assert_count('foreign student cannot read question','select count(*)
 reset role;
 insert into public.subscriptions(id,student_id,plan_id,status,price_minor)
 values('aaaaaaaa-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000001','pending',10000);
+insert into public.subscription_subjects(subscription_id,subject_id)
+values('aaaaaaaa-0000-4000-8000-000000000003','bbbbbbbb-0000-4000-8000-000000000001');
+insert into public.subscriptions(id,student_id,plan_id,status,price_minor)
+values('aaaaaaaa-0000-4000-8000-000000000004','11111111-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000001','pending',10000);
 set role authenticated;
 select test.set_user('11111111-1111-4111-8111-111111111111');
+\set ON_ERROR_STOP off
+select * from public.prepare_subscription_payment('aaaaaaaa-0000-4000-8000-000000000004','00000000-0000-4000-8000-000000000002');
+\set ON_ERROR_STOP on
+select test.assert_count('unscoped pending subscription cannot create payment','select count(*) from public.payments where subscription_id=''aaaaaaaa-0000-4000-8000-000000000004''',0);
 select * from public.prepare_subscription_payment('aaaaaaaa-0000-4000-8000-000000000003','00000000-0000-4000-8000-000000000001');
-select test.assert_count('payment amount comes from pending subscription','select count(*) from public.payments where subscription_id=''aaaaaaaa-0000-4000-8000-000000000003'' and amount_minor=10000 and status=''pending''',1);
+select test.assert_count('payment amount comes from scoped legacy pending subscription','select count(*) from public.payments where subscription_id=''aaaaaaaa-0000-4000-8000-000000000003'' and amount_minor=10000 and status=''pending''',1);
 select public.attach_yookassa_payment(
   (select id from public.payments where subscription_id='aaaaaaaa-0000-4000-8000-000000000003'),
   'provider_payment_test_001',
@@ -237,7 +245,7 @@ reset role;
 set role service_role;
 select public.finalize_yookassa_payment('provider_payment_test_001','succeeded',10000,'RUB','{"status":"succeeded"}'::jsonb);
 reset role;
-select test.assert_count('verified webhook activates pending subscription','select count(*) from public.subscriptions where id=''aaaaaaaa-0000-4000-8000-000000000003'' and status=''active'' and source=''yookassa''',1);
+select test.assert_count('verified webhook activates scoped legacy pending subscription','select count(*) from public.subscriptions where id=''aaaaaaaa-0000-4000-8000-000000000003'' and status=''active'' and source=''yookassa'' and starts_at is not null and ends_at is not null',1);
 
 set role authenticated;
 select test.set_user('11111111-1111-4111-8111-111111111111');
