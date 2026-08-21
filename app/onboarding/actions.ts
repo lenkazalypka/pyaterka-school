@@ -191,12 +191,14 @@ export async function savePlanStep(_: OnboardingActionState, formData: FormData)
   if (!parsed.success) return resultError(parsed.error);
   const { db, user } = await requireIncompleteOnboarding();
   const [{ data: plan }, { count }] = await Promise.all([
-    db.from("plans").select("id,plan_subject_limits(max_subjects)").eq("id", parsed.data.planId).eq("active", true).maybeSingle(),
+    db.from("plans").select("id,plan_subject_limits(max_subjects),pricing_plans(subjects_count,active)").eq("id", parsed.data.planId).eq("active", true).maybeSingle(),
     db.from("student_subjects").select("id", { count: "exact", head: true }).eq("student_id", user.id).eq("status", "active"),
   ]);
   const limit = (plan?.plan_subject_limits as unknown as { max_subjects: number } | null)?.max_subjects;
   if (!plan || !limit) return { error: "Тариф недоступен" };
   if ((count ?? 0) > limit) return { error: `В тариф входит не больше ${limit} предметов. Выберите другой тариф или уменьшите число предметов.` };
+  const prices = (plan.pricing_plans ?? []) as unknown as { subjects_count: number; active: boolean }[];
+  if (!prices.some((price) => price.active && price.subjects_count === (count ?? 0))) return { error: "Цена для выбранного количества предметов не опубликована" };
   const { error } = await db.from("student_onboarding").update({ selected_plan_id: plan.id, current_step: 8, updated_at: new Date().toISOString() }).eq("student_id", user.id);
   if (error) return { error: "Не удалось сохранить тариф" };
   redirect("/onboarding/review");

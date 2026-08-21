@@ -3,10 +3,12 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [home, publicSections, plans, legal, globals, moduleCss, reverseEngineering, notFound, layout] = await Promise.all([
+const [home, publicSections, planner, plans, pricing, legal, globals, moduleCss, reverseEngineering, notFound, layout] = await Promise.all([
   read("../app/page.tsx"),
   read("../components/public/sections.tsx"),
+  read("../components/public/route-planner.tsx"),
   read("../lib/public-site.ts"),
+  read("../lib/pricing.ts"),
   read("../app/legal/[document]/page.tsx"),
   read("../app/globals.css"),
   read("../components/public/redesign-v1.module.css"),
@@ -16,7 +18,7 @@ const [home, publicSections, plans, legal, globals, moduleCss, reverseEngineerin
 ]);
 
 test("public home contains a complete product-first conversion path", () => {
-  const source = `${home}\n${publicSections}`;
+  const source = `${home}\n${planner}\n${publicSections}`;
   for (const section of ["platform", "rhythm", "subjects", "plans", "faq"]) assert.match(source, new RegExp(`id=\"${section}\"`));
   assert.doesNotMatch(source, /lib\/demo|<Dashboard|ScoreComparison/);
   assert.match(source, /href="\/start/);
@@ -27,6 +29,9 @@ test("public plans prefer Supabase and never invent a fallback price", () => {
   assert.match(plans, /from\("plans"\)/);
   assert.match(plans, /priceLabel: null/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
+  assert.match(pricing, /from\("pricing_plans"\)/);
+  assert.match(pricing, /from\("pricing_duration_discounts"\)/);
+  assert.doesNotMatch(pricing, /4990|7990|11990|17990/);
 });
 
 test("legal drafts are explicit and do not invent company details", () => {

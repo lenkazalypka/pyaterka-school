@@ -43,6 +43,10 @@ export function StartWizard({ plans, initialExam, initialGrade, initialSubject, 
   const [planCode, setPlanCode] = useState(() => plans.some((plan) => plan.code === initialPlan) ? initialPlan ?? "" : "");
 
   const selectedPlan = plans.find((plan) => plan.code === planCode);
+  const selectedPriceMinor = selectedPlan?.pricesMinor[subjects.length];
+  const selectedPriceLabel = selectedPlan && selectedPriceMinor
+    ? new Intl.NumberFormat("ru-RU", { style: "currency", currency: selectedPlan.currency, maximumFractionDigits: 0 }).format(selectedPriceMinor / 100) + " / месяц"
+    : null;
   const selectedSubjectNames = subjects.map((slug) => diagnosticSubjects[slug].name);
   const registrationHref = useMemo(() => {
     const query = new URLSearchParams({ exam, grade: String(grade), subjects: subjects.join(","), plan: planCode });
@@ -117,7 +121,7 @@ export function StartWizard({ plans, initialExam, initialGrade, initialSubject, 
               const selected = planCode === plan.code;
               return <button className={`${selected ? "is-selected" : ""} ${unavailable ? "is-unavailable" : ""}`} type="button" disabled={unavailable} aria-pressed={selected} onClick={() => setPlanCode(plan.code)} key={plan.code}>
                 {index === 1 && !unavailable && <span className="start-plan-badge"><Sparkles aria-hidden="true" /> баланс поддержки</span>}
-                <small>до {plan.maxSubjects} предметов</small><h2>{plan.name}</h2><strong>{plan.priceLabel ?? "Цена появится до открытия оплаты"}</strong>
+                <small>до {plan.maxSubjects} предметов</small><h2>{plan.name}</h2><strong>{plan.pricesMinor[subjects.length] ? new Intl.NumberFormat("ru-RU", { style: "currency", currency: plan.currency, maximumFractionDigits: 0 }).format(plan.pricesMinor[subjects.length] / 100) + " / месяц" : "Цена появится до открытия оплаты"}</strong>
                 <ul>{plan.features.slice(0, 4).map((feature) => <li key={feature}><Check aria-hidden="true" />{feature}</li>)}</ul>
                 <i>{unavailable ? `Нужно сократить выбор до ${plan.maxSubjects}` : selected ? "Выбрано" : "Выбрать"}<Check aria-hidden="true" /></i>
               </button>;
@@ -129,7 +133,7 @@ export function StartWizard({ plans, initialExam, initialGrade, initialSubject, 
         {step === 4 && selectedPlan && <>
           <div className="start-stage-heading"><span>Шаг 4 из 4</span><h1>Вот твой план.<br /><em>Без сюрпризов.</em></h1><p>Проверь выбор перед регистрацией. Оплаты при создании аккаунта не будет.</p></div>
           <div className="start-summary">
-            <div className="start-summary-main"><span>Твоя комбинация</span><strong>{exam.toUpperCase()} · {grade} класс</strong><h2>{selectedSubjectNames.join(" + ")}</h2><p>{selectedPlan.name} · {selectedPlan.priceLabel ?? "цена будет опубликована до оплаты"}</p></div>
+            <div className="start-summary-main"><span>Твоя комбинация</span><strong>{exam.toUpperCase()} · {grade} класс</strong><h2>{selectedSubjectNames.join(" + ")}</h2><p>{selectedPlan.name} · {selectedPriceLabel ?? "цена будет опубликована до оплаты"}</p></div>
             <div className="start-summary-steps"><span><b>сейчас</b> создаёшь аккаунт</span><i aria-hidden="true" /><span><b>потом</b> уточняешь цели и расписание</span><i aria-hidden="true" /><span><b>только после</b> подтверждаешь оплату</span></div>
           </div>
           <div className="start-registration-panel"><div><LockKeyhole aria-hidden="true" /><p><strong>Без оплаты на первом шаге</strong><span>Сначала аккаунт и полные условия. Платёж — только после твоего подтверждения.</span></p></div><Link className="button button-primary button-large" href={registrationHref}>Перейти к регистрации <ArrowRight aria-hidden="true" /></Link></div>

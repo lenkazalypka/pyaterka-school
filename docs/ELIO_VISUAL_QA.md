@@ -46,3 +46,10 @@ Viewport: `360×800`, `390×844`, `430×932`, `768×1024`, `1280×800`, `1440×9
 - Screenshot-файлы этой проверки находятся во временном QA-каталоге `/tmp/elio-visual-qa-after` и не являются стабильным regression baseline.
 
 До merge нужны production-like visual smoke tests как минимум для `student`, `parent`, `teacher`, `curator`, `admin`, а также урока с private material и состояний loading/error/empty.
+
+## Commercial pricing slice · 21 августа 2026
+
+- source review подтвердил 12-column desktop composition, вертикальный calculator на mobile, horizontal scroll-snap тарифов, touch targets ≥44 px, bottom safe-area CTA и reduced-motion rules;
+- production build и локальный HTTP smoke подтвердили наличие calculator, annual summary, payment methods, comparison и lead CTA;
+- browser surface текущей среды блокирует `localhost`, поэтому новый slice не объявляется screenshot-проверенным;
+- после применения pricing migration нужен production preview с каталогом Supabase и повторный visual pass на `360`, `390`, `768`, `1280` и `1440` px.

@@ -99,10 +99,20 @@ values('aaaaaaaa-0000-4000-8000-000000000002','bbbbbbbb-0000-4000-8000-000000000
 insert into public.leads(id,name,email,grade,goal,subject_codes,duration_months,consent_version)
 values('95000000-0000-4000-8000-000000000001','Тестовая заявка','lead@example.test',11,'ege',array['russian'],10,'test');
 
+set role service_role;
+select public.capture_pricing_lead(
+  'Pricing student', '+79990000000', 11, 'ege', array['russian'], 80, 12,
+  (select id from public.pricing_plans where type='standard' and subjects_count=1),
+  '11111111-1111-4111-8111-111111111111'
+);
+reset role;
+
 reset request.jwt.claim.sub;
 set role anon;
 select test.assert_count('anon no subscription subjects','select count(*) from public.subscription_subjects',0);
 select test.assert_count('anon has no leads read grant','select count(*) from information_schema.table_privileges where table_schema=''public'' and table_name=''leads'' and grantee=''anon'' and privilege_type=''SELECT''',0);
+select test.assert_count('anon can read active pricing','select count(*) from public.pricing_plans where active',12);
+select test.assert_count('anon has no plan selection read grant','select count(*) from information_schema.table_privileges where table_schema=''public'' and table_name=''user_plan_selection'' and grantee=''anon'' and privilege_type=''SELECT''',0);
 select test.assert_count('anon published program','select count(*) from public.programs where id=''cccccccc-0000-4000-8000-000000000001''',1);
 select test.assert_count('anon no draft program','select count(*) from public.programs where id=''cccccccc-0000-4000-8000-000000000002''',0);
 select test.assert_count('anon published module','select count(*) from public.modules where id=''eeeeeeee-0000-4000-8000-000000000001''',1);
@@ -115,6 +125,7 @@ select test.assert_count('student no foreign profile','select count(*) from publ
 select test.assert_count('student own profile','select count(*) from public.student_profiles where user_id=''11111111-1111-4111-8111-111111111111''',1);
 select test.assert_count('student own subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',1);
 select test.assert_count('student cannot read leads','select count(*) from public.leads',0);
+select test.assert_count('student reads own saved plan selection','select count(*) from public.user_plan_selection where user_id=''11111111-1111-4111-8111-111111111111'' and duration=12 and price=7670400',1);
 select test.assert_count('first AI mentor request is allowed','select count(*) from public.claim_ai_mentor_request() where allowed',1);
 do $$ begin for i in 1..19 loop perform * from public.claim_ai_mentor_request(); end loop; end $$;
 select test.assert_count('twenty-first AI mentor request is blocked','select count(*) from public.claim_ai_mentor_request() where not allowed and retry_after_seconds > 0',1);
@@ -125,11 +136,13 @@ select test.assert_count('student no draft topic','select count(*) from public.t
 select test.set_user('33333333-3333-4333-8333-333333333333');
 select test.assert_count('pending parent no child','select count(*) from public.student_profiles where user_id=''11111111-1111-4111-8111-111111111111''',0);
 select test.assert_count('pending parent no subscription subjects','select count(*) from public.subscription_subjects where subscription_id=''aaaaaaaa-0000-4000-8000-000000000002''',0);
+select test.assert_count('parent cannot read student pricing selection','select count(*) from public.user_plan_selection where user_id=''11111111-1111-4111-8111-111111111111''',0);
 reset role;
 
 set role authenticated;
 select test.set_user('88888888-8888-4888-8888-888888888888');
 select test.assert_count('admin can read leads','select count(*) from public.leads where id=''95000000-0000-4000-8000-000000000001''',1);
+select test.assert_count('admin can read plan selections','select count(*) from public.user_plan_selection where user_id=''11111111-1111-4111-8111-111111111111''',1);
 reset role;
 
 update public.parent_student_links set status='confirmed',confirmed_at=now()
@@ -244,6 +257,17 @@ begin
     or not has_function_privilege('service_role', 'public.record_auth_rate_limit_attempt(text,text[])', 'EXECUTE')
   then
     raise exception 'RATE LIMIT FAIL: RPC privileges are not service-role only';
+  end if;
+end;
+$$;
+
+do $$
+begin
+  if has_function_privilege('anon', 'public.capture_pricing_lead(text,text,smallint,text,text[],smallint,smallint,uuid,uuid)', 'EXECUTE')
+    or has_function_privilege('authenticated', 'public.capture_pricing_lead(text,text,smallint,text,text[],smallint,smallint,uuid,uuid)', 'EXECUTE')
+    or not has_function_privilege('service_role', 'public.capture_pricing_lead(text,text,smallint,text,text[],smallint,smallint,uuid,uuid)', 'EXECUTE')
+  then
+    raise exception 'PRICING FAIL: capture RPC privileges are not service-role only';
   end if;
 end;
 $$;

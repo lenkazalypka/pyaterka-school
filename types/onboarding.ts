@@ -9,7 +9,7 @@ export type SubjectDraft = { subjectId: string; currentGrade: number; lastMockSc
 export type AdmissionGoalDraft = { institutionType: "university" | "college"; institutionName: string; directionName: string; city: string; fundingType: "budget" | "paid" | "either"; priority: number; minimumPassingScore: number | null; desiredScore: number; needsAdmissionHelp: boolean; needsCareerGuidance: boolean };
 export type ScheduleDraft = { weeklyHours: number; preferredFormat: "group" | "individual" | "mixed"; strictControl: boolean; dailyReminders: boolean; otherCourses: string; currentWeeklyLoad: number; desiredStartDate: string; timezone: string; slots: { weekday: number; startsAt: string; endsAt: string }[] };
 export type ParentDraft = { inviteRequested: boolean; parentName: string; email: string; phone: string; relation: string };
-export type PlanOption = { id: string; name: string; code: string; basePriceMinor: number; currency: string; maxSubjects: number; features: { code: string; enabled: boolean; limit: number | null }[] };
+export type PlanOption = { id: string; name: string; code: string; basePriceMinor: number; pricesMinor: Record<number, number>; currency: string; maxSubjects: number; features: { code: string; enabled: boolean; limit: number | null }[] };
 
 export type ReviewData = {
   profile: ProfileDraft;
@@ -20,4 +20,3 @@ export type ReviewData = {
   parent: ParentDraft;
   plan: PlanOption;
 };
-

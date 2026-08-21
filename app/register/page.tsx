@@ -23,7 +23,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Reg
     grade,
     subjects: selectedSubjects.map((slug) => diagnosticSubjects[slug].name),
     planName: selectedPlan.name,
-    priceLabel: selectedPlan.priceLabel,
+    priceLabel: selectedPlan.pricesMinor[selectedSubjects.length]
+      ? new Intl.NumberFormat("ru-RU", { style: "currency", currency: selectedPlan.currency, maximumFractionDigits: 0 }).format(selectedPlan.pricesMinor[selectedSubjects.length] / 100) + " / месяц"
+      : null,
   } : undefined;
 
   return <AuthScreen

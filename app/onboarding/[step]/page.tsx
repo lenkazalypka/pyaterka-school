@@ -27,8 +27,8 @@ async function profileData(db: Db, userId: string): Promise<ProfileDraft> {
 }
 
 async function planOptions(db: Db): Promise<PlanOption[]> {
-  const { data } = await db.from("plans").select("id,name,code,base_price_minor,currency,plan_features(feature_code,enabled,limit_value),plan_subject_limits(max_subjects)").eq("active",true).order("base_price_minor");
-  return (data??[]).map((plan)=>({ id:plan.id,name:plan.name,code:plan.code,basePriceMinor:plan.base_price_minor,currency:plan.currency,maxSubjects:(plan.plan_subject_limits as unknown as {max_subjects:number}|null)?.max_subjects??1,features:((plan.plan_features??[]) as {feature_code:string;enabled:boolean;limit_value:number|null}[]).map((feature)=>({code:feature.feature_code,enabled:feature.enabled,limit:feature.limit_value})) }));
+  const { data } = await db.from("plans").select("id,name,code,base_price_minor,currency,plan_features(feature_code,enabled,limit_value),plan_subject_limits(max_subjects),pricing_plans(subjects_count,monthly_price_minor,active)").eq("active",true).order("base_price_minor");
+  return (data??[]).map((plan)=>({ id:plan.id,name:plan.name,code:plan.code,basePriceMinor:plan.base_price_minor,pricesMinor:Object.fromEntries(((plan.pricing_plans??[]) as {subjects_count:number;monthly_price_minor:number;active:boolean}[]).filter((price)=>price.active).map((price)=>[price.subjects_count,price.monthly_price_minor])),currency:plan.currency,maxSubjects:(plan.plan_subject_limits as unknown as {max_subjects:number}|null)?.max_subjects??1,features:((plan.plan_features??[]) as {feature_code:string;enabled:boolean;limit_value:number|null}[]).map((feature)=>({code:feature.feature_code,enabled:feature.enabled,limit:feature.limit_value})) }));
 }
 
 async function subjectsData(db: Db, userId: string, examTypeId: string) {
@@ -92,4 +92,3 @@ export default async function OnboardingStepPage({params}:{params:Promise<{step:
   }
   return <OnboardingFrame step={step}><h1 className="mt-2 text-3xl font-extrabold tracking-[-.03em] sm:text-4xl">{({profile:"Расскажите о себе",exam:"К какому экзамену готовимся?",subjects:"Выберите предметы",goals:"Куда хотите поступить?",schedule:"Как вам удобно заниматься?",parent:"Подключить родителя?",plan:"Выберите тариф",review:"Проверьте анкету"} as const)[slug]}</h1>{content}</OnboardingFrame>;
 }
-

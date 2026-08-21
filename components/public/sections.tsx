@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { SubjectIcon } from "@/components/icons/subject-icons";
 import { diagnosticSubjects, diagnosticSubjectSlugs } from "@/lib/diagnostic-tests";
-import type { PublicPlan } from "@/lib/public-site";
 import styles from "./redesign-v1.module.css";
 
 const rhythm = [
@@ -34,7 +33,7 @@ const faq = [
 
 const workspaceParts = ["Занятия", "Домашка", "Материалы", "Прогресс", "AI-помощник"] as const;
 
-export function PublicSections({ plans }: { plans: PublicPlan[] }) {
+export function PublicSections() {
   return (
     <>
       <section className={styles.platform} id="platform" aria-labelledby="platform-title">
@@ -70,30 +69,13 @@ export function PublicSections({ plans }: { plans: PublicPlan[] }) {
         <div className={styles.sectionIntro}>
           <span>Предметы</span>
           <h2 id="subjects-title">один кабинет для своей комбинации.</h2>
-          <p>Диагностика помогает определить стартовый уровень и не обещает результат. Персональный прогресс появится только в кабинете после реальных уроков — на публичной странице мы его не изображаем.</p>
+          <p>Диагностика помогает определить стартовый уровень и не обещает результат. Персональный прогресс появляется только после реальных уроков; публичный preview явно отмечен как демонстрация интерфейса.</p>
         </div>
         <div className={styles.subjectGrid}>
           {diagnosticSubjectSlugs.map((slug, index) => {
             const subject = diagnosticSubjects[slug];
             return <article key={slug}><span>{String(index + 1).padStart(2, "0")}</span><SubjectIcon subject={slug} /><h3>{subject.name}</h3><div><Link href={`/test/${subject.slug}`}>Диагностика</Link><Link href={`/start?subject=${slug}`} aria-label={`Выбрать ${subject.name}`}><ArrowRight aria-hidden="true" /></Link></div></article>;
           })}
-        </div>
-      </section>
-
-      <section className={styles.plans} id="plans" aria-labelledby="plans-title">
-        <div className={styles.sectionIntro}>
-          <span>Пакеты</span>
-          <h2 id="plans-title">платить за нужный уровень поддержки.</h2>
-          <p>{plans.some((plan) => plan.priceLabel) ? "Стоимость загружается из активных тарифов Supabase. Итог зависит от выбранных предметов." : "Состав пакетов уже виден. Цена появится только после публикации активных тарифов в Supabase."}</p>
-        </div>
-        <div className={styles.planGrid}>
-          {plans.map((plan, index) => <article className={index === 1 ? styles.planFeatured : styles.planCard} key={plan.code}>
-            <div className={styles.planHeading}><span>пакет {String(index + 1).padStart(2, "0")}</span><small>до {plan.maxSubjects} {plan.maxSubjects === 1 ? "предмета" : "предметов"}</small></div>
-            <h3>{plan.name}</h3>
-            <p className={styles.planPrice}>{plan.priceLabel ?? "Цена появится до оплаты"}</p>
-            <ul>{plan.features.map((feature) => <li key={feature}><Check aria-hidden="true" />{feature}</li>)}</ul>
-            <Link href={`/start?plan=${encodeURIComponent(plan.code)}`}>Выбрать и продолжить <ArrowRight aria-hidden="true" /></Link>
-          </article>)}
         </div>
       </section>
 

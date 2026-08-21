@@ -22,17 +22,17 @@ export function PublicHero() {
         </div>
 
         <div className={styles.productPreview} aria-label="Пример интерфейса ученика elio">
-          <div className={styles.previewTopline}><span>пример интерфейса</span><b>сегодня · ваш часовой пояс</b></div>
-          <div className={styles.previewGreeting}><small>добрый вечер, лена</small><strong>Главное на сегодня</strong></div>
+          <div className={styles.previewTopline}><span>демо интерфейса · не данные ученика</span><b>сегодня · ваш часовой пояс</b></div>
+          <div className={styles.previewGreeting}><small>добрый вечер, лена</small><strong>Главное сегодня</strong></div>
           <article className={styles.nextLesson}>
-            <div><span>следующее занятие</span><h2>Аргументация в сочинении</h2></div>
-            <p><Clock3 aria-hidden="true" /> 18:00–19:30 <i>по вашему времени</i></p>
+            <div><span>18:00 · Русский язык</span><h2>Аргументация в сочинении</h2></div>
+            <p><Clock3 aria-hidden="true" /> после урока <i>ДЗ → разбор ошибок</i></p>
             <button type="button" disabled>Ссылка появится перед уроком</button>
           </article>
           <div className={styles.previewBottom}>
             <article><CalendarDays aria-hidden="true" /><div><small>расписание</small><b>Ближайшие занятия</b></div></article>
             <article><BookOpenCheck aria-hidden="true" /><div><small>домашнее задание</small><b>После назначения</b></div></article>
-            <article><TrendingUp aria-hidden="true" /><div><small>прогресс</small><b>По завершённым урокам</b></div></article>
+            <article><TrendingUp aria-hidden="true" /><div><small>прогресс · демо</small><b>42% маршрута</b></div></article>
             <article><span aria-hidden="true">→</span><div><small>следующий шаг</small><b>Один ясный фокус</b></div></article>
           </div>
           <div className={styles.routeLine} aria-hidden="true"><span /><i /><i /><i /></div>

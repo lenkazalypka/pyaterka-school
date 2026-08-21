@@ -23,10 +23,15 @@ Product-facing names `courses`, `homework`, `student_homework` и `parent_studen
 
 ## Public acquisition
 
-- `leads` — явно отправленный публичный запрос маршрута: имя, один контакт, класс, цель и 1–4 предмета;
-- запись выполняет только rate-limited Server Action через server-only client;
-- `anon` не получает table grants, student/parent не видят заявки, admin работает через RLS policy;
-- стоимость не сохраняется из браузера и всегда остаётся производной от server-owned `plans`.
+- `plans` остаётся каноническим каталогом пакетов для onboarding, subscriptions и ЮKassa;
+- `pricing_plans` добавляет server-owned матрицу «пакет × 1–4 предмета» и ссылается на `plans`, не дублируя payment identifier;
+- `pricing_duration_discounts` хранит скидки для 1, 3, 6 и 12 месяцев;
+- `leads` — явно отправленный публичный запрос: имя, телефон, класс, экзамен, цель, 1–4 предмета и server-calculated price snapshot;
+- `student_leads` — security-invoker compatibility view над `leads`, а не вторая таблица заявок;
+- `user_plan_selection` связывает final selection с заявкой и, при наличии сессии, с пользователем;
+- запись выполняет rate-limited Server Action через service-role-only `capture_pricing_lead`, который атомарно пересчитывает цену и создаёт lead + selection;
+- `anon` не получает доступ к заявкам, student/parent не видят их, admin работает через RLS policy;
+- стоимость из браузера не принимается: PostgreSQL повторно выбирает активную строку тарифа, сверяет число предметов и применяет duration discount один раз.
 
 ## Privacy
 

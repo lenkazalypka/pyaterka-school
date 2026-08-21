@@ -36,6 +36,9 @@ Deployment is **NO-GO** until every required item below is confirmed by the owne
 - [ ] YooKassa credentials, fiscal VAT code and HTTPS webhook for `payment.succeeded`/`payment.canceled` were configured and test-mode payment passed end to end.
 - [ ] Privacy policy, personal-data consent, public offer, and other required legal text were approved; current drafts are not treated as approval.
 - [ ] `LEAD_CAPTURE_ENABLED=true` is set only after the lead consent, operator details, retention and deletion process are legally approved.
+- [ ] Migration `202608210008_commercial_pricing.sql` is applied; all 12 active price rows and four duration discounts were approved by the commercial owner.
+- [ ] Pricing-to-subscription handoff and displayed totals were reconciled with ЮKassa before enabling paid acquisition.
+- [ ] A real lead was verified in `leads` with the matching `user_plan_selection` price snapshot.
 - [ ] The safe baseline headers are present in production. A full script/style CSP requires a separate nonce-based implementation and report-only rollout.
 
 ## Explicit scope warning

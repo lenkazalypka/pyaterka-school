@@ -125,6 +125,76 @@
 .leadForm > button:disabled { cursor: wait; opacity: .6; }.leadForm > button svg { width: 16px; }
 .formError, .formSuccess, .formNotice { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.45; }.formError { color: #ffb8a8; }.formSuccess { color: #d8e8c2; }.formNotice { color: rgba(255,255,255,.58); }
 
+.pricingWorkspace { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; margin-top: 60px; }
+.pricingControls { grid-column: span 7; display: grid; align-content: start; gap: 0; overflow: hidden; border: 1px solid var(--border-soft); border-radius: 28px; background: var(--surface); }
+.pricingControls fieldset { min-width: 0; margin: 0; border: 0; border-bottom: 1px solid var(--border-soft); padding: 28px 32px; }
+.pricingControls fieldset:last-child { border-bottom: 0; }
+.pricingControls legend { width: 100%; margin-bottom: 15px; font-size: 13px; font-weight: 820; }
+.pricingControls legend span { margin-right: 10px; color: var(--brand-primary); font-size: 10px; font-variant-numeric: tabular-nums; }
+.pricingControls legend small { float: right; color: var(--text-muted); font-size: 11px; font-weight: 680; }
+.pricingControls fieldset > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.pricingControls button, .annualControls button { min-height: 46px; border: 1px solid var(--border-soft); border-radius: 12px; padding: 0 17px; background: #fff; color: var(--text-primary); font-size: 12px; font-weight: 760; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease; }
+.pricingControls button:hover:not(:disabled), .annualControls button:hover { border-color: var(--brand-primary); transform: translateY(-1px); }
+.pricingControls button[aria-pressed="true"], .annualControls button[aria-pressed="true"] { border-color: var(--brand-ink); background: var(--brand-ink); color: #fff; }
+.pricingControls button:disabled { cursor: not-allowed; opacity: .35; }
+.pricingSubjects button { display: inline-flex; align-items: center; gap: 7px; }
+.pricingSubjects svg { width: 14px; }
+.scoreOptions button { min-width: 84px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.durationOptions { display: grid !important; grid-template-columns: repeat(4, 1fr); }
+.durationOptions button { display: grid; min-height: 68px; align-content: center; gap: 3px; text-align: left; }
+.durationOptions b { font-size: 12px; }.durationOptions small { color: var(--brand-primary); font-size: 9px; }
+.durationOptions button[aria-pressed="true"] small { color: var(--accent-sand); }
+
+.priceSummary { grid-column: span 5; position: sticky; top: 100px; display: flex; min-height: 650px; flex-direction: column; align-self: start; border-radius: 28px; padding: clamp(29px, 4vw, 44px); background: var(--brand-ink); color: #fff; }
+.priceSummary > svg { width: 46px; height: 46px; border-radius: 14px; padding: 11px; background: var(--accent-sand); color: var(--brand-ink); }
+.priceSummary > span { margin-top: 29px; color: var(--accent-sand); font-size: 10px; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
+.priceSummary h3 { margin: 10px 0 0; font-size: clamp(36px, 4.5vw, 58px); line-height: .98; letter-spacing: -.055em; }
+.priceSummary > p { margin: 14px 0 0; color: rgba(255,255,255,.58); font-size: 13px; }
+.priceSummary dl { margin: 35px 0 0; }
+.priceSummary dl > div { display: grid; grid-template-columns: 1fr auto; gap: 16px; border-top: 1px solid rgba(255,255,255,.14); padding: 14px 0; }
+.priceSummary dt { color: rgba(255,255,255,.46); font-size: 11px; }.priceSummary dd { margin: 0; font-size: 12px; font-weight: 760; font-variant-numeric: tabular-nums; }
+.priceTotal { display: grid; gap: 5px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.14); padding-top: 25px; }
+.priceTotal small { color: rgba(255,255,255,.48); font-size: 10px; }.priceTotal strong { font-size: clamp(32px, 4vw, 49px); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.priceSummary > a { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 14px; margin-top: 23px; border-radius: 13px; padding: 0 17px; background: var(--brand-action); font-size: 12px; font-weight: 820; }
+.priceSummary > a svg { width: 16px; }.priceUnavailable { margin: auto 0; border-top: 1px solid rgba(255,255,255,.14); border-bottom: 1px solid rgba(255,255,255,.14); padding: 24px 0; }.priceUnavailable b { font-size: 16px; }.priceUnavailable p { margin: 9px 0 0; color: rgba(255,255,255,.55); font-size: 12px; line-height: 1.55; }
+
+.pricingCards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; scroll-margin-top: 110px; }
+.pricingCard { display: flex; min-height: 690px; flex-direction: column; border: 1px solid var(--border-soft); border-radius: 26px; padding: 30px; background: var(--surface); }
+.pricingPopular { border-color: var(--brand-ink); background: var(--brand-ink); color: #fff; }
+.pricingCardTop { display: flex; min-height: 28px; align-items: center; justify-content: space-between; gap: 12px; color: var(--brand-primary); font-size: 9px; font-weight: 820; letter-spacing: .07em; text-transform: uppercase; }
+.pricingCardTop b { border-radius: 999px; padding: 7px 9px; background: var(--accent-sand); color: var(--brand-ink); font-size: 8px; }
+.pricingCard h3 { margin: 36px 0 0; font-size: clamp(30px, 3vw, 42px); letter-spacing: -.045em; }
+.pricingCard > p { min-height: 44px; margin: 10px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.5; }
+.pricingPopular > p { color: rgba(255,255,255,.56); }
+.pricingCard > strong { margin-top: 21px; font-size: 27px; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.pricingCard > strong small { color: var(--text-muted); font-size: 10px; font-weight: 650; letter-spacing: 0; }.pricingPopular > strong small { color: rgba(255,255,255,.5); }
+.pricingCard ul { display: grid; gap: 11px; margin: 27px 0 0; border-top: 1px solid var(--border-soft); padding: 24px 0 0; list-style: none; }
+.pricingPopular ul { border-color: rgba(255,255,255,.14); }.pricingCard li { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; line-height: 1.45; }.pricingCard li svg { width: 15px; flex: 0 0 auto; color: var(--brand-primary); stroke-width: 2.8; }.pricingPopular li svg { color: var(--accent-sand); }
+.pricingCard .pricingExcluded { margin-top: 17px; border: 0; padding-top: 0; color: var(--text-muted); }.pricingExcluded li svg { color: var(--text-muted); }
+.pricingCard > button { display: flex; min-height: 49px; align-items: center; justify-content: space-between; gap: 15px; margin-top: auto; border: 1px solid var(--border-soft); border-radius: 13px; padding: 0 15px; background: transparent; color: var(--text-primary); font-size: 11px; font-weight: 820; cursor: pointer; }.pricingCard > button[aria-pressed="true"] { border-color: var(--brand-action); background: var(--brand-action); color: #fff; }.pricingPopular > button { border-color: rgba(255,255,255,.18); color: #fff; }.pricingCard > button svg { width: 15px; }
+
+.tutorComparison, .annualCalculator, .paymentSection, .personalPlan { margin-top: clamp(80px, 10vw, 140px); }
+.tutorComparison > div:first-child, .annualCalculator > div:first-child, .paymentSection > div:first-child, .personalPlan > div:first-child { display: grid; max-width: 930px; grid-template-columns: 180px 1fr; column-gap: 32px; }
+.tutorComparison > div:first-child > span, .annualCalculator > div:first-child > span, .paymentSection > div:first-child > span, .personalPlan > div:first-child > span { padding-top: 9px; color: var(--brand-primary); font-size: 10px; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
+.tutorComparison h2, .annualCalculator h2, .paymentSection h2, .personalPlan h2 { margin: 0; font-size: clamp(39px, 5vw, 66px); line-height: .98; letter-spacing: -.055em; }
+.tutorComparison > div:first-child > p, .annualCalculator > div:first-child > p, .paymentSection > div:first-child > p, .personalPlan > div:first-child > p { grid-column: 2; max-width: 650px; margin: 20px 0 0; color: var(--text-muted); line-height: 1.6; }
+.comparisonCards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.comparisonCards article { display: flex; min-height: 330px; flex-direction: column; border: 1px solid var(--border-soft); border-radius: 26px; padding: clamp(28px, 4vw, 43px); background: var(--surface); }.comparisonCards article:last-child { border-color: var(--brand-ink); background: var(--brand-ink); color: #fff; }
+.comparisonCards small { color: var(--brand-primary); font-size: 10px; font-weight: 820; letter-spacing: .07em; text-transform: uppercase; }.comparisonCards article:last-child small { color: var(--accent-sand); }
+.comparisonCards strong { margin-top: 48px; font-size: clamp(31px, 4vw, 48px); letter-spacing: -.045em; }.comparisonCards p { margin: 10px 0 0; color: var(--text-muted); }.comparisonCards article:last-child p { color: rgba(255,255,255,.55); }.comparisonCards b { margin-top: auto; border-top: 1px solid var(--border-soft); padding-top: 20px; font-size: 14px; }.comparisonCards article:last-child b { border-color: rgba(255,255,255,.14); color: var(--accent-sand); }
+
+.annualCalculator { border-radius: 32px; padding: clamp(30px, 6vw, 70px); background: #ede9df; }
+.annualControls { display: grid; grid-template-columns: .7fr .5fr 1.2fr; gap: 16px; margin-top: 48px; }
+.annualControls fieldset { margin: 0; border: 1px solid var(--border-soft); border-radius: 21px; padding: 23px; background: var(--surface); }.annualControls legend { padding: 0 4px; color: var(--text-muted); font-size: 10px; font-weight: 760; }.annualControls fieldset > div { display: grid; gap: 8px; }.annualControls button { width: 100%; text-align: left; }
+.annualResult { display: flex; min-height: 330px; flex-direction: column; border-radius: 23px; padding: 28px; background: var(--brand-ink); color: #fff; }.annualResult > div { display: grid; gap: 8px; }.annualResult small { color: rgba(255,255,255,.48); font-size: 10px; }.annualResult > div > strong { font-size: 34px; letter-spacing: -.04em; }.annualResult dl { margin: 32px 0 0; }.annualResult dl > div { display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid rgba(255,255,255,.14); padding: 13px 0; font-size: 11px; }.annualResult dt { color: rgba(255,255,255,.48); }.annualResult dd { margin: 0; font-weight: 780; font-variant-numeric: tabular-nums; }.annualResult p { display: flex; align-items: center; gap: 8px; margin: auto 0 0; border-radius: 12px; padding: 13px; background: var(--accent-sand); color: var(--brand-ink); font-size: 12px; font-weight: 820; }.annualResult p svg { width: 17px; }.catalogNotice { align-self: stretch; margin: 0; border: 1px solid var(--border-soft); border-radius: 21px; padding: 24px; background: var(--surface); color: var(--text-muted); }
+
+.paymentSection > div:last-child { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 45px; }.paymentSection article { min-height: 190px; border: 1px solid var(--border-soft); border-radius: 20px; padding: 22px; background: var(--surface); }.paymentSection article svg { width: 38px; height: 38px; border-radius: 12px; padding: 9px; background: var(--brand-soft); color: var(--brand-primary); }.paymentSection article b { display: block; margin-top: 32px; font-size: 13px; }.paymentSection article p { margin: 8px 0 0; color: var(--text-muted); font-size: 10px; line-height: 1.5; }
+
+.personalPlan { scroll-margin-top: 95px; display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(45px, 7vw, 95px); border-radius: 32px; padding: clamp(30px, 6vw, 70px); background: var(--brand-ink); color: #fff; }
+.personalPlan > div:first-child { display: block; }.personalPlan > div:first-child > span { color: var(--accent-sand); }.personalPlan h2 { margin-top: 18px; }.personalPlan > div:first-child > p { margin-top: 20px; color: rgba(255,255,255,.54); }
+.commercialLeadForm { display: grid; grid-template-columns: 1fr .55fr; align-content: start; gap: 12px; }.commercialLeadForm label:not(.leadConsent) { display: grid; gap: 7px; color: rgba(255,255,255,.6); font-size: 10px; font-weight: 760; }.commercialLeadForm label:nth-of-type(3) { grid-column: 1 / -1; }.commercialLeadForm input:not([type="checkbox"]), .commercialLeadForm select { width: 100%; min-height: 50px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,.07); color: #fff; font: inherit; font-size: 15px; }.commercialLeadForm select option { color: var(--text-primary); }.commercialLeadForm input:focus, .commercialLeadForm select:focus { border-color: var(--accent-sand); outline: 2px solid var(--accent-sand); outline-offset: 2px; }.commercialLeadForm > button { grid-column: 1 / -1; display: flex; min-height: 52px; align-items: center; justify-content: space-between; border: 0; border-radius: 13px; padding: 0 17px; background: var(--brand-action); color: #fff; font-size: 12px; font-weight: 820; cursor: pointer; }.commercialLeadForm > button:disabled { cursor: not-allowed; opacity: .55; }.commercialLeadForm > button svg { width: 16px; }
+.mobileStickyCta { display: none; }
+
 .platform, .rhythm, .subjects, .plans, .trust, .faq { padding-block: clamp(86px, 10vw, 142px); }
 .sectionIntro { display: grid; max-width: 850px; grid-template-columns: 180px 1fr; column-gap: 32px; }
 .sectionIntro > span, .rhythmIntro > span, .trust > div:first-child > span, .faq > div:first-child > span, .finalCta span { padding-top: 10px; color: var(--brand-primary); font-size: 11px; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
@@ -235,6 +305,14 @@
   .desktopNav { display: none; }
   .heroGrid { grid-template-columns: 1fr; }
   .plannerWorkspace { grid-template-columns: 1fr; }
+  .pricingWorkspace { grid-template-columns: 1fr; }
+  .pricingControls, .priceSummary { grid-column: auto; }
+  .priceSummary { position: static; min-height: 560px; }
+  .pricingCards { grid-template-columns: repeat(3, minmax(280px, 1fr)); overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+  .pricingCard { scroll-snap-align: start; }
+  .annualControls { grid-template-columns: 1fr 1fr; }.annualResult, .catalogNotice { grid-column: 1 / -1; }
+  .paymentSection > div:last-child { grid-template-columns: repeat(3, 1fr); }
+  .personalPlan { grid-template-columns: 1fr; }
   .plannerResult { min-height: 610px; }
   .heroCopy { max-width: 760px; }
   .productPreview { width: min(700px, 100%); min-height: 560px; transform: none; }
@@ -273,6 +351,15 @@
   .plannerIntro { display: block; }.plannerIntro h2 { margin-top: 16px; }.plannerIntro p { margin-top: 20px; }
   .plannerWorkspace { margin-top: 38px; }.plannerControls { padding: 22px; }.plannerControls fieldset > div { display: grid; grid-template-columns: 1fr 1fr; }.plannerControls button { width: 100%; padding-inline: 10px; }.plannerSubjects button { justify-content: flex-start; }
   .plannerResult { min-height: 690px; padding: 27px 22px; }.plannerResult dl > div { grid-template-columns: 85px 1fr; }.leadForm { grid-template-columns: 1fr; }.leadForm label, .leadConsent, .leadForm > button, .formError, .formSuccess, .formNotice { grid-column: 1; }.leadForm input:not([type="checkbox"]) { font-size: 16px; }
+  .pricingWorkspace { margin-top: 38px; }.pricingControls fieldset { padding: 23px 20px; }.pricingControls fieldset > div { display: grid; grid-template-columns: 1fr 1fr; }.pricingControls button { width: 100%; padding-inline: 10px; }.pricingSubjects button { justify-content: flex-start; }.scoreOptions { grid-template-columns: repeat(3, 1fr) !important; }.durationOptions { grid-template-columns: 1fr 1fr !important; }
+  .priceSummary { min-height: 530px; padding: 28px 22px; }.priceSummary h3 { font-size: 39px; }
+  .pricingCards { width: calc(100vw - 16px); margin-right: calc(50% - 50vw); grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: minmax(280px, 86vw); gap: 12px; padding-right: 16px; }.pricingCard { min-height: 650px; padding: 25px; }
+  .tutorComparison > div:first-child, .annualCalculator > div:first-child, .paymentSection > div:first-child, .personalPlan > div:first-child { display: block; }.tutorComparison h2, .annualCalculator h2, .paymentSection h2, .personalPlan h2 { margin-top: 16px; }.tutorComparison > div:first-child > p, .annualCalculator > div:first-child > p, .paymentSection > div:first-child > p, .personalPlan > div:first-child > p { margin-top: 20px; }
+  .comparisonCards { grid-template-columns: 1fr; margin-top: 34px; }.comparisonCards article { min-height: 290px; }
+  .annualCalculator { width: calc(100% + 32px); margin-left: -16px; border-radius: 26px; padding: 48px 16px; }.annualControls { grid-template-columns: 1fr; margin-top: 34px; }.annualResult, .catalogNotice { grid-column: auto; }
+  .paymentSection > div:last-child { grid-template-columns: 1fr 1fr; margin-top: 34px; }.paymentSection article { min-height: 170px; }
+  .personalPlan { width: calc(100% + 32px); margin-left: -16px; border-radius: 26px; padding: 48px 20px 96px; }.commercialLeadForm { grid-template-columns: 1fr; }.commercialLeadForm label, .commercialLeadForm label:nth-of-type(3), .commercialLeadForm .leadConsent, .commercialLeadForm > button, .commercialLeadForm .formError, .commercialLeadForm .formSuccess, .commercialLeadForm .formNotice { grid-column: 1; }.commercialLeadForm input:not([type="checkbox"]), .commercialLeadForm select { font-size: 16px; }
+  .mobileStickyCta { position: fixed; z-index: 45; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; display: flex; min-height: 54px; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 0 18px; background: var(--brand-action); color: #fff; box-shadow: 0 14px 40px rgba(16,43,37,.28); font-size: 13px; font-weight: 820; }.mobileStickyCta svg { width: 17px; }
   .sectionIntro { display: block; }
   .sectionIntro h2 { margin-top: 16px; }
   .sectionIntro p { margin-top: 20px; }
@@ -310,9 +397,11 @@
   .productPreview { min-height: 500px; }
   .previewBottom { grid-template-columns: 1fr; }.previewBottom article:nth-child(n+3) { display: none; }
   .subjectGrid { grid-template-columns: 1fr; }
+  .paymentSection > div:last-child { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .headerCta, .primaryButton, .finalCta > a, .subjectGrid article { transition: none; }
+  .headerCta, .primaryButton, .finalCta > a, .subjectGrid article, .pricingControls button, .annualControls button { transition: none; }
   .headerCta:hover, .primaryButton:hover, .finalCta > a:hover { transform: none; }
+  .pricingCards { scroll-behavior: auto; }
 }

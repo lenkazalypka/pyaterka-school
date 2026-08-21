@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [sql, atomicDrafts, actions, onboardingGuard, onboardingIndex, stepPage, studentLearning, frame, inviteActions, seed, publicCss] = await Promise.all([
+const [sql, pricingSql, atomicDrafts, actions, onboardingGuard, onboardingIndex, stepPage, studentLearning, frame, inviteActions, seed, publicCss] = await Promise.all([
   read("../supabase/migrations/202608010001_onboarding_stage2.sql"),
+  read("../supabase/migrations/202608210008_commercial_pricing.sql"),
   read("../supabase/migrations/202608210001_onboarding_atomic_drafts.sql"),
   read("../app/onboarding/actions.ts"), read("../lib/onboarding.ts"), read("../app/onboarding/page.tsx"),
   read("../app/onboarding/[step]/page.tsx"), read("../lib/student-learning.ts"),
@@ -46,6 +47,7 @@ test("plan subject limit is enforced in action and transaction", () => {
   assert.match(actions, /subjectCount|count \?\? 0\) > limit/);
   assert.match(sql, /if v_subject_count > v_limit then raise exception 'PLAN_SUBJECT_LIMIT'/i);
   assert.match(sql, /plan_subject_limits/);
+  assert.match(actions, /pricing_plans\(subjects_count,active\)/);
 });
 
 test("OGE uses configurable subject-specific primary score ranges", () => {
@@ -61,6 +63,8 @@ test("browser cannot set price or activate a subscription", () => {
   assert.match(sql, /values \(v_user, v_plan\.id, 'pending', null, v_plan\.base_price_minor, 'manual'/i);
   assert.doesNotMatch(actions, /price_minor/);
   assert.doesNotMatch(actions, /from\("subscriptions"\)\.update\([\s\S]{0,100}status/);
+  assert.match(pricingSql, /create trigger apply_onboarding_subscription_price/);
+  assert.match(pricingSql, /new\.price_minor := v_monthly_price/);
 });
 
 test("completion is idempotent and uses one PostgreSQL transaction", () => {

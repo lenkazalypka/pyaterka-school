@@ -25,13 +25,16 @@ test("plan builder puts exam, subjects and tariff before registration", () => {
 test("plan price and subject limits come from the existing Supabase query", () => {
   assert.match(plans, /from\("plans"\)/);
   assert.match(plans, /plan_subject_limits\(max_subjects\)/);
+  assert.match(plans, /pricing_plans\(subjects_count,monthly_price_minor,active\)/);
   assert.match(plans, /maxSubjects: rawLimit\?\.max_subjects/);
+  assert.match(wizard, /pricesMinor\[subjects\.length\]/);
   assert.doesNotMatch(wizard, /6990|9990|14990/);
 });
 
 test("registration confirms the selected plan without changing auth submission", () => {
   assert.match(register, /getPublicPlans\(\)/);
   assert.match(register, /selectionSummary=/);
+  assert.match(register, /pricesMinor\[selectedSubjects\.length\]/);
   assert.match(auth, /auth-plan-summary/);
   assert.match(auth, /<AuthForm mode=\{mode\}/);
 });

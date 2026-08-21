@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [header, hero, sections, planner, moduleCss, globals, plans, subjectIcons] = await Promise.all([
+const [header, hero, sections, planner, moduleCss, globals, plans, pricing, subjectIcons] = await Promise.all([
   read("../components/public/header.tsx"),
   read("../components/public/hero.tsx"),
   read("../components/public/sections.tsx"),
@@ -11,12 +11,14 @@ const [header, hero, sections, planner, moduleCss, globals, plans, subjectIcons]
   read("../components/public/redesign-v1.module.css"),
   read("../app/globals.css"),
   read("../lib/public-site.ts"),
+  read("../lib/pricing.ts"),
   read("../components/icons/subject-icons.tsx"),
 ]);
 
 test("elio landing keeps the conversion path inside the plan builder", () => {
   for (const anchor of ["#platform", "#calculator", "#rhythm", "#subjects", "#plans"]) assert.ok(header.includes(anchor), anchor);
-  for (const id of ["platform", "rhythm", "subjects", "plans", "faq"]) assert.match(sections, new RegExp(`id=\\"${id}\\"`));
+  for (const id of ["platform", "rhythm", "subjects", "faq"]) assert.match(sections, new RegExp(`id=\\"${id}\\"`));
+  assert.match(planner, /id="plans"/);
   assert.match(`${hero}\n${sections}`, /href="\/start/);
   assert.doesNotMatch(`${header}\n${hero}\n${sections}`, /href="\/register(?:\?|\")/);
 });
@@ -24,10 +26,11 @@ test("elio landing keeps the conversion path inside the plan builder", () => {
 test("hero makes the product workspace the primary visual object", () => {
   assert.match(hero, /styles\.productPreview/);
   assert.match(hero, /Пример интерфейса ученика elio/);
-  assert.match(hero, /Главное на сегодня/);
+  assert.match(hero, /Главное сегодня/);
   assert.match(hero, /домашнее задание/);
   assert.match(hero, /прогресс/);
-  assert.match(hero, /по вашему времени/);
+  assert.match(hero, /18:00 · Русский язык/);
+  assert.match(hero, /демо интерфейса · не данные ученика/);
   assert.doesNotMatch(hero, /className=\{styles\.five\}|>5<\/div>|student\.(png|webp)/i);
   assert.doesNotMatch(hero, /\+9 баллов|Твоя динамика|ДЗ проверено/);
 });
@@ -39,7 +42,9 @@ test("marketing claims remain factual and pricing stays server-owned", () => {
   assert.match(plans, /priceLabel: null/);
   assert.match(plans, /`от \$\{value\} ₽\/мес`/);
   assert.doesNotMatch(plans, /6990|9990|14990/);
-  assert.match(sections, /Цена появится до оплаты/);
+  assert.match(pricing, /from\("pricing_plans"\)/);
+  assert.match(pricing, /return \{ plans: \[\], discounts: \[\] \}/);
+  assert.doesNotMatch(pricing, /4990|7990|11990|17990/);
 });
 
 test("elio visual system is responsive and anti-generic", () => {
@@ -48,14 +53,16 @@ test("elio visual system is responsive and anti-generic", () => {
   assert.match(globals, /--brand-ink:\s*#102b25/i);
   assert.match(globals, /--brand-primary:\s*#c65338/i);
   assert.match(moduleCss, /grid-template-columns:\s*1\.25fr \.75fr/);
-  assert.match(moduleCss, /\.planFeatured \{ grid-row: span 2/);
+  assert.match(moduleCss, /grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/);
   assert.match(moduleCss, /@media \(max-width: 1023px\)/);
   assert.match(moduleCss, /@media \(max-width: 767px\)/);
   assert.match(moduleCss, /@media \(max-width: 374px\)/);
   assert.match(moduleCss, /prefers-reduced-motion/);
   assert.doesNotMatch(moduleCss, /purple|#7c3aed|#4f46e5/i);
-  assert.match(planner, /Стоимость не вычисляется на глаз/);
-  assert.doesNotMatch(planner, /₽|6990|9990|14990/);
+  assert.match(planner, /Каталог и скидки приходят из Supabase/);
+  assert.match(planner, /styles\.pricingCards/);
+  assert.match(moduleCss, /grid-auto-columns: minmax\(280px, 86vw\)/);
+  assert.doesNotMatch(planner, /4990|7990|11990|17990|21990|33990|39990/);
 });
 
 test("subject diagnostics and native disclosure remain accessible", () => {

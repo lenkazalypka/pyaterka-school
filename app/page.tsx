@@ -3,18 +3,18 @@ import { PublicHeader } from "@/components/public/header";
 import { PublicHero } from "@/components/public/hero";
 import { RoutePlanner } from "@/components/public/route-planner";
 import { PublicSections } from "@/components/public/sections";
-import { getPublicPlans } from "@/lib/public-site";
 import { leadCaptureEnabled } from "@/lib/leads";
+import { getPricingCatalog } from "@/lib/pricing";
 
 export default async function Home() {
-  const plans = await getPublicPlans();
+  const pricing = await getPricingCatalog();
 
   return (
     <main className="public-page">
       <PublicHeader />
       <PublicHero />
-      <RoutePlanner enabled={leadCaptureEnabled()} />
-      <PublicSections plans={plans} />
+      <RoutePlanner enabled={leadCaptureEnabled()} pricing={pricing} />
+      <PublicSections />
       <PublicFooter />
     </main>
   );
