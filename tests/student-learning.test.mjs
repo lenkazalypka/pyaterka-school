@@ -3,11 +3,12 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [sql, seed, learning, dashboard, shell, schedule, lessons, lesson, player, materialRoute, recordingRoute, css] = await Promise.all([
+const [sql, seed, learning, dashboard, studentPage, shell, schedule, lessons, lesson, player, materialRoute, recordingRoute, css] = await Promise.all([
   read("../supabase/migrations/202608010002_student_learning_stage.sql"),
   read("../supabase/seed.sql"),
   read("../lib/student-learning.ts"),
   read("../components/dashboard.tsx"),
+  read("../app/student/page.tsx"),
   read("../components/student-shell.tsx"),
   read("../app/student/schedule/page.tsx"),
   read("../app/student/lessons/page.tsx"),
@@ -82,6 +83,15 @@ test("student navigation has real routes and a dedicated mobile composition", ()
   assert.match(shell, /Мобильная навигация ученика/);
   assert.match(css, /\.student-mobile-nav/);
   assert.match(css, /@media \(max-width: 767px\)[\s\S]*\.student-event/);
+});
+
+test("student home prioritizes the next action and exposes AI honestly", () => {
+  assert.match(dashboard, /Главное действие/);
+  assert.match(dashboard, /Привет, \{firstName\}/);
+  assert.match(dashboard, /ELIO AI · Beta/);
+  assert.match(dashboard, /aiEnabled \?/);
+  assert.match(studentPage, /aiMentorConfigured\(\)/);
+  assert.match(dashboard, /AI-наставник появится после безопасной настройки provider/);
 });
 
 test("local learning data is explicitly demo and does not fabricate recordings", () => {

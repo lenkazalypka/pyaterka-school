@@ -10,6 +10,7 @@ export function PublicHeader() {
         <Brand />
         <nav className={styles.desktopNav} aria-label="Основная навигация">
           <Link href="#platform">Платформа</Link>
+          <Link href="#calculator">Маршрут</Link>
           <Link href="#rhythm">Как учимся</Link>
           <Link href="#subjects">Предметы</Link>
           <Link href="#plans">Тарифы</Link>
@@ -22,6 +23,7 @@ export function PublicHeader() {
           <summary aria-label="Открыть меню"><Menu aria-hidden="true" /></summary>
           <nav aria-label="Мобильная навигация">
             <Link href="#platform">Платформа</Link>
+            <Link href="#calculator">Маршрут</Link>
             <Link href="#rhythm">Как учимся</Link>
             <Link href="#subjects">Предметы</Link>
             <Link href="#plans">Тарифы</Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Check, Clock3 } from "lucide-react";
+import { ArrowRight, BookOpenCheck, CalendarDays, Check, Clock3, TrendingUp } from "lucide-react";
 import styles from "./redesign-v1.module.css";
 
 export function PublicHero() {
@@ -7,7 +7,7 @@ export function PublicHero() {
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.heroGrid}>
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}><span aria-hidden="true" /> Подготовка к ЕГЭ и ОГЭ</p>
+          <p className={styles.eyebrow}><span aria-hidden="true" /> Подготовка к ЕГЭ и ОГЭ без хаоса</p>
           <h1 id="hero-title">ты знаешь,<br /><em>что делать дальше.</em></h1>
           <p className={styles.heroLead}>elio собирает занятия, домашние задания, материалы и цели в один спокойный маршрут до экзамена.</p>
           <div className={styles.heroActions}>
@@ -31,7 +31,9 @@ export function PublicHero() {
           </article>
           <div className={styles.previewBottom}>
             <article><CalendarDays aria-hidden="true" /><div><small>расписание</small><b>Ближайшие занятия</b></div></article>
-            <article><span aria-hidden="true">→</span><div><small>задачи</small><b>Что нужно сделать</b></div></article>
+            <article><BookOpenCheck aria-hidden="true" /><div><small>домашнее задание</small><b>После назначения</b></div></article>
+            <article><TrendingUp aria-hidden="true" /><div><small>прогресс</small><b>По завершённым урокам</b></div></article>
+            <article><span aria-hidden="true">→</span><div><small>следующий шаг</small><b>Один ясный фокус</b></div></article>
           </div>
           <div className={styles.routeLine} aria-hidden="true"><span /><i /><i /><i /></div>
         </div>

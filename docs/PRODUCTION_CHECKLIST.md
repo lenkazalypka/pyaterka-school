@@ -35,6 +35,7 @@ Deployment is **NO-GO** until every required item below is confirmed by the owne
 - [ ] Before enabling AI mentor, output moderation/incident handling, privacy and pedagogical evals, token/cost telemetry, hard budget alerts, scheduled purge of expired conversations, retention/delete behavior, and production RLS CI were approved.
 - [ ] YooKassa credentials, fiscal VAT code and HTTPS webhook for `payment.succeeded`/`payment.canceled` were configured and test-mode payment passed end to end.
 - [ ] Privacy policy, personal-data consent, public offer, and other required legal text were approved; current drafts are not treated as approval.
+- [ ] `LEAD_CAPTURE_ENABLED=true` is set only after the lead consent, operator details, retention and deletion process are legally approved.
 - [ ] The safe baseline headers are present in production. A full script/style CSP requires a separate nonce-based implementation and report-only rollout.
 
 ## Explicit scope warning

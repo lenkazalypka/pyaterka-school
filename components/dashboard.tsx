@@ -25,8 +25,9 @@ function money(minor: number, currency: string) {
   return new Intl.NumberFormat("ru-RU", { style: "currency", currency, maximumFractionDigits: 0 }).format(minor / 100);
 }
 
-export function Dashboard({ data, paymentError }: { data: StudentLearningData; paymentError?: string }) {
+export function Dashboard({ data, paymentError, aiEnabled = false }: { data: StudentLearningData; paymentError?: string; aiEnabled?: boolean }) {
   const { identity } = data;
+  const firstName = identity.name.trim().split(/\s+/)[0] || "ученик";
   const now = new Date(data.generatedAt).getTime();
   const upcoming = data.events.filter((event) => event.status !== "cancelled" && new Date(event.endsAt).getTime() >= now);
   const nextEvent = upcoming[0] ?? null;
@@ -36,7 +37,7 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
   return <StudentShell identity={identity} active="home">
     <div className="student-page student-dashboard">
       <header className="student-page-heading">
-        <div><span className="student-eyebrow">Сегодня · <span className="capitalize">{date}</span></span><h1>Здравствуйте, {identity.name}</h1><p>Сначала — ближайшее действие. Остальная статистика не мешает учиться.</p></div>
+        <div><span className="student-eyebrow">Сегодня · <span className="capitalize">{date}</span></span><h1>Привет, {firstName}.</h1><p>Сначала — ближайшее действие. Остальная статистика не мешает учиться.</p></div>
         <div className="flex flex-wrap justify-end gap-2">{data.activity.streakDays > 0 && <div className="student-subscription"><small>Ритм</small><b>{data.activity.streakDays} дн. подряд · {data.activity.weeklyPoints} б. за неделю</b></div>}{data.subscription && <div className={`student-subscription student-subscription-${data.subscription.status}`}><small>{data.subscription.planName}</small><b>{subscriptionLabels[data.subscription.status] ?? data.subscription.status}</b></div>}</div>
       </header>
 
@@ -48,7 +49,7 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
 
       <section className="student-dashboard-grid" aria-label="Главное на сегодня">
         <article className="student-next-card">
-          <div className="student-card-heading"><div><small>Следующее занятие</small><h2>{nextEvent ? nextEvent.title : "В расписании пока пусто"}</h2></div><CalendarDays aria-hidden="true" /></div>
+          <div className="student-card-heading"><div><small>Главное действие</small><h2>{nextEvent ? nextEvent.title : "В расписании пока пусто"}</h2></div><CalendarDays aria-hidden="true" /></div>
           {nextEvent ? <><div className="student-next-meta"><span>{nextEvent.subject ?? "Учебное событие"}</span><b>{new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", timeZone: identity.timezone }).format(new Date(nextEvent.startsAt))}, {eventTime(nextEvent.startsAt, identity.timezone)}</b>{nextEvent.teacher && <span>{nextEvent.teacher}</span>}</div><div className="student-next-actions">{nextEvent.joinUrl ? <a className="button button-primary" href={nextEvent.joinUrl} target="_blank" rel="noreferrer">Подключиться</a> : nextEvent.lessonId ? <Link className="button button-light" href={`/student/lessons/${nextEvent.lessonId}`}>Открыть урок</Link> : null}<Link href="/student/schedule">Всё расписание <ArrowRight aria-hidden="true" /></Link></div></> : <div className="student-empty-on-dark"><CheckCircle2 aria-hidden="true" /><p>Новых занятий нет. Когда администратор добавит вас в активную группу, событие появится автоматически.</p></div>}
         </article>
 
@@ -56,6 +57,11 @@ export function Dashboard({ data, paymentError }: { data: StudentLearningData; p
           <div className="student-card-heading"><div><small>Фокус</small><h2>Что сделать сегодня</h2></div><Target aria-hidden="true" /></div>
           {data.tasks.length ? <div className="student-task-list">{data.tasks.slice(0, 5).map((task) => <div className={task.overdue ? "is-overdue" : ""} key={task.id}><span>{task.overdue ? <AlertCircle aria-hidden="true" /> : <BookOpen aria-hidden="true" />}</span><div><b>{task.title}</b><small>{task.subject}</small></div><time dateTime={task.dueAt}>{task.overdue ? "Просрочено · " : "До "}{dueLabel(task.dueAt, identity.timezone)}</time></div>)}</div> : <div className="student-empty"><CheckCircle2 aria-hidden="true" /><b>Нет срочных заданий</b><p>Домашние задания появятся здесь после публикации преподавателем.</p></div>}
         </article>
+      </section>
+
+      <section className="student-ai-card" aria-labelledby="student-ai-title">
+        <div><span className="student-eyebrow">ELIO AI · Beta</span><h2 id="student-ai-title">понять ошибку.<br />выбрать следующий шаг.</h2><p>{aiEnabled ? "Наставник использует ваши предметы, цели и проверенные результаты, но ничего не меняет без вашего действия." : "AI-наставник появится после безопасной настройки provider. Учебные данные не заменяются демонстрационными ответами."}</p></div>
+        <div><span>Объясни тему</span><span>Почему ошибка?</span><span>Что делать дальше?</span>{aiEnabled ? <Link className="button button-primary" href="/student/ai">Открыть ELIO AI <ArrowRight aria-hidden="true" /></Link> : <button className="button button-secondary" type="button" disabled>Пока недоступно</button>}</div>
       </section>
 
       <section className="student-section">

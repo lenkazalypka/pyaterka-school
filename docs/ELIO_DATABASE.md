@@ -21,6 +21,13 @@ Product-facing names `courses`, `homework`, `student_homework` и `parent_studen
 - `student_weekly_goals` — цель недели;
 - `ai_conversations` — приватная история с context snapshot.
 
+## Public acquisition
+
+- `leads` — явно отправленный публичный запрос маршрута: имя, один контакт, класс, цель и 1–4 предмета;
+- запись выполняет только rate-limited Server Action через server-only client;
+- `anon` не получает table grants, student/parent не видят заявки, admin работает через RLS policy;
+- стоимость не сохраняется из браузера и всегда остаётся производной от server-owned `plans`.
+
 ## Privacy
 
 - student читает собственные данные;

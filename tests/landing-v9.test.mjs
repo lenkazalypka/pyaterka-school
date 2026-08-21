@@ -3,10 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [header, hero, sections, moduleCss, globals, plans, subjectIcons] = await Promise.all([
+const [header, hero, sections, planner, moduleCss, globals, plans, subjectIcons] = await Promise.all([
   read("../components/public/header.tsx"),
   read("../components/public/hero.tsx"),
   read("../components/public/sections.tsx"),
+  read("../components/public/route-planner.tsx"),
   read("../components/public/redesign-v1.module.css"),
   read("../app/globals.css"),
   read("../lib/public-site.ts"),
@@ -14,7 +15,7 @@ const [header, hero, sections, moduleCss, globals, plans, subjectIcons] = await 
 ]);
 
 test("elio landing keeps the conversion path inside the plan builder", () => {
-  for (const anchor of ["#platform", "#rhythm", "#subjects", "#plans"]) assert.ok(header.includes(anchor), anchor);
+  for (const anchor of ["#platform", "#calculator", "#rhythm", "#subjects", "#plans"]) assert.ok(header.includes(anchor), anchor);
   for (const id of ["platform", "rhythm", "subjects", "plans", "faq"]) assert.match(sections, new RegExp(`id=\\"${id}\\"`));
   assert.match(`${hero}\n${sections}`, /href="\/start/);
   assert.doesNotMatch(`${header}\n${hero}\n${sections}`, /href="\/register(?:\?|\")/);
@@ -24,6 +25,8 @@ test("hero makes the product workspace the primary visual object", () => {
   assert.match(hero, /styles\.productPreview/);
   assert.match(hero, /Пример интерфейса ученика elio/);
   assert.match(hero, /Главное на сегодня/);
+  assert.match(hero, /домашнее задание/);
+  assert.match(hero, /прогресс/);
   assert.match(hero, /по вашему времени/);
   assert.doesNotMatch(hero, /className=\{styles\.five\}|>5<\/div>|student\.(png|webp)/i);
   assert.doesNotMatch(hero, /\+9 баллов|Твоя динамика|ДЗ проверено/);
@@ -40,8 +43,10 @@ test("marketing claims remain factual and pricing stays server-owned", () => {
 });
 
 test("elio visual system is responsive and anti-generic", () => {
-  assert.match(globals, /--brand-ink:\s*#183129/);
-  assert.match(globals, /--brand-primary:\s*#b34d33/i);
+  assert.match(globals, /--page-bg:\s*#f5f2ea/i);
+  assert.match(globals, /--surface:\s*#ffffff/i);
+  assert.match(globals, /--brand-ink:\s*#102b25/i);
+  assert.match(globals, /--brand-primary:\s*#c65338/i);
   assert.match(moduleCss, /grid-template-columns:\s*1\.25fr \.75fr/);
   assert.match(moduleCss, /\.planFeatured \{ grid-row: span 2/);
   assert.match(moduleCss, /@media \(max-width: 1023px\)/);
@@ -49,6 +54,8 @@ test("elio visual system is responsive and anti-generic", () => {
   assert.match(moduleCss, /@media \(max-width: 374px\)/);
   assert.match(moduleCss, /prefers-reduced-motion/);
   assert.doesNotMatch(moduleCss, /purple|#7c3aed|#4f46e5/i);
+  assert.match(planner, /Стоимость не вычисляется на глаз/);
+  assert.doesNotMatch(planner, /₽|6990|9990|14990/);
 });
 
 test("subject diagnostics and native disclosure remain accessible", () => {

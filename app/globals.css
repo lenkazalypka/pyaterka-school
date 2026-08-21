@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --page-bg: #f3f1ea;
-  --surface: #fbfaf6;
+  --page-bg: #f5f2ea;
+  --surface: #ffffff;
   --surface-soft: #f7f5ee;
   --surface-rose: #f4e6df;
-  --brand-primary: #b34d33;
-  --brand-primary-hover: #963e29;
-  --brand-primary-dark: #7d3424;
+  --brand-primary: #c65338;
+  --brand-action: #a84530;
+  --brand-primary-hover: #a84530;
+  --brand-primary-dark: #873625;
   --brand-burgundy: #263f37;
-  --brand-ink: #183129;
+  --brand-ink: #102b25;
   --brand-soft: #f2e4dc;
   --accent-peach: #dfb46d;
   --accent-sand: #e5c888;
@@ -33,10 +34,10 @@
   --subject-biology: #a9c1a6;
   --subject-chemistry: #d3b6a8;
   --subject-english: #b9b9a7;
-  --text-primary: #17231f;
+  --text-primary: #102b25;
   --text-muted: #626d67;
-  --border-soft: #dcded6;
-  --focus-ring: #b34d33;
+  --border-soft: rgba(16, 43, 37, .12);
+  --focus-ring: #c65338;
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 30px;
@@ -82,7 +83,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 .button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
 .button-small { min-height: 42px; padding-inline: 18px; border-radius: 12px; }
 .button-large { min-height: 56px; padding-inline: 25px; border-radius: 16px; }
-.button-primary { background: var(--brand-primary); color: #fff; box-shadow: var(--shadow-brand); }
+.button-primary { background: var(--brand-action); color: #fff; box-shadow: var(--shadow-brand); }
 .button-primary:hover { background: var(--brand-primary-hover); }
 .button-secondary { border: 1px solid var(--border-soft); background: #fff; color: var(--text-primary); box-shadow: 0 8px 24px rgba(91, 31, 48, .06); }
 .button-secondary:hover { border-color: #d9cfd3; box-shadow: 0 12px 28px rgba(91, 31, 48, .1); }
@@ -311,7 +312,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 .student-notice > svg { width: 21px; flex: 0 0 auto; color: #a66d00; }.student-notice b { font-size: 14px; }.student-notice p { margin: 4px 0 0; color: #7e6227; font-size: 12px; line-height: 1.5; }
 .student-dashboard-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; margin-top: 30px; }
 .student-next-card, .student-tasks-card, .student-detail-card { border-radius: 25px; padding: 27px; }
-.student-next-card { min-height: 370px; background: var(--brand-primary); color: #fff; box-shadow: var(--shadow-brand); }
+.student-next-card { min-height: 370px; background: var(--brand-ink); color: #fff; box-shadow: var(--shadow-card); }
 .student-tasks-card, .student-detail-card { border: 1px solid var(--border-soft); background: #fff; box-shadow: var(--shadow-card); }
 .student-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
 .student-card-heading small { display: block; color: inherit; opacity: .6; font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: .06em; }
@@ -328,6 +329,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 .student-task-list b, .student-task-list small { display: block; }.student-task-list b { font-size: 13px; }.student-task-list small { margin-top: 3px; color: var(--text-muted); font-size: 11px; }.student-task-list time { color: var(--text-muted); font-size: 10px; }
 .student-task-list .is-overdue > span { background: var(--surface-rose); color: var(--brand-primary); }.student-task-list .is-overdue time { color: #b13b34; font-weight: 850; }
 .student-section { margin-top: 55px; }
+.student-ai-card { display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; margin-top: 22px; border-radius: 26px; padding: 38px; color: #fff; background: var(--brand-ink); }.student-ai-card h2 { margin: 13px 0 0; font-size: clamp(30px,4vw,48px); line-height: 1; letter-spacing: -.045em; }.student-ai-card p { max-width: 650px; margin: 18px 0 0; color: rgba(255,255,255,.62); font-size: 13px; line-height: 1.6; }.student-ai-card > div:last-child { display: grid; align-content: center; gap: 8px; }.student-ai-card > div:last-child > span { border-top: 1px solid rgba(255,255,255,.14); padding: 11px 0; color: rgba(255,255,255,.72); font-size: 12px; }.student-ai-card .button { justify-self: start; margin-top: 12px; }
 .student-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 25px; margin-bottom: 20px; }
 .student-section-heading h2 { margin: 6px 0 0; font-size: 30px; letter-spacing: -.04em; }.student-section-heading > a { display: inline-flex; align-items: center; gap: 7px; color: var(--brand-primary); font-size: 13px; font-weight: 850; }.student-section-heading svg { width: 16px; }
 .student-event-list { display: grid; gap: 10px; }
@@ -468,6 +470,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   .student-next-meta { margin-top: 45px; }
   .student-next-actions { align-items: flex-start; flex-direction: column; }
   .student-next-actions .button { width: 100%; }
+  .student-ai-card { grid-template-columns: 1fr; gap: 28px; padding: 27px 22px; }.student-ai-card .button { width: 100%; }
   .student-task-list > div { grid-template-columns: 35px 1fr; padding: 10px 0; }.student-task-list time { grid-column: 2; }
   .student-section { margin-top: 44px; }
   .student-section-heading { align-items: flex-start; flex-direction: column; }

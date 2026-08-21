@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { supabaseAdmin } from "./supabase-admin";
 
-export type RateLimitAction = "login" | "register" | "recover" | "parent_invite";
+export type RateLimitAction = "login" | "register" | "recover" | "parent_invite" | "lead";
 
 export class RateLimitExceededError extends Error {
   constructor(readonly retryAfterSeconds: number) {

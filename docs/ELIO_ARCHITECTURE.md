@@ -10,6 +10,7 @@ ELIO — модульный монолит на Next.js App Router и Supabase. 
 |---|---|
 | Чтение продукта | Server Component → Supabase SSR client → RLS |
 | Пользовательская мутация | UI form → Server Action → Zod → Supabase/RPC → revalidate |
+| Публичная заявка | UI form → Server Action → Zod → persistent rate limit → server-only insert |
 | Многострочный инвариант | PostgreSQL transaction/RPC |
 | Private file | Route Handler → session/RLS → signed URL 60 секунд |
 | Payment activation | verified ЮKassa webhook → service-role RPC |
